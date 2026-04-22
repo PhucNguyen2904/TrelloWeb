@@ -95,7 +95,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         fd.append('username', (data as LoginFormData).email);
         fd.append('password', (data as LoginFormData).password);
         const res = await api.post('/auth/login', fd, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-        const userRes = await api.get('/auth/me', { headers: { Authorization: `Bearer ${res.data.access_token}` } });
+        const userRes = await api.get('/auth/me');
         const user = userRes.data;
         login(user, res.data.access_token);
         addToast({ type: 'success', title: 'Login successful!' });
