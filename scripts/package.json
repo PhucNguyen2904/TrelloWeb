@@ -1,0 +1,20 @@
+{
+  "name": "trello-keep-alive",
+  "version": "1.0.0",
+  "description": "Keep-alive solution for Render free tier FastAPI backend",
+  "main": "scripts/keep-alive.js",
+  "scripts": {
+    "ping:test": "node scripts/keep-alive.js https://your-render-url.onrender.com",
+    "ping:verbose": "VERBOSE=true node scripts/keep-alive.js https://your-render-url.onrender.com",
+    "ping:prod": "node scripts/keep-alive.js $RENDER_URL 3 10000"
+  },
+  "keywords": [
+    "render",
+    "free-tier",
+    "keep-alive",
+    "ping",
+    "health-check"
+  ],
+  "author": "",
+  "license": "MIT"
+}

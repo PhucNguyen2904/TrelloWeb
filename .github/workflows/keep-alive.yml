@@ -1,0 +1,60 @@
+name: Keep-Alive Ping (Render Free Tier)
+
+on:
+  schedule:
+    # Chạy mỗi 5 phút
+    - cron: '*/5 * * * *'
+  # Cho phép chạy thủ công từ GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # ============ Chạy ping bằng Node.js ============
+      - name: Run keep-alive ping (Node.js)
+        env:
+          RENDER_URL: ${{ secrets.RENDER_URL }}
+          PING_RETRIES: 3
+          PING_TIMEOUT: 10000
+          VERBOSE: false
+        run: node scripts/keep-alive.js "$RENDER_URL" 3 10000
+        continue-on-error: true  # Cho phép workflow tiếp tục nếu ping fail
+
+      # ============ Chạy ping bằng Python (backup) ============
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run keep-alive ping (Python) - Backup
+        env:
+          RENDER_URL: ${{ secrets.RENDER_URL }}
+          PING_RETRIES: 2
+          PING_TIMEOUT: 10
+          VERBOSE: false
+        run: python scripts/keep-alive.py "$RENDER_URL" 2 10
+        continue-on-error: true
+
+      # ============ Log & Notification ============
+      - name: Log completion
+        if: always()
+        run: |
+          echo "=== Keep-Alive Ping Run Complete ==="
+          echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          echo "Target: ${{ secrets.RENDER_URL }}/health"
+          echo "Status: Check logs above for details"
