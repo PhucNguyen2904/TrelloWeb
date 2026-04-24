@@ -139,11 +139,6 @@ export function AuthForm({ mode }: AuthFormProps) {
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <label className="font-medium" style={{ fontSize: 13, color: '#404751' }}>Password</label>
-          {isLogin && (
-            <Link href="/forgot-password" className="hover:underline" style={{ fontSize: 12, color: '#005f98', fontWeight: 500 }}>
-              Forgot password?
-            </Link>
-          )}
         </div>
         <div className="relative">
           <input type={showPassword ? 'text' : 'password'} {...register('password')} disabled={isLoading}
