@@ -3,19 +3,27 @@ from typing import Optional
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from app.core.config import settings
+import hashlib
 
-# Password hashing
+# Password hashing - bcrypt has a 72-byte limit
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# bcrypt maximum password length
+MAX_PASSWORD_LENGTH = 72
 
 
 def hash_password(password: str) -> str:
-    """Hash password using bcrypt"""
-    return pwd_context.hash(password)
+    """Hash password using bcrypt with 72-byte limit"""
+    # Truncate to bcrypt limit if necessary
+    password_truncated = password[:MAX_PASSWORD_LENGTH]
+    return pwd_context.hash(password_truncated)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify password against hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify password against hash with 72-byte limit"""
+    # Truncate to bcrypt limit if necessary
+    password_truncated = plain_password[:MAX_PASSWORD_LENGTH]
+    return pwd_context.verify(password_truncated, hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
