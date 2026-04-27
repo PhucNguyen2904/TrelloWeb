@@ -37,7 +37,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS
-    ALLOWED_ORIGINS: str = "http://localhost,http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001,https://trello-web-neon-rho.vercel.app"
+    ALLOWED_ORIGINS: list = [
+        "http://localhost",
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "https://trello-web-neon-rho.vercel.app",
+        "https://trello-web-phi-five.vercel.app",
+        "https://trello-web-git-master-team-alpla.vercel.app",
+    ]
     
     class Config:
         case_sensitive = True
@@ -50,7 +59,10 @@ class Settings(BaseSettings):
                 self.ALLOWED_ORIGINS = json.loads(self.ALLOWED_ORIGINS)
             except json.JSONDecodeError:
                 # If it fails, split by comma
-                self.ALLOWED_ORIGINS = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
+                self.ALLOWED_ORIGINS = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
+        # Ensure it's always a list
+        if not isinstance(self.ALLOWED_ORIGINS, list):
+            self.ALLOWED_ORIGINS = [self.ALLOWED_ORIGINS]
 
 
 settings = Settings()
