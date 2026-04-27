@@ -91,14 +91,29 @@ export function AuthForm({ mode }: AuthFormProps) {
     try {
       setIsLoading(true);
       if (isLogin) {
+        // Step 1: Login và lấy token
         const fd = new URLSearchParams();
         fd.append('username', (data as LoginFormData).email);
         fd.append('password', (data as LoginFormData).password);
-        const res = await api.post('/api/auth/login', fd, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-        const userRes = await api.get('/api/auth/me');
+        const res = await api.post('/api/auth/login', fd, { 
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
+        });
+        
+        // Step 2: Extract token từ response
+        const token = res.data.access_token;
+        
+        // Step 3: Gọi /me với token explicit trong Authorization header
+        // (Không rely vào store vì chưa update)
+        const userRes = await api.get('/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         const user = userRes.data;
-        login(user, res.data.access_token);
+        
+        // Step 4: Update store với user data và token
+        login(user, token);
         addToast({ type: 'success', title: 'Login successful!' });
+        
+        // Step 5: Redirect theo role
         const role = user.role?.name;
         const dest = role === 'superadmin' || role === 'admin' ? '/dashboard/users' : '/dashboard';
         router.replace(dest);
