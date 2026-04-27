@@ -96,9 +96,9 @@ export function Topbar({ title = 'Dashboard', showCreateButton = false, onCreate
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden flex h-full items-center justify-between px-6">
-        <div className="ml-12">
-          <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+      <div className="md:hidden flex h-full items-center justify-between px-4 gap-3">
+        <div className="ml-12 min-w-0 flex-1">
+          <h2 className="text-base font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
             {title}
           </h2>
         </div>

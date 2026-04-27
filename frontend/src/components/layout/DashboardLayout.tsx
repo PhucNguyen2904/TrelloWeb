@@ -60,10 +60,11 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
           marginTop: 'var(--topbar-height)',
           minHeight: 'calc(100vh - var(--topbar-height))',
           background: 'var(--background)',
+          width: '100%',
         }}
       >
-        <div className="content-offset" style={{ padding: '32px 24px' }}>
-          <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto' }}>
+        <div className="content-offset dashboard-content-shell">
+          <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', minWidth: 0 }}>
             {children}
           </div>
         </div>

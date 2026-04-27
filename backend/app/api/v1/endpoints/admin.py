@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -9,6 +11,7 @@ from app.crud.user import get_all_users, delete_user, create_user, get_user_by_i
 from app.deps.auth import RoleChecker
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
+logger = logging.getLogger(__name__)
 
 # Dependency that ensures the user is an admin
 allow_admin = RoleChecker(["admin"])
@@ -16,12 +19,19 @@ allow_admin = RoleChecker(["admin"])
 @router.get("/users", response_model=list[UserResponseWithoutPassword])
 async def read_users(
     skip: int = 0,
-    limit: int = 100,
+    limit: int | None = Query(default=100, ge=1, le=1000),
     current_admin: User = Depends(allow_admin),
     db: Session = Depends(get_db)
 ):
     """Retrieve list of users (Admin only)"""
     users = get_all_users(db, skip=skip, limit=limit)
+    logger.info(
+        "admin_users_list actor_id=%s skip=%s limit=%s returned=%s",
+        current_admin.id,
+        skip,
+        limit,
+        len(users),
+    )
     return users
 
 @router.post("/users", response_model=UserResponseWithoutPassword, status_code=status.HTTP_201_CREATED)
