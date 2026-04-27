@@ -94,8 +94,8 @@ export function AuthForm({ mode }: AuthFormProps) {
         const fd = new URLSearchParams();
         fd.append('username', (data as LoginFormData).email);
         fd.append('password', (data as LoginFormData).password);
-        const res = await api.post('/auth/login', fd, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-        const userRes = await api.get('/auth/me');
+        const res = await api.post('/api/auth/login', fd, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+        const userRes = await api.get('/api/auth/me');
         const user = userRes.data;
         login(user, res.data.access_token);
         addToast({ type: 'success', title: 'Login successful!' });
@@ -104,7 +104,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         router.replace(dest);
       } else {
         const { email, password } = data as RegisterFormData;
-        await api.post('/auth/register', { email, password });
+        await api.post('/api/auth/register', { email, password });
         addToast({ type: 'success', title: 'Registration successful! Please log in.' });
         router.replace('/login');
       }
