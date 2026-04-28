@@ -23,7 +23,7 @@ export function Topbar({ title = 'Dashboard', showCreateButton = false, onCreate
 
   return (
     <header
-      className="topbar-offset fixed top-0 left-0 right-0 h-[var(--topbar-height)] border-b z-20"
+      className="fixed top-0 left-0 right-0 z-20 h-[var(--topbar-height)] border-b md:left-64 md:w-[calc(100%-16rem)]"
       style={{ backgroundColor: 'var(--surface-0)', borderColor: 'var(--border)' }}
     >
       {/* Desktop Layout */}

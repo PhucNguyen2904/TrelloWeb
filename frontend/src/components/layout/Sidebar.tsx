@@ -237,10 +237,9 @@ export function Sidebar() {
 
       {/* Desktop sidebar (always visible) */}
       <div
-        className="hidden md:flex md:flex-col"
+        className="fixed left-0 top-0 z-10 hidden h-screen w-64 md:flex md:flex-col"
         style={{
-          position: 'fixed', left: 0, top: 0, bottom: 0,
-          width: 'var(--sidebar-width)', zIndex: 10,
+          bottom: 0,
         }}
       >
         <SidebarContent />
@@ -251,7 +250,7 @@ export function Sidebar() {
         className="md:hidden"
         style={{
           position: 'fixed', left: 0, top: 0, bottom: 0,
-          width: 'var(--sidebar-width)', zIndex: 35,
+          width: '16rem', zIndex: 35,
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 280ms cubic-bezier(0.4,0,0.2,1)',
         }}
