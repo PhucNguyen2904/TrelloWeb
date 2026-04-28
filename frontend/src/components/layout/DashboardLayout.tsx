@@ -24,6 +24,26 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
     }
   }, [user, token, router]);
 
+  useEffect(() => {
+    if (!mobileSidebarOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', onEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onEscape);
+    };
+  }, [mobileSidebarOpen]);
+
   // Don't render dashboard content while redirecting
   if (!user || !token) {
     return (
@@ -34,7 +54,7 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f7f9ff]">
+    <div className="relative flex min-h-screen overflow-x-clip bg-[#f7f9ff]">
       <Sidebar
         className="w-64"
         mobileOpen={mobileSidebarOpen}
@@ -47,8 +67,8 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
           onMobileMenuClick={() => setMobileSidebarOpen((prev) => !prev)}
         />
 
-        <main className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-7xl animate-fadeIn">
+        <main className="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 xl:p-8">
+          <div className="mx-auto w-full max-w-7xl animate-fade-in">
             {children}
           </div>
         </main>

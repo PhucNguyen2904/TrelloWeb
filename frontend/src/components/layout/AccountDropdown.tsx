@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import { RoleBadge } from '@/components/ui/Badge';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -15,35 +15,52 @@ export function AccountDropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
   const { user, logout } = useAuthStore();
+  const menuId = 'account-menu';
+
+  const closeMenu = useCallback((focusTrigger = false) => {
+    setOpen(false);
+    if (focusTrigger) {
+      buttonRef.current?.focus();
+    }
+  }, []);
 
   useEffect(() => {
     const onClickOutside = (event: MouseEvent) => {
       if (!dropdownRef.current) return;
       if (!dropdownRef.current.contains(event.target as Node)) {
-        setOpen(false);
+        closeMenu();
       }
     };
 
-    document.addEventListener('mousedown', onClickOutside);
+    document.addEventListener('pointerdown', onClickOutside);
     const onEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setOpen(false);
-        buttonRef.current?.focus();
+        closeMenu(true);
       }
     };
 
     document.addEventListener('keydown', onEscape);
     return () => {
-      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('pointerdown', onClickOutside);
       document.removeEventListener('keydown', onEscape);
     };
-  }, []);
+  }, [closeMenu]);
+
+  useEffect(() => {
+    if (!open) return;
+    firstMenuItemRef.current?.focus();
+  }, [open]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setOpen((prev) => !prev);
+    }
+    if (e.key === 'ArrowDown' && !open) {
+      e.preventDefault();
+      setOpen(true);
     }
   };
 
@@ -62,11 +79,13 @@ export function AccountDropdown() {
     <div ref={dropdownRef} className="relative">
       <button
         ref={buttonRef}
+        type="button"
         onClick={() => setOpen((prev) => !prev)}
         onKeyDown={handleKeyDown}
-        className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition duration-200 ease-in-out hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition duration-200 ease-in-out hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-300"
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-controls={menuId}
         aria-label="Account menu"
       >
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
@@ -84,10 +103,12 @@ export function AccountDropdown() {
       </button>
 
       <div
+        id={menuId}
         className={`absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-slate-200 bg-white p-2 shadow-lg transition duration-200 ease-in-out ${
-          open ? 'scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
+          open ? 'scale-100 opacity-100' : 'pointer-events-none invisible scale-95 opacity-0'
         }`}
         role="menu"
+        aria-hidden={!open}
       >
         <div className="mb-1 flex items-center gap-3 rounded-lg px-2 py-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
@@ -106,19 +127,22 @@ export function AccountDropdown() {
         <div className="my-2 border-t border-slate-200" />
 
         <Link
+          ref={firstMenuItemRef}
           href="/dashboard/profile"
-          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-700 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"
-          onClick={() => setOpen(false)}
+          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-700 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-300"
+          onClick={() => closeMenu()}
           role="menuitem"
+          tabIndex={open ? 0 : -1}
         >
           <User size={16} />
           Profile
         </Link>
         <Link
           href="/dashboard/settings"
-          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-700 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"
-          onClick={() => setOpen(false)}
+          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-700 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-300"
+          onClick={() => closeMenu()}
           role="menuitem"
+          tabIndex={open ? 0 : -1}
         >
           <Settings size={16} />
           Settings
@@ -128,8 +152,10 @@ export function AccountDropdown() {
 
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-200"
+          type="button"
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-rose-300"
           role="menuitem"
+          tabIndex={open ? 0 : -1}
         >
           <LogOut size={16} />
           Logout

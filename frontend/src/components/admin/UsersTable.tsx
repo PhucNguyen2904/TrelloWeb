@@ -15,7 +15,7 @@ interface User {
 
 interface UsersTableProps {
   users: User[];
-  roles?: any[];
+  roles?: Array<{ id: number; name: string }>;
   isSuperAdmin?: boolean;
   currentUserId?: number;
   onEdit?: (userId: number, roleId: number) => void;
@@ -54,8 +54,13 @@ export function UsersTable({
   // Sort users
   const sortedUsers = useMemo(() => {
     const sorted = [...filteredUsers].sort((a, b) => {
-      let aVal: any = a[sortField];
-      let bVal: any = b[sortField];
+      let aVal: string | number = a.id;
+      let bVal: string | number = b.id;
+
+      if (sortField === 'email') {
+        aVal = a.email;
+        bVal = b.email;
+      }
 
       if (sortField === 'role') {
         aVal = a.role?.name || '';
@@ -65,7 +70,7 @@ export function UsersTable({
         bVal = new Date(b.created_at || 0).getTime();
       }
 
-      if (typeof aVal === 'string') {
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
         aVal = aVal.toLowerCase();
         bVal = bVal.toLowerCase();
       }
@@ -125,23 +130,34 @@ export function UsersTable({
     }
   };
 
-  const SortHeader = ({ field, label }: { field: SortField; label: string }) => (
-    <th
-      onClick={() => handleSort(field)}
-      className="cursor-pointer select-none px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-slate-700"
-    >
-      <div className="flex items-center gap-2">
-        {label}
-        {sortField === field && (
-          sortOrder === 'asc' ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          )
-        )}
-      </div>
-    </th>
-  );
+  const renderSortHeader = (field: SortField, label: string) => {
+    const isCurrentField = sortField === field;
+    const ariaSort = isCurrentField ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none';
+
+    return (
+      <th
+        scope="col"
+        aria-sort={ariaSort}
+        className="select-none px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+      >
+        <button
+          type="button"
+          onClick={() => handleSort(field)}
+          className="flex items-center gap-2 text-left transition duration-200 ease-in-out hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-slate-300"
+          aria-label={`Sort by ${label}`}
+        >
+          {label}
+          {isCurrentField && (
+            sortOrder === 'asc' ? (
+              <ChevronUp className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <ChevronDown className="h-4 w-4" aria-hidden="true" />
+            )
+          )}
+        </button>
+      </th>
+    );
+  };
 
   return (
     <div
@@ -164,15 +180,15 @@ export function UsersTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="w-full overflow-x-auto">
           <table className="w-full min-w-[720px] text-left">
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
-                <SortHeader field="id" label="ID" />
-                <SortHeader field="email" label="Email" />
-                <SortHeader field="role" label="Role" />
-                <SortHeader field="created_at" label="Created" />
+                {renderSortHeader('id', 'ID')}
+                {renderSortHeader('email', 'Email')}
+                {renderSortHeader('role', 'Role')}
+                {renderSortHeader('created_at', 'Created')}
                 <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Actions
                 </th>
@@ -226,21 +242,21 @@ export function UsersTable({
                             {editingUserId === user.id ? (
                               <>
                                 <button
-                                  onClick={() => handleSaveRole(user.id)}
-                                  disabled={isLoading}
-                                  className="rounded-lg p-2 text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-green-200"
-                                  title="Save"
-                                  aria-label="Save changes"
-                                >
+                                    onClick={() => handleSaveRole(user.id)}
+                                    disabled={isLoading}
+                                    className="rounded-lg p-2 text-green-700 transition duration-200 ease-in-out hover:bg-green-100 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-green-300"
+                                    title="Save"
+                                    aria-label="Save changes"
+                                  >
                                   ✓
                                 </button>
                                 <button
-                                  onClick={() => setEditingUserId(null)}
-                                  disabled={isLoading}
-                                  className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                                  title="Cancel"
-                                  aria-label="Cancel editing"
-                                >
+                                    onClick={() => setEditingUserId(null)}
+                                    disabled={isLoading}
+                                    className="rounded-lg p-2 text-slate-500 transition duration-200 ease-in-out hover:bg-slate-100 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-slate-300"
+                                    title="Cancel"
+                                    aria-label="Cancel editing"
+                                  >
                                   ✕
                                 </button>
                               </>
@@ -248,7 +264,7 @@ export function UsersTable({
                               <button
                                 onClick={() => handleEditRole(user.id, user.role?.id || 1)}
                                 disabled={isLoading}
-                                className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                className="rounded-lg p-2 text-slate-500 transition duration-200 ease-in-out hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-300"
                                 title="Edit Role"
                                 aria-label="Edit user role"
                               >
@@ -263,7 +279,7 @@ export function UsersTable({
                             <button
                               onClick={() => handleDelete(user.id, user.email)}
                               disabled={isLoading}
-                              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-200"
+                              className="rounded-lg p-2 text-slate-500 transition duration-200 ease-in-out hover:bg-red-50 hover:text-red-600 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-red-300"
                               title="Delete User"
                               aria-label={`Delete user ${user.email}`}
                             >
@@ -291,7 +307,7 @@ export function UsersTable({
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1 || isLoading}
-              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition duration-200 ease-in-out hover:bg-slate-50 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-slate-300"
               aria-label="Previous page"
             >
               Previous
@@ -310,10 +326,10 @@ export function UsersTable({
                     onClick={() => setCurrentPage(page)}
                     disabled={isLoading}
                     aria-current={isActive ? "page" : undefined}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 ${
+                    className={`rounded-lg px-3 py-2 text-sm font-medium transition duration-200 ease-in-out focus-visible:ring-2 ${
                       isActive
-                        ? 'bg-[#0079BF] text-white focus:ring-blue-400'
-                        : 'border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 disabled:opacity-50 focus:ring-slate-200'
+                        ? 'bg-[#0079BF] text-white focus-visible:ring-blue-400'
+                        : 'border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 disabled:opacity-50 focus-visible:ring-slate-300'
                     }`}
                   >
                     {page}
@@ -324,7 +340,7 @@ export function UsersTable({
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages || isLoading}
-              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition duration-200 ease-in-out hover:bg-slate-50 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-slate-300"
               aria-label="Next page"
             >
               Next

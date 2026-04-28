@@ -76,15 +76,15 @@ export function Sidebar({ className, mobileOpen = false, onCloseMobile }: Sideba
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col border-r border-[#e2e8f0] bg-[#f7f9ff]">
-      <div className="flex items-center gap-3 border-b border-[#e2e8f0] px-5 py-5">
+    <div className="flex h-full flex-col border-r border-slate-200 bg-[#f7f9ff]">
+      <div className="flex items-center gap-3 border-b border-slate-200 px-5 py-5">
         <div className="text-[#0079BF]">
           <Logo />
         </div>
         <span className="text-base font-bold tracking-tight text-slate-800">ProjectFlow</span>
       </div>
 
-      <div className="mx-4 mt-4 rounded-xl border border-[#e2e8f0] bg-white p-3 shadow-sm">
+      <div className="mx-4 mt-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <p className="text-xs text-slate-400">Workspace</p>
         <div className="mt-2 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0079BF] text-sm font-bold text-white">
@@ -110,11 +110,12 @@ export function Sidebar({ className, mobileOpen = false, onCloseMobile }: Sideba
                 href={item.href}
                 onClick={onCloseMobile}
                 className={cn(
-                  'group flex items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 text-sm font-medium transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-400',
+                  'group flex items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 text-sm font-medium transition duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400',
                   isActive
                     ? 'border-[#0079BF] bg-blue-50 text-blue-600'
                     : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 )}
+                aria-current={isActive ? 'page' : undefined}
               >
                 <Icon
                   size={17}
@@ -127,17 +128,17 @@ export function Sidebar({ className, mobileOpen = false, onCloseMobile }: Sideba
         </div>
       </nav>
 
-      <footer className="space-y-3 border-t border-[#e2e8f0] p-4">
+      <footer className="space-y-3 border-t border-slate-200 p-4">
         <button
           aria-label="Help Center"
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-400"
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400"
         >
           <HelpCircle size={16} />
           Help Center
         </button>
 
         {user ? (
-          <div className="rounded-xl border border-[#e2e8f0] bg-white p-3 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
             <div className="mb-3 flex items-center gap-3">
               <Avatar email={user.email} />
               <div className="min-w-0">
@@ -150,7 +151,7 @@ export function Sidebar({ className, mobileOpen = false, onCloseMobile }: Sideba
 
             <button
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-400"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-400"
             >
               <LogOut size={15} />
               Logout
@@ -163,29 +164,30 @@ export function Sidebar({ className, mobileOpen = false, onCloseMobile }: Sideba
 
   return (
     <>
-      <aside className={cn('hidden shrink-0 md:flex', className)}>{sidebarContent}</aside>
+      <aside className={cn('hidden h-screen shrink-0 md:sticky md:top-0 md:flex', className)}>{sidebarContent}</aside>
 
-      <div
+      <button
+        type="button"
         className={cn(
           'fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm transition duration-300 ease-in-out md:hidden',
           mobileOpen ? 'opacity-100 pointer-events-auto' : 'pointer-events-none opacity-0'
         )}
         onClick={onCloseMobile}
-        role="button"
         aria-label="Close sidebar overlay"
-        tabIndex={-1}
+        aria-hidden={!mobileOpen}
       />
 
       <aside
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transform transition duration-300 ease-in-out md:hidden',
-          mobileOpen ? 'translate-x-0 shadow-lg' : '-translate-x-full'
+          mobileOpen ? 'pointer-events-auto translate-x-0 shadow-lg' : 'pointer-events-none -translate-x-full'
         )}
+        aria-hidden={!mobileOpen}
       >
         <div className="relative h-full overflow-y-auto overscroll-contain">
           <button
             onClick={onCloseMobile}
-            className="absolute right-3 top-3 z-10 rounded-lg border border-[#e2e8f0] bg-white p-1.5 text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            className="absolute right-3 top-3 z-10 rounded-lg border border-slate-200 bg-white p-1.5 text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-300"
             aria-label="Close sidebar"
           >
             <X size={16} />

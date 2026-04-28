@@ -8,6 +8,21 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useToast } from "@/store/useToastStore";
 import { Users } from "lucide-react";
 
+interface DashboardUser {
+  id: number;
+  email: string;
+  role?: {
+    id: number;
+    name: string;
+  };
+  created_at?: string;
+}
+
+interface RoleOption {
+  id: number;
+  name: string;
+}
+
 export default function UsersPage() {
   const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
@@ -16,34 +31,20 @@ export default function UsersPage() {
   const isSuperAdmin = user?.role?.name === 'superadmin';
   const isAdmin = user?.role?.name === 'admin' || isSuperAdmin;
 
-  // Redirect if not admin
-  if (!isAdmin) {
-    return (
-      <DashboardLayout topbarProps={{ title: 'Access Denied' }}>
-        <div
-          className="animate-fadeIn text-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 py-16 px-6"
-        >
-          <h3 className="mb-2 text-lg font-semibold text-slate-700">Access Denied</h3>
-          <p className="text-sm text-slate-500">You do not have permission to access this page.</p>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   // Fetch Users
-  const { data: users = [], isLoading: isUsersLoading } = useQuery<any[]>({
+  const { data: users = [], isLoading: isUsersLoading } = useQuery<DashboardUser[]>({
     queryKey: ['users'],
     queryFn: async () => {
       const endpoint = isSuperAdmin ? '/super-admin/users' : '/admin/users';
       const pageSize = 200;
       let skip = 0;
-      const allUsers: any[] = [];
+      const allUsers: DashboardUser[] = [];
 
       while (true) {
         const res = await api.get(endpoint, {
           params: { skip, limit: pageSize },
         });
-        const batch = Array.isArray(res.data) ? res.data : [];
+        const batch = Array.isArray(res.data) ? (res.data as DashboardUser[]) : [];
         allUsers.push(...batch);
 
         if (batch.length < pageSize) break;
@@ -52,14 +53,15 @@ export default function UsersPage() {
 
       return allUsers;
     },
+    enabled: isAdmin,
   });
 
   // Fetch Roles (SuperAdmin Only)
-  const { data: roles = [] } = useQuery<any[]>({
+  const { data: roles = [] } = useQuery<RoleOption[]>({
     queryKey: ['roles'],
     queryFn: async () => {
       const res = await api.get('/super-admin/roles');
-      return res.data;
+      return Array.isArray(res.data) ? (res.data as RoleOption[]) : [];
     },
     enabled: isSuperAdmin,
   });
@@ -94,6 +96,17 @@ export default function UsersPage() {
     }
   });
 
+  if (!isAdmin) {
+    return (
+      <DashboardLayout topbarProps={{ title: 'Access Denied' }}>
+        <div className="animate-fade-in rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-16 text-center">
+          <h3 className="mb-2 text-lg font-semibold text-slate-700">Access Denied</h3>
+          <p className="text-sm text-slate-500">You do not have permission to access this page.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout
       topbarProps={{
@@ -102,35 +115,32 @@ export default function UsersPage() {
       }}
     >
       <div className="space-y-6 md:space-y-8">
-        {/* Header */}
-        <section className="mb-6 space-y-2">
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:p-6">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Users Management</p>
-          <div className="flex items-start gap-3 md:items-center">
-            <Users className="mt-0.5 h-7 w-7 shrink-0 text-[#0079BF] md:mt-0" />
-            <h1 className="text-2xl font-bold leading-tight text-slate-800 md:text-3xl">
+          <div className="mt-2 flex items-start gap-3 md:items-center">
+            <Users className="mt-0.5 h-6 w-6 shrink-0 text-[#0079BF] md:mt-0" />
+            <h1 className="text-2xl font-bold text-slate-800">
               {isSuperAdmin ? 'Manage All Users' : 'Manage Users'}
             </h1>
           </div>
-          <p className="pl-10 text-sm text-slate-500">
+          <p className="mt-1 pl-9 text-sm text-slate-500 md:pl-9">
             {isSuperAdmin
               ? 'View and manage all users across the workspace.'
               : 'View and manage users you have permission to access.'}
           </p>
         </section>
 
-        {/* Users Table */}
         {isUsersLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="skeleton animate-stagger-{i} h-16 rounded-xl border border-slate-200"
-                style={{ animationDelay: `${(i - 1) * 50}ms` }}
+                className="h-16 animate-pulse rounded-xl border border-slate-200 bg-white shadow-sm"
               />
             ))}
           </div>
         ) : (
-          <div className="animate-fadeIn">
+          <div className="animate-fade-in">
             <UsersTable
               users={users}
               roles={roles}
