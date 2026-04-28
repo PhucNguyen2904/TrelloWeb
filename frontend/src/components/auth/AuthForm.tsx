@@ -95,28 +95,51 @@ export function AuthForm({ mode }: AuthFormProps) {
         const fd = new URLSearchParams();
         fd.append('username', (data as LoginFormData).email);
         fd.append('password', (data as LoginFormData).password);
-        const res = await api.post('/api/auth/login', fd, { 
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
-        });
         
-        // Step 2: Extract token từ response
-        const token = res.data.access_token;
-        
-        // Step 3: Gọi /me với token explicit trong Authorization header
-        // (Không rely vào store vì chưa update)
-        const userRes = await api.get('/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const user = userRes.data;
-        
-        // Step 4: Update store với user data và token
-        login(user, token);
-        addToast({ type: 'success', title: 'Login successful!' });
-        
-        // Step 5: Redirect theo role
-        const role = user.role?.name;
-        const dest = role === 'superadmin' || role === 'admin' ? '/dashboard/users' : '/dashboard';
-        router.replace(dest);
+        try {
+          const res = await api.post('/api/auth/login', fd, { 
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
+          });
+          
+          // Step 2: Extract token từ response
+          const token = res.data.access_token;
+          
+          // Step 3: Gọi /me với token explicit trong Authorization header
+          // (Không rely vào store vì chưa update)
+          const userRes = await api.get('/api/auth/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const user = userRes.data;
+          
+          // Step 4: Update store với user data và token
+          login(user, token);
+          addToast({ type: 'success', title: 'Login successful!' });
+          
+          // Step 5: Redirect theo role
+          const role = user.role?.name;
+          const dest = role === 'superadmin' || role === 'admin' ? '/dashboard/users' : '/dashboard';
+          router.replace(dest);
+        } catch (loginError: any) {
+          // Improve error messages for user
+          let errorMsg = 'Login failed. Please try again.';
+          
+          if (loginError.code === 'ECONNABORTED' || loginError.message?.includes('timeout')) {
+            errorMsg = 'Request timeout. Backend might be slow. Please try again in a few seconds.';
+          } else if (loginError.code === 'ENOTFOUND' || loginError.message?.includes('cannot reach')) {
+            errorMsg = 'Cannot reach backend server. Check your internet connection or try again later.';
+          } else if (loginError.response?.status === 401) {
+            errorMsg = 'Invalid email or password.';
+          } else if (loginError.response?.data?.detail) {
+            errorMsg = loginError.response.data.detail;
+          }
+          
+          addToast({ 
+            type: 'error', 
+            title: 'Login failed', 
+            description: errorMsg 
+          });
+          throw loginError;
+        }
       } else {
         const { email, password } = data as RegisterFormData;
         await api.post('/api/auth/register', { email, password });
@@ -124,7 +147,8 @@ export function AuthForm({ mode }: AuthFormProps) {
         router.replace('/login');
       }
     } catch (err: any) {
-      addToast({ type: 'error', title: isLogin ? 'Login failed' : 'Registration failed', description: err.response?.data?.detail || 'An unexpected error occurred' });
+      console.error('[AuthForm] Error:', err);
+      // Errors already handled by individual try-catch above
     } finally {
       setIsLoading(false);
     }

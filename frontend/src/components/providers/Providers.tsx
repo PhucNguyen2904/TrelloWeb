@@ -2,7 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from '@/components/ui/Toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { startKeepAlive, stopKeepAlive } from '@/lib/keep-alive';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -17,6 +18,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   );
+
+  // Initialize backend keep-alive service
+  // Prevents Render free tier from going to sleep
+  useEffect(() => {
+    startKeepAlive();
+    return () => stopKeepAlive();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
