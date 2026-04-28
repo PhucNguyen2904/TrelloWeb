@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -9,6 +11,7 @@ from app.crud.user import get_all_users, delete_user, create_user, get_user_by_i
 from app.deps.auth import RoleChecker
 
 router = APIRouter(prefix="/api/super-admin", tags=["super-admin"])
+logger = logging.getLogger(__name__)
 
 # Dependency that ensures the user is a superadmin
 allow_super_admin = RoleChecker(["superadmin"])
@@ -16,12 +19,19 @@ allow_super_admin = RoleChecker(["superadmin"])
 @router.get("/users", response_model=list[UserResponseWithoutPassword])
 async def read_all_users(
     skip: int = 0,
-    limit: int = 100,
+    limit: int | None = Query(default=None, ge=1, le=1000),
     current_super_admin: User = Depends(allow_super_admin),
     db: Session = Depends(get_db)
 ):
     """Retrieve list of all users (Super Admin only)"""
     users = get_all_users(db, skip=skip, limit=limit)
+    logger.info(
+        "super_admin_users_list actor_id=%s skip=%s limit=%s returned=%s",
+        current_super_admin.id,
+        skip,
+        limit,
+        len(users),
+    )
     return users
 
 @router.post("/users", response_model=UserResponseWithoutPassword, status_code=status.HTTP_201_CREATED)

@@ -15,13 +15,15 @@ app = FastAPI(
     description="A Trello-like task management API built with FastAPI"
 )
 
-# Add CORS middleware
+# Add CORS middleware with proper configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=True,              # Required for cookies & Authorization header
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_headers=["*"],                 # Allow all headers including Authorization
+    expose_headers=["*"],                # Expose all response headers to client
+    max_age=3600,                        # Preflight cache: 1 hour
 )
 
 # Include router

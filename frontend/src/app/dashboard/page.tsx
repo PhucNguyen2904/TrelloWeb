@@ -111,8 +111,8 @@ export default function DashboardPage() {
     <DashboardLayout topbarProps={{ title: isAdmin ? 'Manage Users' : 'My Boards' }}>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#181c20', display: 'flex', alignItems: 'center', gap: 12, margin: 0 }}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#181c20', display: 'flex', alignItems: 'center', gap: 12, margin: 0, lineHeight: 1.2 }}>
             {isSuperAdmin && <Shield style={{ width: 32, height: 32, color: '#0079bf' }} />}
             {isAdmin && !isSuperAdmin && <Users style={{ width: 32, height: 32, color: '#0079bf' }} />}
             {!isAdmin && <Layout style={{ width: 32, height: 32, color: '#0079bf' }} />}
@@ -136,6 +136,7 @@ export default function DashboardPage() {
                 fontWeight: 600,
                 cursor: 'pointer',
                 transition: 'background 0.2s',
+                alignSelf: 'flex-start',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.background = '#005f98')}
               onMouseLeave={(e) => (e.currentTarget.style.background = '#0079bf')}

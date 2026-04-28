@@ -46,9 +46,12 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
     return user
 
 
-def get_all_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
-    """Get all users"""
-    return db.query(User).options(joinedload(User.role)).offset(skip).limit(limit).all()
+def get_all_users(db: Session, skip: int = 0, limit: int | None = 100) -> list[User]:
+    """Get all users with optional pagination."""
+    query = db.query(User).options(joinedload(User.role)).order_by(User.id.asc()).offset(skip)
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
 
 
 def delete_user(db: Session, user_id: int) -> bool:

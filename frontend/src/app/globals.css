@@ -482,6 +482,21 @@ input:focus:not(:focus-visible) { outline: none; }
   }
 }
 
+/* Shared dashboard content spacing across breakpoints */
+.dashboard-content-shell {
+  padding: 16px;
+}
+@media (min-width: 768px) {
+  .dashboard-content-shell {
+    padding: 24px 20px;
+  }
+}
+@media (min-width: 1024px) {
+  .dashboard-content-shell {
+    padding: 32px 24px;
+  }
+}
+
 /* Auth pages — show left marketing column on lg+ */
 .auth-left-col {
   display: none;

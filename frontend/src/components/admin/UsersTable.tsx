@@ -167,7 +167,8 @@ export function UsersTable({
 
       {/* Table */}
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl">
-        <table className="w-full text-left">
+        <div className="w-full overflow-x-auto">
+        <table className="w-full min-w-[760px] text-left">
           <thead className="bg-white/5 border-b border-white/10">
             <tr>
               <SortHeader field="id" label="ID" />
@@ -269,16 +270,17 @@ export function UsersTable({
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <p className="text-sm text-gray-500">
             Showing {paginatedUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to{' '}
             {Math.min(currentPage * itemsPerPage, sortedUsers.length)} of {sortedUsers.length} users
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1 || isLoading}

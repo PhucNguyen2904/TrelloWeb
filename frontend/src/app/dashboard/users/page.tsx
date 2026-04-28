@@ -38,8 +38,22 @@ export default function UsersPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const endpoint = isSuperAdmin ? '/super-admin/users' : '/admin/users';
-      const res = await api.get(endpoint);
-      return res.data;
+      const pageSize = 200;
+      let skip = 0;
+      const allUsers: any[] = [];
+
+      while (true) {
+        const res = await api.get(endpoint, {
+          params: { skip, limit: pageSize },
+        });
+        const batch = Array.isArray(res.data) ? res.data : [];
+        allUsers.push(...batch);
+
+        if (batch.length < pageSize) break;
+        skip += pageSize;
+      }
+
+      return allUsers;
     },
   });
 
@@ -85,11 +99,11 @@ export default function UsersPage() {
 
   return (
     <DashboardLayout topbarProps={{ title: 'Manage Users' }}>
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <Users className="w-8 h-8 text-indigo-500" />
-          <h1 className="text-3xl font-bold">
+        <div className="flex items-start gap-3 md:items-center">
+          <Users className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 shrink-0 mt-1 md:mt-0" />
+          <h1 className="text-2xl md:text-3xl font-bold leading-tight break-words">
             {isSuperAdmin ? 'Super Admin - Manage All Users' : 'Manage Users'}
           </h1>
         </div>

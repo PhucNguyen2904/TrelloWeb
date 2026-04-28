@@ -233,6 +233,8 @@ export default function BoardPage({ params }: PageProps) {
             alignItems: 'center',
             justifyContent: 'space-between',
             paddingBottom: 4,
+            flexWrap: 'wrap',
+            gap: 8,
           }}
         >
           <Link
