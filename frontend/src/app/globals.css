@@ -478,7 +478,19 @@ input:focus:not(:focus-visible) { outline: none; }
 }
 @media (min-width: 768px) {
   .content-offset {
-    margin-left: var(--sidebar-width); /* 260px */
+    margin-left: var(--sidebar-width);
+  }
+}
+
+/* Dashboard topbar — align with content when sidebar is fixed on md+ */
+.topbar-offset {
+  left: 0;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .topbar-offset {
+    left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
   }
 }
 

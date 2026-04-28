@@ -55,7 +55,7 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
       <Topbar {...(topbarProps || {})} />
 
       <main
-        className="flex-1 pt-[var(--topbar-height)] md:ml-[var(--sidebar-width)]"
+        className="content-offset flex-1 pt-[var(--topbar-height)]"
         style={{ minHeight: '100vh' }}
       >
         <div className="dashboard-content-shell w-full">{children}</div>
