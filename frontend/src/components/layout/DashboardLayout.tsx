@@ -55,23 +55,11 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
       <Topbar {...(topbarProps || {})} />
 
       <main
-<<<<<<< HEAD
         className="flex-1 pt-[var(--topbar-height)] md:ml-[var(--sidebar-width)]"
         style={{ minHeight: '100vh' }}
       >
         <div className="px-4 py-6 md:px-6 md:py-6">
           <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto' }}>
-=======
-        style={{
-          marginTop: 'var(--topbar-height)',
-          minHeight: 'calc(100vh - var(--topbar-height))',
-          background: 'var(--background)',
-          width: '100%',
-        }}
-      >
-        <div className="content-offset dashboard-content-shell">
-          <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', minWidth: 0 }}>
->>>>>>> 6ed65ebbfc924e3d2302a33af955f59f13ff60ef
             {children}
           </div>
         </div>
