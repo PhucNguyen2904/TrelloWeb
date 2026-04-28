@@ -58,11 +58,7 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
         className="flex-1 pt-[var(--topbar-height)] md:ml-[var(--sidebar-width)]"
         style={{ minHeight: '100vh' }}
       >
-        <div className="px-4 py-6 md:px-6 md:py-6">
-          <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto' }}>
-            {children}
-          </div>
-        </div>
+        <div className="dashboard-content-shell w-full">{children}</div>
       </main>
     </div>
   );

@@ -98,21 +98,31 @@ export default function UsersPage() {
   });
 
   return (
-    <DashboardLayout topbarProps={{ title: 'Manage Users' }}>
-      <div className="space-y-6 md:space-y-8">
+    <DashboardLayout topbarProps={{ title: 'Users Management' }}>
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-start gap-3 md:items-center">
-          <Users className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 shrink-0 mt-1 md:mt-0" />
-          <h1 className="text-2xl md:text-3xl font-bold leading-tight break-words">
-            {isSuperAdmin ? 'Super Admin - Manage All Users' : 'Manage Users'}
-          </h1>
-        </div>
+        <section className="space-y-2">
+          <div className="flex items-start gap-3 md:items-center">
+            <Users className="mt-0.5 h-7 w-7 shrink-0 text-[var(--primary-container)] md:mt-0 md:h-8 md:w-8" />
+            <h1 className="text-2xl font-bold leading-tight text-[var(--text-primary)] md:text-3xl">
+              {isSuperAdmin ? 'Manage All Users' : 'Manage Users'}
+            </h1>
+          </div>
+          <p className="pl-10 text-sm text-[var(--text-muted)] md:pl-11">
+            {isSuperAdmin
+              ? 'View and manage all users across the workspace.'
+              : 'View and manage users you have permission to access.'}
+          </p>
+        </section>
 
         {/* Users Table */}
         {isUsersLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-white/5 animate-pulse rounded-xl border border-white/5" />
+              <div
+                key={i}
+                className="h-16 animate-pulse rounded-xl border border-[var(--border)] bg-[var(--surface-container-low)]"
+              />
             ))}
           </div>
         ) : (

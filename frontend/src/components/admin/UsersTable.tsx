@@ -118,18 +118,18 @@ export function UsersTable({
   const getRoleColor = (roleName?: string) => {
     switch (roleName) {
       case 'superadmin':
-        return 'bg-red-500/20 text-red-300';
+        return 'bg-[var(--error-container)] text-[var(--on-error-container)]';
       case 'admin':
-        return 'bg-indigo-500/20 text-indigo-300';
+        return 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)]';
       default:
-        return 'bg-gray-500/20 text-gray-300';
+        return 'bg-[var(--surface-container)] text-[var(--text-secondary)]';
     }
   };
 
   const SortHeader = ({ field, label }: { field: SortField; label: string }) => (
     <th
       onClick={() => handleSort(field)}
-      className="px-6 py-4 font-medium text-gray-300 cursor-pointer hover:text-white transition-colors select-none"
+      className="cursor-pointer select-none px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
     >
       <div className="flex items-center gap-2">
         {label}
@@ -152,7 +152,7 @@ export function UsersTable({
     >
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
         <input
           type="text"
           placeholder="Search by email..."
@@ -161,122 +161,126 @@ export function UsersTable({
             setSearchQuery(e.target.value);
             setCurrentPage(1);
           }}
-          className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500 transition-colors"
+          className="input-field py-2.5 pl-10 pr-4 text-sm"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl">
+      <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-container-lowest)]">
         <div className="w-full overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left">
-          <thead className="bg-white/5 border-b border-white/10">
-            <tr>
-              <SortHeader field="id" label="ID" />
-              <SortHeader field="email" label="Email" />
-              <SortHeader field="role" label="Role" />
-              <SortHeader field="created_at" label="Created" />
-              <th className="px-6 py-4 font-medium text-gray-300 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {paginatedUsers.length === 0 ? (
+          <table className="w-full min-w-[720px] text-left">
+            <thead className="border-b border-[var(--border)] bg-[var(--surface-container-low)]">
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                  No users found
-                </td>
+                <SortHeader field="id" label="ID" />
+                <SortHeader field="email" label="Email" />
+                <SortHeader field="role" label="Role" />
+                <SortHeader field="created_at" label="Created" />
+                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                  Actions
+                </th>
               </tr>
-            ) : (
-              paginatedUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-4 text-gray-400">#{user.id}</td>
-                  <td className="px-6 py-4 font-medium text-white">{user.email}</td>
-                  <td className="px-6 py-4">
-                    {editingUserId === user.id && isSuperAdmin ? (
-                      <select
-                        value={editRoleId}
-                        onChange={(e) => setEditRoleId(parseInt(e.target.value))}
-                        className="px-2 py-1 bg-white/10 border border-white/20 rounded-md text-white text-sm focus:outline-none focus:border-indigo-500"
-                        disabled={isLoading}
-                      >
-                        {roles.map((role) => (
-                          <option key={role.id} value={role.id}>
-                            {role.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${getRoleColor(user.role?.name)}`}>
-                        {user.role?.name || 'unknown'}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">
-                    {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {isSuperAdmin && user.id !== currentUserId && (
-                        <>
-                          {editingUserId === user.id ? (
-                            <>
-                              <button
-                                onClick={() => handleSaveRole(user.id)}
-                                disabled={isLoading}
-                                className="text-green-400 hover:text-green-300 p-2 hover:bg-green-500/10 rounded-lg transition-colors disabled:opacity-50"
-                                title="Save"
-                              >
-                                ✓
-                              </button>
-                              <button
-                                onClick={() => setEditingUserId(null)}
-                                disabled={isLoading}
-                                className="text-gray-400 hover:text-gray-300 p-2 hover:bg-gray-500/10 rounded-lg transition-colors disabled:opacity-50"
-                                title="Cancel"
-                              >
-                                ✕
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                handleEditRole(user.id, user.role?.id || 1)
-                              }
-                              disabled={isLoading}
-                              className="text-gray-400 hover:text-indigo-400 p-2 hover:bg-indigo-500/10 rounded-lg transition-colors disabled:opacity-50"
-                              title="Edit Role"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </>
-                      )}
-                      {user.id !== currentUserId &&
-                        (isSuperAdmin ||
-                          (user.role?.name !== 'admin' &&
-                            user.role?.name !== 'superadmin')) && (
-                          <button
-                            onClick={() => handleDelete(user.id, user.email)}
-                            disabled={isLoading}
-                            className="text-gray-400 hover:text-red-400 p-2 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
-                            title="Delete User"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
+            </thead>
+            <tbody className="divide-y divide-[var(--surface-container)]">
+              {paginatedUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-10 text-center">
+                    <div className="mx-auto max-w-md space-y-1">
+                      <p className="text-base font-semibold text-[var(--text-secondary)]">No users found</p>
+                      <p className="text-sm text-[var(--text-muted)]">
+                        Try adjusting search keywords or clear filters.
+                      </p>
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                paginatedUsers.map((user) => (
+                  <tr key={user.id} className="transition-colors hover:bg-[var(--surface-container-low)]">
+                    <td className="px-5 py-3.5 text-sm text-[var(--text-muted)]">#{user.id}</td>
+                    <td className="px-5 py-3.5 text-sm font-medium text-[var(--text-primary)]">{user.email}</td>
+                    <td className="px-5 py-3.5">
+                      {editingUserId === user.id && isSuperAdmin ? (
+                        <select
+                          value={editRoleId}
+                          onChange={(e) => setEditRoleId(parseInt(e.target.value))}
+                          className="rounded-md border border-[var(--border)] bg-[var(--surface-container-lowest)] px-2 py-1 text-sm text-[var(--text-primary)] focus:border-[var(--border-focus)] focus:outline-none"
+                          disabled={isLoading}
+                        >
+                          {roles.map((role) => (
+                            <option key={role.id} value={role.id}>
+                              {role.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className={`rounded-md px-2 py-1 text-xs font-medium ${getRoleColor(user.role?.name)}`}>
+                          {user.role?.name || 'unknown'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm text-[var(--text-muted)]">
+                      {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {isSuperAdmin && user.id !== currentUserId && (
+                          <>
+                            {editingUserId === user.id ? (
+                              <>
+                                <button
+                                  onClick={() => handleSaveRole(user.id)}
+                                  disabled={isLoading}
+                                  className="rounded-lg p-2 text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50"
+                                  title="Save"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  onClick={() => setEditingUserId(null)}
+                                  disabled={isLoading}
+                                  className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-container)] disabled:opacity-50"
+                                  title="Cancel"
+                                >
+                                  ✕
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleEditRole(user.id, user.role?.id || 1)}
+                                disabled={isLoading}
+                                className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50"
+                                title="Edit Role"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </>
+                        )}
+                        {user.id !== currentUserId &&
+                          (isSuperAdmin ||
+                            (user.role?.name !== 'admin' && user.role?.name !== 'superadmin')) && (
+                            <button
+                              onClick={() => handleDelete(user.id, user.email)}
+                              disabled={isLoading}
+                              className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                              title="Delete User"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[var(--text-muted)]">
             Showing {paginatedUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to{' '}
             {Math.min(currentPage * itemsPerPage, sortedUsers.length)} of {sortedUsers.length} users
           </p>
@@ -284,7 +288,7 @@ export function UsersTable({
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1 || isLoading}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface-container-lowest)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-container-low)] disabled:opacity-50"
             >
               Previous
             </button>
@@ -303,8 +307,8 @@ export function UsersTable({
                     disabled={isLoading}
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-white/10 hover:bg-white/20 text-white disabled:opacity-50'
+                        ? 'bg-[var(--primary-container)] text-white'
+                        : 'border border-[var(--border)] bg-[var(--surface-container-lowest)] text-[var(--text-primary)] hover:bg-[var(--surface-container-low)] disabled:opacity-50'
                     }`}
                   >
                     {page}
@@ -315,7 +319,7 @@ export function UsersTable({
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages || isLoading}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface-container-lowest)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-container-low)] disabled:opacity-50"
             >
               Next
             </button>
