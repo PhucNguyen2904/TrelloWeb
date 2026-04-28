@@ -23,11 +23,11 @@ export function Topbar({ title = 'Dashboard', showCreateButton = false, onCreate
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 h-[var(--topbar-height)] border-b z-20"
+      className="fixed top-0 left-0 right-0 h-[var(--topbar-height)] border-b z-20 md:left-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]"
       style={{ backgroundColor: 'var(--surface-0)', borderColor: 'var(--border)' }}
     >
       {/* Desktop Layout */}
-      <div className="hidden md:flex h-full items-center justify-between px-6 ml-[var(--sidebar-width)]">
+      <div className="hidden h-full items-center justify-between px-6 md:flex">
         {/* Left: Title */}
         <div>
           <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -96,8 +96,8 @@ export function Topbar({ title = 'Dashboard', showCreateButton = false, onCreate
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden flex h-full items-center justify-between px-6">
-        <div className="ml-12">
+      <div className="flex h-full items-center justify-between px-4 md:hidden">
+        <div className="ml-14">
           <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
             {title}
           </h2>

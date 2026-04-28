@@ -50,19 +50,15 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--background)' }}>
+    <div className="flex min-h-screen bg-[var(--background)]">
       <Sidebar />
       <Topbar {...(topbarProps || {})} />
 
-      {/* Main Content — offset by sidebar width on desktop */}
       <main
-        style={{
-          marginTop: 'var(--topbar-height)',
-          minHeight: 'calc(100vh - var(--topbar-height))',
-          background: 'var(--background)',
-        }}
+        className="flex-1 pt-[var(--topbar-height)] md:ml-[var(--sidebar-width)]"
+        style={{ minHeight: '100vh' }}
       >
-        <div className="content-offset" style={{ padding: '32px 24px' }}>
+        <div className="px-4 py-6 md:px-6 md:py-6">
           <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto' }}>
             {children}
           </div>
