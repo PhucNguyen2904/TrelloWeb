@@ -98,7 +98,12 @@ export default function UsersPage() {
   });
 
   return (
-    <DashboardLayout topbarProps={{ title: 'Users Management' }}>
+    <DashboardLayout
+      topbarProps={{
+        title: 'Users Management',
+        subtitle: 'Manage access, roles, and user lifecycle efficiently.',
+      }}
+    >
       <div className="space-y-6 md:space-y-8">
         {/* Header */}
         <section className="mb-6 space-y-2">

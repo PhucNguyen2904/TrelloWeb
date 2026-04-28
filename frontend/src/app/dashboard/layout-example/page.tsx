@@ -4,7 +4,12 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default function DashboardLayoutExamplePage() {
   return (
-    <DashboardLayout topbarProps={{ title: 'Dashboard Layout Example' }}>
+    <DashboardLayout
+      topbarProps={{
+        title: 'Dashboard Layout Example',
+        subtitle: 'Reference page for spacing, hierarchy, and clean SaaS layout.',
+      }}
+    >
       <div className="space-y-6">
         <section className="rounded-xl border border-[var(--border)] bg-white p-6">
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Overview</h1>

@@ -1,112 +1,61 @@
 'use client';
 
 import { useAuthStore } from '@/store/useAuthStore';
-import { RoleBadge } from '@/components/ui/Badge';
-import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
-import Link from 'next/link';
+import { AccountDropdown } from './AccountDropdown';
 
 export interface TopbarProps {
   title?: string;
+  subtitle?: string;
   showCreateButton?: boolean;
   onCreateClick?: () => void;
 }
 
-export function Topbar({ title = 'Dashboard', showCreateButton = false, onCreateClick }: TopbarProps) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user, logout } = useAuthStore();
-
-  const handleLogout = () => {
-    logout();
-    window.location.href = '/login';
-  };
+export function Topbar({ title = 'Dashboard', subtitle, showCreateButton = false, onCreateClick }: TopbarProps) {
+  const user = useAuthStore((s) => s.user);
 
   return (
     <header
-      className="sticky top-0 z-20 h-[var(--topbar-height)] border-b"
-      style={{ backgroundColor: 'var(--surface-0)', borderColor: 'var(--border)' }}
+      className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur-sm"
     >
       {/* Desktop Layout */}
-      <div className="hidden h-full items-center justify-between px-6 md:flex">
+      <div className="hidden min-h-[72px] items-center justify-between px-6 py-3 md:flex">
         {/* Left: Title */}
-        <div>
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-            {title}
-          </h2>
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-bold text-slate-900">{title}</h1>
+          {subtitle ? (
+            <p className="mt-0.5 truncate text-sm text-slate-500">{subtitle}</p>
+          ) : null}
         </div>
 
         {/* Right: Actions & User Menu */}
         <div className="flex items-center gap-4">
-          {user && <RoleBadge role={user.role.name as 'superadmin' | 'admin' | 'user' | 'guest'} size="sm" />}
-
           {showCreateButton && (
             <button
               onClick={onCreateClick}
-              className="px-4 py-2 text-sm font-medium text-white rounded-md transition-all hover:brightness-110"
-              style={{ backgroundColor: 'var(--primary)' }}
+              className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-[0.99]"
             >
               + Create
             </button>
           )}
 
-          {/* User Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-3 py-2 rounded-md transition-colors"
-              style={{ color: 'var(--text-primary)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-hover)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-            >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ backgroundColor: 'var(--primary)' }}>
-                {user?.email.charAt(0).toUpperCase()}
-              </div>
-              <ChevronDown size={16} />
-            </button>
-
-            {dropdownOpen && (
-              <div
-                className="absolute right-0 mt-2 w-48 rounded-lg shadow-md border py-2 z-40"
-                style={{ backgroundColor: 'var(--surface-0)', borderColor: 'var(--border)' }}
-              >
-                <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
-                  <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                    ACCOUNT
-                  </p>
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                    {user?.email}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    handleLogout();
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm transition-colors"
-                  style={{ color: 'var(--text-primary)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-hover)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
+          {user ? <AccountDropdown /> : null}
         </div>
       </div>
 
       {/* Mobile Layout */}
-      <div className="flex h-full items-center justify-between px-4 md:hidden">
-        <div className="ml-14">
-          <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+      <div className="flex min-h-[56px] items-center justify-between px-4 py-2 md:hidden">
+        <div className="ml-14 min-w-0">
+          <h2 className="truncate text-base font-semibold text-slate-900">
             {title}
           </h2>
+          {subtitle ? (
+            <p className="truncate text-xs text-slate-500">{subtitle}</p>
+          ) : null}
         </div>
         {showCreateButton && (
           <button
             onClick={onCreateClick}
-            className="px-3 py-1.5 text-xs font-medium text-white rounded-md transition-all hover:brightness-110"
-            style={{ backgroundColor: 'var(--primary)' }}
+            className="rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-[0.99]"
           >
             + Create
           </button>

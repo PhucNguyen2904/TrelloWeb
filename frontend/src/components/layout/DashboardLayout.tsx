@@ -54,7 +54,7 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
       <Sidebar />
       <main className="flex min-h-screen min-w-0 flex-1 flex-col">
         <Topbar {...(topbarProps || {})} />
-        <div className="w-full flex-1 p-4 md:p-6 lg:p-8 bg-gray-50">
+        <div className="w-full flex-1 bg-gray-50 p-6 lg:p-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </div>
       </main>

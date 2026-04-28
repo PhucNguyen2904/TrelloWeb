@@ -120,34 +120,13 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '9px 12px',
-                  borderRadius: isActive ? '0 8px 8px 0' : '8px',
-                  fontSize: 14,
-                  fontWeight: isActive ? 600 : 500,
-                  color: isActive ? '#005f98' : '#404751',
-                  background: isActive ? '#d4e0f8' : 'transparent',
-                  boxShadow: isActive ? 'inset 3px 0 0 #0079bf' : 'none',
-                  textDecoration: 'none',
-                  transition: 'background 120ms ease, color 120ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = '#ebeef4';
-                    e.currentTarget.style.color = '#181c20';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#404751';
-                  }
-                }}
+                className={`flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-all duration-200 ${
+                  isActive
+                    ? 'rounded-l-none bg-blue-50 font-semibold text-blue-700 shadow-[inset_3px_0_0_0_#2563eb]'
+                    : 'font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                }`}
               >
-                <span style={{ color: isActive ? '#0079bf' : '#707882', display: 'flex', alignItems: 'center' }}>
+                <span style={{ color: isActive ? '#2563eb' : '#707882', display: 'flex', alignItems: 'center' }}>
                   {item.icon}
                 </span>
                 {item.label}

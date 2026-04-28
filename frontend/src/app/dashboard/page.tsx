@@ -108,7 +108,14 @@ export default function DashboardPage() {
   };
 
   return (
-    <DashboardLayout topbarProps={{ title: isAdmin ? 'Manage Users' : 'My Boards' }}>
+    <DashboardLayout
+      topbarProps={{
+        title: isAdmin ? 'Manage Users' : 'My Boards',
+        subtitle: isAdmin
+          ? 'Review user list, roles, and access from one place.'
+          : 'Track your boards and recent workspace activity.',
+      }}
+    >
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
