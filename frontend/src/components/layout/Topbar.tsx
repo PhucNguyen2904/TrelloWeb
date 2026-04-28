@@ -11,7 +11,7 @@ interface TopBarProps {
 
 export function TopBar({ onCreateClick, onMobileMenuClick }: TopBarProps) {
   return (
-    <div className="fixed top-0 left-0 right-0 h-topbar bg-surface-card border-b border-border flex items-center px-6 z-40">
+    <div className="h-[52px] flex-shrink-0 bg-surface-card border-b border-border flex items-center px-6 z-50">
       {/* Left: Logo + Nav */}
       <div className="flex items-center gap-8 flex-1">
         <Link href="/dashboard" className="flex items-center gap-2">
