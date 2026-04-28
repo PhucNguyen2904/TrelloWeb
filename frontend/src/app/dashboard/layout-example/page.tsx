@@ -4,18 +4,13 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default function DashboardLayoutExamplePage() {
   return (
-    <DashboardLayout
-      topbarProps={{
-        title: 'Dashboard Layout Example',
-        subtitle: 'Reference page for spacing, hierarchy, and clean SaaS layout.',
-      }}
-    >
+    <DashboardLayout>
       <div className="space-y-6">
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Overview</p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-800">Overview</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Page nay dung de verify layout 2 cot: sidebar desktop ben trai, content ben phai, khong overlap.
+        <section className="rounded-xl border border-border bg-surface-card p-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">Overview</p>
+          <h1 className="mt-2 text-2xl font-bold text-text-heading">Layout Example</h1>
+          <p className="mt-1 text-sm text-text-body">
+            This page demonstrates the dashboard layout with sidebar on desktop and responsive design.
           </p>
         </section>
 

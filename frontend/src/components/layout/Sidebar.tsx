@@ -1,226 +1,134 @@
 'use client';
 
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuthStore } from '@/store/useAuthStore';
-import { CalendarDays, ChevronLeft, ChevronRight, HelpCircle, LayoutDashboard, LogOut, Settings, ShieldCheck, Users, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/Button';
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: typeof LayoutDashboard;
-}
-
-const NAV_ITEMS: Record<string, NavItem[]> = {
-  superadmin: [
-    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/dashboard/calendar', icon: CalendarDays },
-    { label: 'Users Management', href: '/dashboard/users', icon: Users },
-    { label: 'Roles', href: '/dashboard/roles', icon: ShieldCheck },
-    { label: 'Settings', href: '/dashboard/settings', icon: Settings },
-  ],
-  admin: [
-    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/dashboard/calendar', icon: CalendarDays },
-    { label: 'Users Management', href: '/dashboard/users', icon: Users },
-    { label: 'Settings', href: '/dashboard/settings', icon: Settings },
-  ],
-  user: [
-    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/dashboard/calendar', icon: CalendarDays },
-  ],
-  guest: [
-    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/dashboard/calendar', icon: CalendarDays },
-  ],
-};
-
-function Logo() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="3" width="8" height="5" rx="1.5" fill="currentColor" opacity="0.85" />
-      <rect x="13" y="3" width="8" height="9" rx="1.5" fill="currentColor" />
-      <rect x="3" y="10" width="8" height="11" rx="1.5" fill="currentColor" />
-      <rect x="13" y="14" width="8" height="7" rx="1.5" fill="currentColor" opacity="0.85" />
-    </svg>
-  );
-}
+import {
+  LayoutDashboard,
+  Kanban,
+  Calendar,
+  Clock,
+  HelpCircle,
+  ChevronLeft,
+  LogOut,
+} from 'lucide-react';
 
 interface SidebarProps {
-  className?: string;
-  mobileOpen?: boolean;
-  onCloseMobile?: () => void;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function Sidebar({
-  className,
-  mobileOpen = false,
-  onCloseMobile,
-  collapsed = false,
-  onToggleCollapse,
-}: SidebarProps) {
-  const { user, logout } = useAuthStore();
+const navItems = [
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Boards', href: '/dashboard/boards', icon: Kanban },
+  { label: 'Calendar', href: '/dashboard/calendar', icon: Calendar },
+  { label: 'Recent', href: '/dashboard/recent', icon: Clock },
+];
+
+export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
 
-  const roleKey = (user?.role?.name || 'guest') as keyof typeof NAV_ITEMS;
-  const items = NAV_ITEMS[roleKey] ?? NAV_ITEMS.guest;
-
-  const handleLogout = () => {
-    logout();
-    window.location.href = '/login';
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
-  const sidebarContent = (
-    <div className="flex h-full flex-col border-r border-slate-200 bg-[#f7f9ff] transition-all duration-300 ease-in-out">
-      <div className={cn('flex items-center border-b border-slate-200 px-5 py-5', collapsed ? 'justify-center' : 'gap-3')}>
-        <div className="text-[#0079BF]">
-          <Logo />
-        </div>
-        {!collapsed ? <span className="text-base font-bold tracking-tight text-slate-800">ProjectFlow</span> : null}
-      </div>
-
-      <div className="mx-4 mt-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-        {!collapsed ? (
-          <>
-            <p className="text-xs text-slate-400">Workspace</p>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0079BF] text-sm font-bold text-white">
-                PF
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-800">Engineering Team</p>
-                <p className="text-xs text-slate-500">Premium Workspace</p>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex justify-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0079BF] text-sm font-bold text-white">
-              PF
-            </div>
-          </div>
-        )}
-      </div>
-
-      <nav className="mt-4 flex-1 overflow-y-auto px-3">
-        {!collapsed ? (
-          <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Navigation</p>
-        ) : null}
-        <div className="space-y-1">
-          {items.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={`${item.href}-${item.label}`}
-                href={item.href}
-                onClick={onCloseMobile}
-                className={cn(
-                  'group flex items-center rounded-lg border-l-2 px-3 py-2.5 text-sm font-medium transition duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400',
-                  collapsed ? 'justify-center' : 'gap-3',
-                  isActive
-                    ? 'border-[var(--accent)] bg-[var(--surface-2)] text-[var(--text-primary)]'
-                    : 'border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]'
-                )}
-                aria-current={isActive ? 'page' : undefined}
-                title={collapsed ? item.label : undefined}
-              >
-                <Icon
-                  size={17}
-                  className={cn(
-                    'transition duration-150 ease-out',
-                    isActive ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]'
-                  )}
-                />
-                {!collapsed ? item.label : null}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-
-      <footer className="space-y-3 border-t border-slate-200 p-4">
-        <button
-          aria-label="Help Center"
-          className={cn(
-            'flex w-full items-center rounded-lg px-3 py-2 text-left text-sm text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400',
-            collapsed ? 'justify-center' : 'gap-2'
-          )}
-          title={collapsed ? 'Help Center' : undefined}
-        >
-          <HelpCircle size={16} />
-          {!collapsed ? 'Help Center' : null}
-        </button>
-
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          className={cn(
-            'hidden w-full items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition duration-200 ease-in-out hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400 md:flex',
-            collapsed ? 'justify-center' : 'gap-2'
-          )}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          {!collapsed ? 'Collapse Sidebar' : null}
-        </button>
-
-        {user ? (
-          <button
-            onClick={handleLogout}
-            className={cn(
-              'flex w-full items-center rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-400',
-              collapsed ? 'justify-center' : 'justify-center gap-2'
-            )}
-            title={collapsed ? 'Logout' : undefined}
-          >
-            <LogOut size={15} />
-            {!collapsed ? 'Logout' : null}
-          </button>
-        ) : null}
-      </footer>
-    </div>
-  );
+  const sidebarWidth = isCollapsed ? 'w-14' : 'w-60';
 
   return (
     <>
-      <aside className={cn('hidden h-screen shrink-0 lg:sticky lg:top-0 lg:flex lg:w-[220px]', className)}>{sidebarContent}</aside>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 lg:hidden z-30"
+          onClick={onClose}
+        />
+      )}
 
-      <button
-        type="button"
-        className={cn(
-          'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition duration-300 ease-in-out lg:hidden',
-          mobileOpen ? 'opacity-100 pointer-events-auto' : 'pointer-events-none opacity-0'
-        )}
-        onClick={onCloseMobile}
-        aria-label="Close sidebar overlay"
-        aria-hidden={!mobileOpen}
-      />
-
+      {/* Sidebar */}
       <aside
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transform transition duration-300 ease-in-out lg:hidden',
-          mobileOpen ? 'pointer-events-auto translate-x-0 shadow-lg' : 'pointer-events-none -translate-x-full'
-        )}
-        aria-hidden={!mobileOpen}
+        className={`fixed left-0 top-topbar h-[calc(100vh-52px)] bg-surface-card border-r border-border overflow-y-auto transition-all duration-300 z-40 lg:relative lg:z-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        } ${sidebarWidth}`}
       >
-        <div className="relative h-full overflow-y-auto overscroll-contain">
-          <button
-            onClick={onCloseMobile}
-            className="absolute right-3 top-3 z-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 text-[var(--text-secondary)] transition duration-200 ease-in-out hover:bg-[var(--surface-2)]"
-            aria-label="Close sidebar"
-          >
-            <X size={16} />
-          </button>
+        {/* Workspace block */}
+        {!isCollapsed && (
+          <div className="p-4 border-b border-border">
+            <div className="bg-surface-muted rounded-lg p-3 flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-lg bg-brand flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                style={{ backgroundColor: '#0079BF' }}
+              >
+                ET
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-text-heading truncate">
+                  Engineering
+                </p>
+                <p className="text-xs text-text-muted truncate">
+                  Premium Workspace
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
-          <div className="pt-2">{sidebarContent}</div>
+        {/* Navigation */}
+        <nav className="p-3 space-y-1">
+          <p className="text-xs tracking-widest font-medium text-text-muted px-3 mb-3 uppercase">
+            {!isCollapsed ? 'Navigation' : ''}
+          </p>
+
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+
+            return (
+              <Link key={item.href} href={item.href}>
+                <button
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg h-9 text-sm font-medium transition-colors relative ${
+                    isActive
+                      ? 'bg-brand-light text-brand'
+                      : 'text-text-body hover:bg-surface-muted'
+                  }`}
+                >
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand rounded-r" />
+                  )}
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-brand' : ''}`} />
+                  {!isCollapsed && <span>{item.label}</span>}
+                </button>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Bottom Section */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-border p-3 space-y-2">
+          {!isCollapsed && (
+            <>
+              <button className="w-full text-left text-sm text-text-body hover:bg-surface-muted rounded-lg px-3 py-2 flex items-center gap-3 h-9">
+                <HelpCircle className="w-4 h-4 flex-shrink-0" />
+                Help Center
+              </button>
+              <button
+                onClick={toggleCollapse}
+                className="w-full text-left text-sm text-text-body hover:bg-surface-muted rounded-lg px-3 py-2 flex items-center gap-3 h-9"
+              >
+                <ChevronLeft className="w-4 h-4 flex-shrink-0" />
+                Collapse
+              </button>
+            </>
+          )}
+
+          <button className="w-full text-left text-sm text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 flex items-center gap-3 h-9">
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            {!isCollapsed && 'Logout'}
+          </button>
         </div>
       </aside>
     </>
   );
 }
+
+export default Sidebar;

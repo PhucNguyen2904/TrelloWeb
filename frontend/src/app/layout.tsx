@@ -1,23 +1,11 @@
 import type { Metadata } from "next";
-import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers/Providers";
 
-const bodyFont = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const displayFont = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const monoFont = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -36,10 +24,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${bodyFont.variable} ${displayFont.variable} ${monoFont.variable} h-full antialiased`}
-      data-scroll-behavior="smooth"
+      className={`${inter.variable} h-full antialiased`}
     >
-      <body className="font-body min-h-full flex flex-col bg-[var(--primary)] text-[var(--text-primary)]">
+      <body className="font-sans min-h-screen bg-surface-app text-text-body">
         <Providers>{children}</Providers>
       </body>
     </html>

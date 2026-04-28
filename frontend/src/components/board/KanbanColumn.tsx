@@ -1,158 +1,131 @@
 'use client';
 
-import { Task, TaskStatus } from "@/lib/types";
-import { motion } from "framer-motion";
+import { Card } from "@/lib/types";
+import React from "react";
 import { Plus } from "lucide-react";
-import { TaskCard } from "./TaskCard";
 
-interface KanbanColumnProps {
-  title: string;
-  status: TaskStatus;
-  tasks: Task[];
-  onAddTask?: () => void;
-  onEditTask?: (task: Task) => void;
-  onDeleteTask?: (taskId: number) => void;
-  onMoveTask?: (taskId: number, newStatus: TaskStatus) => void;
-  isLoading?: boolean;
+interface KanbanColumnComponentProps {
+  id: string;
+  name: string;
+  cards: Card[];
+  onCardClick?: (card: Card) => void;
+  onAddCard?: (columnId: string) => void;
 }
 
-export function KanbanColumn({
-  title,
-  status,
-  tasks,
-  onAddTask,
-  onEditTask,
-  onDeleteTask,
-  onMoveTask,
-  isLoading = false,
-}: KanbanColumnProps) {
-  const columnTasks = tasks.filter((t) => t.status === status);
-
+export function KanbanColumnComponent({
+  id,
+  name,
+  cards,
+  onCardClick,
+  onAddCard,
+}: KanbanColumnComponentProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: 280,
-        maxWidth: 320,
-        background: '#f1f3fa',
-        border: '1px solid #e0e2e9',
-        borderRadius: 10,
-        overflow: 'hidden',
-      }}
-    >
+    <div className="min-w-[272px] max-w-[300px] bg-surface-muted rounded-xl border border-border flex flex-col h-full">
       {/* Header */}
-      <div
-        style={{
-          padding: '12px 14px',
-          borderBottom: '1px solid #e0e2e9',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <h3
-          style={{
-            fontSize: 13,
-            fontWeight: 700,
-            color: '#181c20',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            margin: 0,
-          }}
-        >
-          {title}
-        </h3>
-        <span
-          style={{
-            background: '#e0e2e9',
-            color: '#404751',
-            borderRadius: 9999,
-            padding: '2px 8px',
-            fontSize: 12,
-            fontWeight: 600,
-          }}
-        >
-          {columnTasks.length}
-        </span>
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-text-heading">{name}</h3>
+        <div className="px-2 py-1 bg-border rounded-full text-xs text-text-body">
+          {cards.length}
+        </div>
       </div>
 
-      {/* Task List */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-          minHeight: 100,
-        }}
-      >
-        {columnTasks.length === 0 ? (
+      {/* Cards */}
+      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+        {cards.map((card) => (
           <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 120,
-            }}
+            key={card.id}
+            onClick={() => onCardClick?.(card)}
+            className="p-3 bg-surface-card rounded-lg border border-border shadow-card hover:shadow-lg transition-shadow cursor-pointer"
           >
-            <p style={{ fontSize: 13, color: '#b0b7c3', textAlign: 'center', margin: 0 }}>No tasks yet</p>
+            {/* Labels */}
+            {card.labels && card.labels.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {card.labels.map((label) => (
+                  <span
+                    key={label.id}
+                    className="px-2 py-1 rounded text-xs text-white"
+                    style={{ backgroundColor: label.color }}
+                  >
+                    {label.name}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Title */}
+            <p className="text-sm font-medium leading-snug text-text-heading mb-2">
+              {card.title}
+            </p>
+
+            {/* Image */}
+            {card.imageUrl && (
+              <img
+                src={card.imageUrl}
+                alt={card.title}
+                className="w-full h-28 object-cover rounded mb-2"
+              />
+            )}
+
+            {/* Checklist Progress */}
+            {card.checklist && card.checklist.length > 0 && (
+              <div className="mb-2">
+                <div className="h-2 bg-border rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-brand"
+                    style={{
+                      width: `${(card.checklist.filter((item) => item.completed).length / card.checklist.length) * 100}%`,
+                    }}
+                  ></div>
+                </div>
+                <p className="text-xs text-text-muted mt-1">
+                  {card.checklist.filter((item) => item.completed).length}/{card.checklist.length}
+                </p>
+              </div>
+            )}
+
+            {/* Footer: Due Date + Comments + Assignee */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {card.dueDate && (
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      card.isOverdue
+                        ? "bg-red-100 text-red-700"
+                        : "bg-border text-text-muted"
+                    }`}
+                  >
+                    {new Date(card.dueDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                )}
+                {card.commentCount > 0 && (
+                  <span className="text-xs text-text-muted flex items-center gap-1">
+                    💬 {card.commentCount}
+                  </span>
+                )}
+              </div>
+
+              {/* Assignee Avatar */}
+              {card.assignees && card.assignees.length > 0 && (
+                <div className="w-6 h-6 rounded-full bg-brand flex items-center justify-center text-xs text-white font-semibold">
+                  {card.assignees[0].initials}
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          columnTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onEdit={() => onEditTask?.(task)}
-              onDelete={() => onDeleteTask?.(task.id)}
-              onMove={(newStatus) => {
-                if (newStatus !== status) {
-                  onMoveTask?.(task.id, newStatus);
-                }
-              }}
-              isLoading={isLoading}
-            />
-          ))
-        )}
+        ))}
       </div>
 
-      {/* Add a card Button */}
-      <div style={{ padding: '6px 8px 8px' }}>
-        <button
-          onClick={onAddTask}
-          disabled={isLoading}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '8px 12px',
-            textAlign: 'left',
-            background: 'transparent',
-            border: 'none',
-            borderRadius: 8,
-            color: '#707882',
-            fontSize: 13,
-            cursor: 'pointer',
-            transition: 'background 0.15s, color 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#e6e8ee';
-            e.currentTarget.style.color = '#005f98';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = '#707882';
-          }}
-        >
-          <Plus size={14} />
-          Add a card
-        </button>
-      </div>
-    </motion.div>
+      {/* Add Card Button */}
+      <button
+        onClick={() => onAddCard?.(id)}
+        className="w-full px-3 py-2 text-text-muted hover:text-text-heading hover:bg-white transition-colors flex items-center justify-center gap-2 text-sm"
+      >
+        <Plus className="w-4 h-4" />
+        Add a card
+      </button>
+    </div>
   );
 }

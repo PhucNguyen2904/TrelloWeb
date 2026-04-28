@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import type { Workspace } from "@/lib/mock-data";
+import type { Workspace } from "@/lib/types";
 
 interface FeaturedWorkspaceProps {
   workspace: Workspace;
@@ -26,18 +25,13 @@ export function FeaturedWorkspace({ workspace }: FeaturedWorkspaceProps) {
           </span>
           <div className="space-y-3">
             <h2 className="font-display text-4xl text-white sm:text-5xl">{workspace.name}</h2>
-            <p className="max-w-xl text-sm leading-7 text-white/72 sm:text-base">{workspace.description}</p>
+            <p className="max-w-xl text-sm leading-7 text-white/72 sm:text-base">Collaborate and organize your workspace</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href={`/board/${workspace.boards[0]?.id}`} aria-label="Open featured workspace board">
-              <Button className="rounded-full px-5">
-                Open flagship board
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+            <Link href={`/dashboard/boards`} className="px-5 py-2 rounded-full bg-brand text-white hover:opacity-90 transition flex items-center gap-2">
+              Open workspace
+              <ArrowRight className="h-4 w-4" />
             </Link>
-            <Button variant="secondary" className="rounded-full px-5">
-              View workspace brief
-            </Button>
           </div>
         </div>
 
@@ -46,9 +40,8 @@ export function FeaturedWorkspace({ workspace }: FeaturedWorkspaceProps) {
           <div className="relative grid h-full gap-3 sm:grid-cols-2">
             {workspace.boards.slice(0, 4).map((board) => (
               <div key={board.id} className="rounded-[22px] border border-white/8 bg-black/10 p-4">
-                <div className={`h-20 rounded-2xl bg-gradient-to-br ${board.theme}`} />
+                <div className="h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500" />
                 <p className="mt-4 font-display text-lg text-white">{board.name}</p>
-                <p className="mt-1 text-xs text-white/70">{board.description}</p>
               </div>
             ))}
           </div>

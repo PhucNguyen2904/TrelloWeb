@@ -1,7 +1,7 @@
 "use client";
 
 import { eachDayOfInterval, endOfMonth, endOfWeek, isSameMonth, isToday, startOfMonth, startOfWeek } from "date-fns";
-import type { CalendarEvent } from "@/lib/mock-data";
+import type { CalendarEvent } from "@/lib/types";
 import { EventPill } from "./EventPill";
 
 interface CalendarGridProps {

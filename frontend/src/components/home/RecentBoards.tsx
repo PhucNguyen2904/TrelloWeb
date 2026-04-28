@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
-import type { BoardSummary } from "@/lib/mock-data";
+import type { Board } from "@/lib/types";
 
 interface RecentBoardsProps {
-  boards: BoardSummary[];
+  boards: Board[];
 }
 
 export function RecentBoards({ boards }: RecentBoardsProps) {
@@ -32,14 +32,13 @@ export function RecentBoards({ boards }: RecentBoardsProps) {
             className="shrink-0"
           >
             <Link
-              href={`/board/${board.id}`}
+              href={`/dashboard/boards`}
               aria-label={`Open board ${board.name}`}
-              className={`mesh-card group flex h-[140px] w-[220px] flex-col justify-between rounded-[24px] border border-[var(--border)] bg-gradient-to-br ${board.theme} p-4 shadow-[var(--shadow-soft)] transition-all duration-150 hover:border-[var(--accent)] hover:shadow-[var(--shadow-glow)]`}
-              style={{ filter: `hue-rotate(${index * 15}deg)` }}
+              className="mesh-card group flex h-[140px] w-[220px] flex-col justify-between rounded-[24px] border border-border bg-gradient-to-br from-brand to-blue-700 p-4 shadow-card transition-all duration-150 hover:border-brand hover:shadow-lg"
             >
               <div className="flex justify-end">
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/15 text-white/90 backdrop-blur">
-                  <Star className={`h-4 w-4 ${board.starred ? "fill-current" : ""}`} />
+                  <Star className="h-4 w-4" />
                 </span>
               </div>
 
@@ -49,7 +48,7 @@ export function RecentBoards({ boards }: RecentBoardsProps) {
                     <span
                       key={member.id}
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 text-xs font-semibold text-white"
-                      style={{ backgroundColor: member.color }}
+                      style={{ backgroundColor: member.avatarColor }}
                     >
                       {member.initials}
                     </span>
@@ -57,7 +56,7 @@ export function RecentBoards({ boards }: RecentBoardsProps) {
                 </div>
                 <div>
                   <h3 className="font-display text-[18px] text-white">{board.name}</h3>
-                  <p className="mt-1 text-xs text-white/72">{board.lastUpdated}</p>
+                  <p className="mt-1 text-xs text-white/72">Recently viewed</p>
                 </div>
               </div>
             </Link>

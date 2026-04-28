@@ -8,8 +8,8 @@ import { useState } from "react";
 
 interface BoardCardProps {
   board: Board;
-  onRename?: (boardId: number, newName: string) => void;
-  onDelete?: (boardId: number) => void;
+  onRename?: (boardId: string, newName: string) => void;
+  onDelete?: (boardId: string) => void;
   isLoading?: boolean;
 }
 
@@ -21,7 +21,7 @@ export function BoardCard({ board, onRename, onDelete, isLoading }: BoardCardPro
   const [editName, setEditName] = useState(board.name);
   const [hovered, setHovered] = useState(false);
 
-  const coverColor = COVER_COLORS[board.id % COVER_COLORS.length];
+  const coverColor = COVER_COLORS[(parseInt(board.id) || 0) % COVER_COLORS.length];
 
   const handleSaveRename = () => {
     if (editName.trim() && editName !== board.name) {
@@ -34,22 +34,6 @@ export function BoardCard({ board, onRename, onDelete, isLoading }: BoardCardPro
     if (confirm(`Are you sure you want to delete "${board.name}"?`)) {
       onDelete?.(board.id);
     }
-  };
-
-  const getDateText = () => {
-    if (!board.created_at) return 'Just now';
-    const date = new Date(board.created_at);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
   };
 
   return (
@@ -286,7 +270,7 @@ export function BoardCard({ board, onRename, onDelete, isLoading }: BoardCardPro
             {board.name}
           </h3>
           <p style={{ fontSize: 12, color: '#707882', margin: 0 }}>
-            {getDateText()}
+            Updated recently
           </p>
         </Link>
       )}
