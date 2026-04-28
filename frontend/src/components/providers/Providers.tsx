@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from '@/components/ui/Toast';
 import { useState, useEffect } from 'react';
 import { startKeepAlive, stopKeepAlive } from '@/lib/keep-alive';
+import { ThemeProvider } from 'next-themes';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -27,9 +28,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastContainer />
-      {children}
-    </QueryClientProvider>
+    <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem disableTransitionOnChange>
+      <QueryClientProvider client={queryClient}>
+        <ToastContainer />
+        {children}
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { CalendarDays, ChevronLeft, ChevronRight, HelpCircle, LayoutDashboard, LogOut, Settings, ShieldCheck, Users, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/Button';
 
 interface NavItem {
   label: string;
@@ -38,7 +39,7 @@ const NAV_ITEMS: Record<string, NavItem[]> = {
 
 function Logo() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="3" y="3" width="8" height="5" rx="1.5" fill="currentColor" opacity="0.85" />
       <rect x="13" y="3" width="8" height="9" rx="1.5" fill="currentColor" />
       <rect x="3" y="10" width="8" height="11" rx="1.5" fill="currentColor" />
@@ -123,15 +124,18 @@ export function Sidebar({
                   'group flex items-center rounded-lg border-l-2 px-3 py-2.5 text-sm font-medium transition duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400',
                   collapsed ? 'justify-center' : 'gap-3',
                   isActive
-                    ? 'border-[#0079BF] bg-blue-50 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'border-[var(--accent)] bg-[var(--surface-2)] text-[var(--text-primary)]'
+                    : 'border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]'
                 )}
                 aria-current={isActive ? 'page' : undefined}
                 title={collapsed ? item.label : undefined}
               >
                 <Icon
                   size={17}
-                  className={cn('transition duration-200 ease-in-out', isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700')}
+                  className={cn(
+                    'transition duration-150 ease-out',
+                    isActive ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]'
+                  )}
                 />
                 {!collapsed ? item.label : null}
               </Link>
@@ -185,12 +189,12 @@ export function Sidebar({
 
   return (
     <>
-      <aside className={cn('hidden h-screen shrink-0 md:sticky md:top-0 md:flex', className)}>{sidebarContent}</aside>
+      <aside className={cn('hidden h-screen shrink-0 lg:sticky lg:top-0 lg:flex lg:w-[220px]', className)}>{sidebarContent}</aside>
 
       <button
         type="button"
         className={cn(
-          'fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm transition duration-300 ease-in-out md:hidden',
+          'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition duration-300 ease-in-out lg:hidden',
           mobileOpen ? 'opacity-100 pointer-events-auto' : 'pointer-events-none opacity-0'
         )}
         onClick={onCloseMobile}
@@ -200,7 +204,7 @@ export function Sidebar({
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transform transition duration-300 ease-in-out md:hidden',
+          'fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transform transition duration-300 ease-in-out lg:hidden',
           mobileOpen ? 'pointer-events-auto translate-x-0 shadow-lg' : 'pointer-events-none -translate-x-full'
         )}
         aria-hidden={!mobileOpen}
@@ -208,7 +212,7 @@ export function Sidebar({
         <div className="relative h-full overflow-y-auto overscroll-contain">
           <button
             onClick={onCloseMobile}
-            className="absolute right-3 top-3 z-10 rounded-lg border border-slate-200 bg-white p-1.5 text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-300"
+            className="absolute right-3 top-3 z-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 text-[var(--text-secondary)] transition duration-200 ease-in-out hover:bg-[var(--surface-2)]"
             aria-label="Close sidebar"
           >
             <X size={16} />

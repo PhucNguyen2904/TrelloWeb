@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
-import { RoleBadge } from '@/components/ui/Badge';
+import { ChevronDown, LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTheme } from 'next-themes';
+import { Button } from '@/components/ui/Button';
 
 function getRoleLabel(roleName?: string) {
   if (!roleName) return 'Guest';
@@ -21,6 +22,7 @@ export function AccountDropdown() {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
   const { user, logout } = useAuthStore();
+  const { resolvedTheme, setTheme } = useTheme();
   const menuId = 'account-menu';
 
   const closeMenu = useCallback((focusTrigger = false) => {
@@ -87,13 +89,13 @@ export function AccountDropdown() {
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         onKeyDown={handleKeyDown}
-        className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition duration-200 ease-in-out hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-300"
+        className="group flex items-center gap-3 rounded-full border border-[var(--border)] bg-[color:color-mix(in_srgb,var(--surface)_78%,transparent)] px-2 py-1.5 transition-all duration-150 ease-out hover:border-[var(--border-hover)] hover:bg-[var(--surface-2)]"
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={menuId}
         aria-label="Account menu"
       >
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--accent)] via-[var(--accent-blue)] to-[var(--accent-purple)] text-sm font-semibold text-white">
           {avatarText}
         </div>
         <div className="hidden min-w-0 text-left lg:block">
@@ -101,39 +103,42 @@ export function AccountDropdown() {
         </div>
         <ChevronDown
           size={16}
-          className={`text-slate-500 transition duration-200 ease-in-out ${open ? 'rotate-180' : ''}`}
+          className={`text-[var(--text-secondary)] transition duration-200 ease-in-out ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </button>
 
       <div
         id={menuId}
-        className={`absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-slate-200 bg-white p-2 shadow-lg transition duration-200 ease-in-out ${
+        className={`absolute right-0 mt-3 w-72 origin-top-right rounded-[24px] border border-[var(--border)] bg-[color:color-mix(in_srgb,var(--surface)_92%,transparent)] p-3 shadow-[var(--shadow-soft)] backdrop-blur transition duration-200 ease-in-out ${
           open ? 'scale-100 opacity-100' : 'pointer-events-none invisible scale-95 opacity-0'
         }`}
         role="menu"
         aria-hidden={!open}
       >
-        <div className="mb-1 flex items-center gap-3 rounded-lg px-2 py-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
+        <div className="mb-1 flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[var(--accent)] via-[var(--accent-blue)] to-[var(--accent-purple)] text-sm font-semibold text-white">
             {avatarText}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-800">{user.email}</p>
-            <p className="text-xs text-slate-500">{roleLabel}</p>
+            <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{user.email}</p>
+            <p className="text-xs text-[var(--text-secondary)]">{roleLabel}</p>
           </div>
         </div>
 
-        <div className="mb-2 px-2 pb-1">
-          <RoleBadge role={roleName} size="sm" />
+        <div className="mb-2 flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
+          <span className="text-xs uppercase tracking-[0.2em] text-[var(--text-tertiary)]">Role</span>
+          <span className="rounded-full border border-[rgba(245,158,11,0.25)] bg-[rgba(245,158,11,0.12)] px-2.5 py-1 text-[11px] font-medium text-[var(--accent-warm)]">
+            {roleName}
+          </span>
         </div>
 
-        <div className="my-2 border-t border-slate-200" />
+        <div className="my-3 border-t border-[var(--border)]" />
 
         <Link
           ref={firstMenuItemRef}
           href="/dashboard/profile"
-          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-700 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-300"
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition duration-200 ease-in-out hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
           onClick={() => closeMenu()}
           role="menuitem"
           tabIndex={open ? 0 : -1}
@@ -143,7 +148,7 @@ export function AccountDropdown() {
         </Link>
         <Link
           href="/dashboard/settings"
-          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-700 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-300"
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition duration-200 ease-in-out hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
           onClick={() => closeMenu()}
           role="menuitem"
           tabIndex={open ? 0 : -1}
@@ -152,12 +157,27 @@ export function AccountDropdown() {
           Settings
         </Link>
 
-        <div className="my-2 border-t border-slate-200" />
+        <div className="my-3 border-t border-[var(--border)]" />
+
+        <div className="mb-3 flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5">
+          <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+            {resolvedTheme === 'light' ? <Sun size={15} /> : <Moon size={15} />}
+            Theme
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 rounded-full px-3 text-xs"
+            onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
+          >
+            {resolvedTheme === 'light' ? 'Dark' : 'Light'}
+          </Button>
+        </div>
 
         <button
           onClick={handleLogout}
           type="button"
-          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-rose-300"
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--accent-danger)] transition duration-200 ease-in-out hover:bg-[rgba(239,68,68,0.08)]"
           role="menuitem"
           tabIndex={open ? 0 : -1}
         >

@@ -37,11 +37,11 @@ export async function sendHealthCheck(): Promise<boolean> {
       console.log(`[KeepAlive] ⚠️ Backend returned ${response.status}`);
       return false;
     }
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === 'AbortError') {
       console.log('[KeepAlive] ⏱️ Health check timeout (backend may be slow)');
     } else {
-      console.log('[KeepAlive] Backend not reachable:', error.message);
+      console.log('[KeepAlive] Backend not reachable:', error instanceof Error ? error.message : 'Unknown error');
     }
     return false;
   }

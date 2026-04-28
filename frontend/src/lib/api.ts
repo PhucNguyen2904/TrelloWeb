@@ -56,7 +56,7 @@ api.interceptors.request.use((config) => {
  */
 api.interceptors.response.use(
   (response) => {
-    const { status, config, data } = response;
+    const { status, config } = response;
     console.log(`[API] ✅ ${status} ${config.method?.toUpperCase()} ${config.url}`);
     return response;
   },

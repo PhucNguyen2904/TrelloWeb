@@ -48,14 +48,17 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
   // Don't render dashboard content while redirecting
   if (!user || !token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f9ff]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-[#0079BF]" />
+      <div className="editorial-shell flex min-h-screen items-center justify-center">
+        <div className="flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text-secondary)] shadow-[var(--shadow-soft)]">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border-hover)] border-t-[var(--accent)]" />
+          Loading workspace
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative flex min-h-screen overflow-x-clip bg-[#f7f9ff]">
+    <div className="editorial-shell relative flex min-h-screen overflow-x-clip">
       <Sidebar
         className={desktopSidebarCollapsed ? 'w-20' : 'w-64'}
         mobileOpen={mobileSidebarOpen}
@@ -70,8 +73,8 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
           onMobileMenuClick={() => setMobileSidebarOpen((prev) => !prev)}
         />
 
-        <main className="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 xl:p-8">
-          <div className="mx-auto w-full max-w-7xl animate-fade-in">
+        <main className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-5 lg:px-8 lg:py-6">
+          <div className="mx-auto w-full max-w-[1440px]">
             {children}
           </div>
         </main>

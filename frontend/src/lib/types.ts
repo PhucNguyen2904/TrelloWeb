@@ -1,5 +1,3 @@
-import { User } from "@/store/useAuthStore";
-
 export interface Board {
   id: number;
   name: string;

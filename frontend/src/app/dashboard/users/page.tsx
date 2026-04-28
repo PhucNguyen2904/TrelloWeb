@@ -1,6 +1,5 @@
 'use client';
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -98,63 +97,54 @@ export default function UsersPage() {
 
   if (!isAdmin) {
     return (
-      <DashboardLayout topbarProps={{ title: 'Access Denied' }}>
-        <div className="animate-fade-in rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-16 text-center">
-          <h3 className="mb-2 text-lg font-semibold text-slate-700">Access Denied</h3>
-          <p className="text-sm text-slate-500">You do not have permission to access this page.</p>
-        </div>
-      </DashboardLayout>
+      <div className="rounded-[28px] border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-16 text-center shadow-[var(--shadow-soft)]">
+        <h3 className="font-display text-2xl text-[var(--text-primary)]">Access Denied</h3>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">You do not have permission to access this page.</p>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout
-      topbarProps={{
-        title: 'Users Management',
-        subtitle: 'Manage access, roles, and user lifecycle efficiently.',
-      }}
-    >
-      <div className="space-y-6 md:space-y-8">
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Users Management</p>
-          <div className="mt-2 flex items-start gap-3 md:items-center">
-            <Users className="mt-0.5 h-6 w-6 shrink-0 text-[#0079BF] md:mt-0" />
-            <h1 className="text-2xl font-bold text-slate-800">
-              {isSuperAdmin ? 'Manage All Users' : 'Manage Users'}
-            </h1>
-          </div>
-          <p className="mt-1 pl-9 text-sm text-slate-500 md:pl-9">
-            {isSuperAdmin
-              ? 'View and manage all users across the workspace.'
-              : 'View and manage users you have permission to access.'}
-          </p>
-        </section>
+    <div className="space-y-6 md:space-y-8">
+      <section className="rounded-[28px] border border-[var(--border)] bg-[color:color-mix(in_srgb,var(--surface)_92%,transparent)] p-5 shadow-[var(--shadow-soft)] md:p-6">
+        <p className="font-mono-ui text-[11px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">Users Management</p>
+        <div className="mt-2 flex items-start gap-3 md:items-center">
+          <Users className="mt-0.5 h-6 w-6 shrink-0 text-[var(--accent)] md:mt-0" />
+          <h1 className="font-display text-3xl text-[var(--text-primary)]">
+            {isSuperAdmin ? 'Manage All Users' : 'Manage Users'}
+          </h1>
+        </div>
+        <p className="mt-1 pl-9 text-sm text-[var(--text-secondary)] md:pl-9">
+          {isSuperAdmin
+            ? 'View and manage all users across the workspace.'
+            : 'View and manage users you have permission to access.'}
+        </p>
+      </section>
 
-        {isUsersLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-16 animate-pulse rounded-xl border border-slate-200 bg-white shadow-sm"
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="animate-fade-in">
-            <UsersTable
-              users={users}
-              roles={roles}
-              isSuperAdmin={isSuperAdmin}
-              currentUserId={user?.id}
-              onEdit={(userId, roleId) =>
-                updateUserRoleMutation.mutate({ userId, roleId })
-              }
-              onDelete={(userId) => deleteUserMutation.mutate(userId)}
-              isLoading={deleteUserMutation.isPending || updateUserRoleMutation.isPending}
+      {isUsersLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-16 animate-pulse rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-soft)]"
             />
-          </div>
-        )}
-      </div>
-    </DashboardLayout>
+          ))}
+        </div>
+      ) : (
+        <div>
+          <UsersTable
+            users={users}
+            roles={roles}
+            isSuperAdmin={isSuperAdmin}
+            currentUserId={user?.id}
+            onEdit={(userId, roleId) =>
+              updateUserRoleMutation.mutate({ userId, roleId })
+            }
+            onDelete={(userId) => deleteUserMutation.mutate(userId)}
+            isLoading={deleteUserMutation.isPending || updateUserRoleMutation.isPending}
+          />
+        </div>
+      )}
+    </div>
   );
 }

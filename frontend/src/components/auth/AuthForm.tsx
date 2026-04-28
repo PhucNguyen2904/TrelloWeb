@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useToastStore } from '@/store/useToastStore';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import Link from 'next/link';
 import { api } from '@/lib/api';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 
@@ -27,6 +26,7 @@ const registerSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
+type AuthFormData = LoginFormData | RegisterFormData;
 
 interface AuthFormProps { mode: 'login' | 'register'; }
 
@@ -69,6 +69,19 @@ const focusHandlers = (hasError: boolean) => ({
   },
 });
 
+function getMessage(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getErrorDetail(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const response = 'response' in error ? error.response : undefined;
+  if (typeof response !== 'object' || response === null) return undefined;
+  const data = 'data' in response ? response.data : undefined;
+  if (typeof data !== 'object' || data === null) return undefined;
+  return 'detail' in data ? getMessage(data.detail) : undefined;
+}
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const { login } = useAuthStore();
@@ -77,24 +90,27 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const isLogin = mode === 'login';
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm({
+  const { register, handleSubmit, formState: { errors }, control } = useForm<AuthFormData>({
     resolver: zodResolver(isLogin ? loginSchema : registerSchema),
     defaultValues: isLogin
       ? { email: '', password: '', rememberMe: false }
       : { fullName: '', email: '', password: '', agreeToTerms: false },
   });
 
-  const pw = (watch('password') as string) || '';
+  const pw = useWatch({ control, name: 'password' }) || '';
   const strength = getStrength(pw);
+  const fullNameError = !isLogin && 'fullName' in errors ? getMessage(errors.fullName?.message) : undefined;
+  const agreeToTermsError = !isLogin && 'agreeToTerms' in errors ? getMessage(errors.agreeToTerms?.message) : undefined;
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: AuthFormData) => {
     try {
       setIsLoading(true);
       if (isLogin) {
+        const loginData = data as LoginFormData;
         // Step 1: Login và lấy token
         const fd = new URLSearchParams();
-        fd.append('username', (data as LoginFormData).email);
-        fd.append('password', (data as LoginFormData).password);
+        fd.append('username', loginData.email);
+        fd.append('password', loginData.password);
         
         try {
           const res = await api.post('/api/auth/login', fd, { 
@@ -119,18 +135,38 @@ export function AuthForm({ mode }: AuthFormProps) {
           const role = user.role?.name;
           const dest = role === 'superadmin' || role === 'admin' ? '/dashboard/users' : '/dashboard';
           router.replace(dest);
-        } catch (loginError: any) {
+        } catch (loginError: unknown) {
           // Improve error messages for user
           let errorMsg = 'Login failed. Please try again.';
           
-          if (loginError.code === 'ECONNABORTED' || loginError.message?.includes('timeout')) {
+          if (
+            typeof loginError === 'object' &&
+            loginError !== null &&
+            'code' in loginError &&
+            (loginError.code === 'ECONNABORTED' ||
+              ('message' in loginError && typeof loginError.message === 'string' && loginError.message.includes('timeout')))
+          ) {
             errorMsg = 'Request timeout. Backend might be slow. Please try again in a few seconds.';
-          } else if (loginError.code === 'ENOTFOUND' || loginError.message?.includes('cannot reach')) {
+          } else if (
+            typeof loginError === 'object' &&
+            loginError !== null &&
+            'code' in loginError &&
+            (loginError.code === 'ENOTFOUND' ||
+              ('message' in loginError && typeof loginError.message === 'string' && loginError.message.includes('cannot reach')))
+          ) {
             errorMsg = 'Cannot reach backend server. Check your internet connection or try again later.';
-          } else if (loginError.response?.status === 401) {
+          } else if (
+            typeof loginError === 'object' &&
+            loginError !== null &&
+            'response' in loginError &&
+            typeof loginError.response === 'object' &&
+            loginError.response !== null &&
+            'status' in loginError.response &&
+            loginError.response.status === 401
+          ) {
             errorMsg = 'Invalid email or password.';
-          } else if (loginError.response?.data?.detail) {
-            errorMsg = loginError.response.data.detail;
+          } else {
+            errorMsg = getErrorDetail(loginError) ?? errorMsg;
           }
           
           addToast({ 
@@ -146,7 +182,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         addToast({ type: 'success', title: 'Registration successful! Please log in.' });
         router.replace('/login');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[AuthForm] Error:', err);
       // Errors already handled by individual try-catch above
     } finally {
@@ -160,8 +196,8 @@ export function AuthForm({ mode }: AuthFormProps) {
         <div>
           <label className="block mb-1.5 font-medium" style={{ fontSize: 13, color: '#404751' }}>Full Name</label>
           <input type="text" {...register('fullName')} disabled={isLoading} placeholder="John Doe"
-            style={inputStyle(!!(errors as any).fullName)} {...focusHandlers(!!(errors as any).fullName)} />
-          <FieldError msg={(errors as any).fullName?.message} />
+            style={inputStyle(!!fullNameError)} {...focusHandlers(!!fullNameError)} />
+          <FieldError msg={fullNameError} />
         </div>
       )}
 
@@ -219,7 +255,7 @@ export function AuthForm({ mode }: AuthFormProps) {
               I agree to the <a href="#" style={{ color: '#005f98' }} className="hover:underline">Terms of Service</a> and <a href="#" style={{ color: '#005f98' }} className="hover:underline">Privacy Policy</a>
             </span>
           </label>
-          <FieldError msg={(errors as any).agreeToTerms?.message} />
+          <FieldError msg={agreeToTermsError} />
         </div>
       )}
 

@@ -6,7 +6,8 @@ import type { NextRequest } from 'next/server';
  * Auth guards are handled client-side in DashboardLayout.
  * This file simply passes all requests through.
  */
-export function proxy(_request: NextRequest) {
+export function proxy(request: NextRequest) {
+  void request;
   return NextResponse.next();
 }
 

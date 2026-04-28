@@ -1,8 +1,11 @@
 'use client';
 
-import { Bell, Menu, Plus, Search, Settings } from 'lucide-react';
+import { Bell, Menu, Search, Settings } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { AccountDropdown } from './AccountDropdown';
+import { Button } from '@/components/ui/Button';
+import { useTheme } from 'next-themes';
+import { Moon, SunMedium } from 'lucide-react';
 
 export interface TopbarProps {
   title?: string;
@@ -13,20 +16,17 @@ export interface TopbarProps {
 }
 
 export function Topbar({
-  title = 'Dashboard',
-  subtitle,
-  showCreateButton = false,
-  onCreateClick,
   onMobileMenuClick,
 }: TopbarProps) {
   const user = useAuthStore((s) => s.user);
+  const { resolvedTheme, setTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
-      <div className="flex min-h-[60px] items-center gap-2 px-3 py-2 sm:px-4 md:min-h-[72px] md:gap-3 md:py-3 md:px-6">
+    <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div className="flex h-[52px] items-center gap-2 px-3 sm:px-4 lg:px-6">
         <button
           onClick={onMobileMenuClick}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition duration-200 ease-in-out hover:bg-slate-100 active:scale-95 focus-visible:ring-2 focus-visible:ring-slate-300 md:hidden"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] transition duration-150 ease-out hover:border-[var(--border-hover)] hover:text-[var(--text-primary)] lg:hidden"
           aria-label="Open sidebar"
         >
           <Menu size={18} />
@@ -47,34 +47,33 @@ export function Topbar({
           <label className="flex items-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 py-2 text-sm text-slate-500 shadow-sm transition duration-200 ease-in-out focus-within:border-[#0079BF]/40 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0079BF]/20">
             <Search size={16} className="text-slate-400 flex-shrink-0" />
             <input
-              className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+              className="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
               placeholder="Search boards, tasks, members..."
               aria-label="Search"
             />
           </label>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2 md:gap-3">
-          {showCreateButton && (
-            <button
-              onClick={onCreateClick}
-              aria-label="Create new board"
-              className="hidden items-center gap-1 rounded-lg bg-[#0079BF] px-3 py-2 text-sm font-semibold text-white transition duration-200 ease-in-out hover:bg-[#0068a8] focus-visible:ring-2 focus-visible:ring-[#0079BF]/50 focus-visible:ring-offset-2 active:scale-95 md:inline-flex"
-            >
-              <Plus size={15} />
-              Create
-            </button>
-          )}
-
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-2)] md:inline-flex"
+            onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
+            aria-label="Toggle theme"
+          >
+            {resolvedTheme === 'light' ? <Moon size={16} /> : <SunMedium size={16} />}
+          </Button>
           <button
             aria-label="Notifications"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-800 active:scale-95 focus-visible:ring-2 focus-visible:ring-slate-300"
+            className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] transition duration-150 ease-out hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
           >
             <Bell size={17} />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--accent-danger)]" aria-hidden="true" />
           </button>
           <button
             aria-label="Settings"
-            className="hidden h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-800 active:scale-95 focus-visible:ring-2 focus-visible:ring-slate-300 md:inline-flex"
+            className="hidden h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] transition duration-150 ease-out hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] md:inline-flex"
           >
             <Settings size={17} />
           </button>

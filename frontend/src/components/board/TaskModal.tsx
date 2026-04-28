@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Task, TaskStatus } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Edit2, Plus, X } from "lucide-react";
 
 interface TaskModalProps {
@@ -22,24 +22,22 @@ export function TaskModal({
   onUpdate,
   onClose,
 }: TaskModalProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<TaskStatus>(TaskStatus.TODO);
+  const initialState = useMemo(
+    () => ({
+      title: task?.title ?? "",
+      description: task?.description ?? "",
+      status: task?.status ?? TaskStatus.TODO,
+    }),
+    [task]
+  );
+  const [draft, setDraft] = useState<typeof initialState | null>(null);
   const [titleFocused, setTitleFocused] = useState(false);
   const [descFocused, setDescFocused] = useState(false);
   const [statusFocused, setStatusFocused] = useState(false);
-
-  useEffect(() => {
-    if (task) {
-      setTitle(task.title);
-      setDescription(task.description);
-      setStatus(task.status);
-    } else {
-      setTitle("");
-      setDescription("");
-      setStatus(TaskStatus.TODO);
-    }
-  }, [task, isOpen]);
+  const currentDraft = draft ?? initialState;
+  const title = currentDraft.title;
+  const description = currentDraft.description;
+  const status = currentDraft.status;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +51,7 @@ export function TaskModal({
   };
 
   const handleClose = () => {
-    setTitle("");
-    setDescription("");
-    setStatus(TaskStatus.TODO);
+    setDraft(null);
     onClose();
   };
 
@@ -193,7 +189,9 @@ export function TaskModal({
                   autoFocus
                   placeholder="e.g., Implement user authentication"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) =>
+                    setDraft((current) => ({ ...(current ?? initialState), title: e.target.value }))
+                  }
                   maxLength={150}
                   style={inputStyle(titleFocused)}
                   onFocus={() => setTitleFocused(true)}
@@ -223,7 +221,9 @@ export function TaskModal({
                   id="task-description"
                   placeholder="Add more details about this task..."
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) =>
+                    setDraft((current) => ({ ...(current ?? initialState), description: e.target.value }))
+                  }
                   maxLength={500}
                   rows={4}
                   style={{
@@ -256,7 +256,9 @@ export function TaskModal({
                 <select
                   id="task-status"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                  onChange={(e) =>
+                    setDraft((current) => ({ ...(current ?? initialState), status: e.target.value as TaskStatus }))
+                  }
                   style={inputStyle(statusFocused)}
                   onFocus={() => setStatusFocused(true)}
                   onBlur={() => setStatusFocused(false)}

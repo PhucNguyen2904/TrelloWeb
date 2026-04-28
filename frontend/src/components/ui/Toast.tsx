@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useToastStore, type Toast } from '@/store/useToastStore';
 import clsx from 'clsx';
