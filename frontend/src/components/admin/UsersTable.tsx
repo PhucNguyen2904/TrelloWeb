@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
 import { Edit2, Trash2, ChevronUp, ChevronDown, Search } from "lucide-react";
 
 interface User {
@@ -118,18 +117,18 @@ export function UsersTable({
   const getRoleColor = (roleName?: string) => {
     switch (roleName) {
       case 'superadmin':
-        return 'bg-[var(--error-container)] text-[var(--on-error-container)]';
+        return 'bg-red-100 text-red-700';
       case 'admin':
-        return 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)]';
+        return 'bg-blue-100 text-blue-700';
       default:
-        return 'bg-[var(--surface-container)] text-[var(--text-secondary)]';
+        return 'bg-slate-100 text-slate-600';
     }
   };
 
   const SortHeader = ({ field, label }: { field: SortField; label: string }) => (
     <th
       onClick={() => handleSort(field)}
-      className="cursor-pointer select-none px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+      className="cursor-pointer select-none px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-slate-700"
     >
       <div className="flex items-center gap-2">
         {label}
@@ -145,14 +144,12 @@ export function UsersTable({
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="space-y-4"
+    <div
+      className="animate-fadeIn space-y-4"
     >
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           type="text"
           placeholder="Search by email..."
@@ -162,31 +159,32 @@ export function UsersTable({
             setCurrentPage(1);
           }}
           className="input-field py-2.5 pl-10 pr-4 text-sm"
+          aria-label="Search users by email"
         />
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-container-lowest)]">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="w-full overflow-x-auto">
           <table className="w-full min-w-[720px] text-left">
-            <thead className="border-b border-[var(--border)] bg-[var(--surface-container-low)]">
+            <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
                 <SortHeader field="id" label="ID" />
                 <SortHeader field="email" label="Email" />
                 <SortHeader field="role" label="Role" />
                 <SortHeader field="created_at" label="Created" />
-                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--surface-container)]">
+            <tbody className="divide-y divide-slate-100">
               {paginatedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-10 text-center">
                     <div className="mx-auto max-w-md space-y-1">
-                      <p className="text-base font-semibold text-[var(--text-secondary)]">No users found</p>
-                      <p className="text-sm text-[var(--text-muted)]">
+                      <p className="text-base font-semibold text-slate-700">No users found</p>
+                      <p className="text-sm text-slate-500">
                         Try adjusting search keywords or clear filters.
                       </p>
                     </div>
@@ -194,16 +192,17 @@ export function UsersTable({
                 </tr>
               ) : (
                 paginatedUsers.map((user) => (
-                  <tr key={user.id} className="transition-colors hover:bg-[var(--surface-container-low)]">
-                    <td className="px-5 py-3.5 text-sm text-[var(--text-muted)]">#{user.id}</td>
-                    <td className="px-5 py-3.5 text-sm font-medium text-[var(--text-primary)]">{user.email}</td>
+                  <tr key={user.id} className="transition-colors hover:bg-slate-50">
+                    <td className="px-5 py-3.5 text-sm text-slate-500">#{user.id}</td>
+                    <td className="px-5 py-3.5 text-sm font-medium text-slate-800">{user.email}</td>
                     <td className="px-5 py-3.5">
                       {editingUserId === user.id && isSuperAdmin ? (
                         <select
                           value={editRoleId}
                           onChange={(e) => setEditRoleId(parseInt(e.target.value))}
-                          className="rounded-md border border-[var(--border)] bg-[var(--surface-container-lowest)] px-2 py-1 text-sm text-[var(--text-primary)] focus:border-[var(--border-focus)] focus:outline-none"
+                          className="rounded-md border border-slate-200 bg-white px-2 py-1 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                           disabled={isLoading}
+                          aria-label="Select role"
                         >
                           {roles.map((role) => (
                             <option key={role.id} value={role.id}>
@@ -217,7 +216,7 @@ export function UsersTable({
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5 text-sm text-[var(--text-muted)]">
+                    <td className="px-5 py-3.5 text-sm text-slate-500">
                       {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -229,16 +228,18 @@ export function UsersTable({
                                 <button
                                   onClick={() => handleSaveRole(user.id)}
                                   disabled={isLoading}
-                                  className="rounded-lg p-2 text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50"
+                                  className="rounded-lg p-2 text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-green-200"
                                   title="Save"
+                                  aria-label="Save changes"
                                 >
                                   ✓
                                 </button>
                                 <button
                                   onClick={() => setEditingUserId(null)}
                                   disabled={isLoading}
-                                  className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-container)] disabled:opacity-50"
+                                  className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
                                   title="Cancel"
+                                  aria-label="Cancel editing"
                                 >
                                   ✕
                                 </button>
@@ -247,8 +248,9 @@ export function UsersTable({
                               <button
                                 onClick={() => handleEditRole(user.id, user.role?.id || 1)}
                                 disabled={isLoading}
-                                className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50"
+                                className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                                 title="Edit Role"
+                                aria-label="Edit user role"
                               >
                                 <Edit2 className="h-4 w-4" />
                               </button>
@@ -261,8 +263,9 @@ export function UsersTable({
                             <button
                               onClick={() => handleDelete(user.id, user.email)}
                               disabled={isLoading}
-                              className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-200"
                               title="Delete User"
+                              aria-label={`Delete user ${user.email}`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -280,7 +283,7 @@ export function UsersTable({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-sm text-slate-500">
             Showing {paginatedUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to{' '}
             {Math.min(currentPage * itemsPerPage, sortedUsers.length)} of {sortedUsers.length} users
           </p>
@@ -288,7 +291,8 @@ export function UsersTable({
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1 || isLoading}
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface-container-lowest)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-container-low)] disabled:opacity-50"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              aria-label="Previous page"
             >
               Previous
             </button>
@@ -305,10 +309,11 @@ export function UsersTable({
                     key={page}
                     onClick={() => setCurrentPage(page)}
                     disabled={isLoading}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    aria-current={isActive ? "page" : undefined}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 ${
                       isActive
-                        ? 'bg-[var(--primary-container)] text-white'
-                        : 'border border-[var(--border)] bg-[var(--surface-container-lowest)] text-[var(--text-primary)] hover:bg-[var(--surface-container-low)] disabled:opacity-50'
+                        ? 'bg-[#0079BF] text-white focus:ring-blue-400'
+                        : 'border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 disabled:opacity-50 focus:ring-slate-200'
                     }`}
                   >
                     {page}
@@ -319,13 +324,14 @@ export function UsersTable({
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages || isLoading}
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface-container-lowest)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-container-low)] disabled:opacity-50"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              aria-label="Next page"
             >
               Next
             </button>
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

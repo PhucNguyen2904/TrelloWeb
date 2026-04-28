@@ -6,7 +6,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useToast } from "@/store/useToastStore";
-import { motion } from "framer-motion";
 import { Users } from "lucide-react";
 
 export default function UsersPage() {
@@ -21,14 +20,12 @@ export default function UsersPage() {
   if (!isAdmin) {
     return (
       <DashboardLayout topbarProps={{ title: 'Access Denied' }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-20 bg-white/5 rounded-2xl border border-white/10 border-dashed"
+        <div
+          className="animate-fadeIn text-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 py-16 px-6"
         >
-          <h3 className="text-xl font-medium text-gray-300 mb-2">Access Denied</h3>
-          <p className="text-gray-500">You do not have permission to access this page.</p>
-        </motion.div>
+          <h3 className="mb-2 text-lg font-semibold text-slate-700">Access Denied</h3>
+          <p className="text-sm text-slate-500">You do not have permission to access this page.</p>
+        </div>
       </DashboardLayout>
     );
   }
@@ -107,14 +104,14 @@ export default function UsersPage() {
       <div className="space-y-6 md:space-y-8">
         {/* Header */}
         <section className="mb-6 space-y-2">
-          <p className="text-sm font-medium text-[var(--text-muted)]">Users Management</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Users Management</p>
           <div className="flex items-start gap-3 md:items-center">
-            <Users className="mt-0.5 h-7 w-7 shrink-0 text-[var(--primary-container)] md:mt-0" />
-            <h1 className="text-2xl font-bold leading-tight text-[var(--text-primary)] md:text-3xl">
+            <Users className="mt-0.5 h-7 w-7 shrink-0 text-[#0079BF] md:mt-0" />
+            <h1 className="text-2xl font-bold leading-tight text-slate-800 md:text-3xl">
               {isSuperAdmin ? 'Manage All Users' : 'Manage Users'}
             </h1>
           </div>
-          <p className="pl-10 text-sm text-[var(--text-muted)]">
+          <p className="pl-10 text-sm text-slate-500">
             {isSuperAdmin
               ? 'View and manage all users across the workspace.'
               : 'View and manage users you have permission to access.'}
@@ -127,22 +124,25 @@ export default function UsersPage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-16 animate-pulse rounded-xl border border-[var(--border)] bg-[var(--surface-container-low)]"
+                className="skeleton animate-stagger-{i} h-16 rounded-xl border border-slate-200"
+                style={{ animationDelay: `${(i - 1) * 50}ms` }}
               />
             ))}
           </div>
         ) : (
-          <UsersTable
-            users={users}
-            roles={roles}
-            isSuperAdmin={isSuperAdmin}
-            currentUserId={user?.id}
-            onEdit={(userId, roleId) =>
-              updateUserRoleMutation.mutate({ userId, roleId })
-            }
-            onDelete={(userId) => deleteUserMutation.mutate(userId)}
-            isLoading={deleteUserMutation.isPending || updateUserRoleMutation.isPending}
-          />
+          <div className="animate-fadeIn">
+            <UsersTable
+              users={users}
+              roles={roles}
+              isSuperAdmin={isSuperAdmin}
+              currentUserId={user?.id}
+              onEdit={(userId, roleId) =>
+                updateUserRoleMutation.mutate({ userId, roleId })
+              }
+              onDelete={(userId) => deleteUserMutation.mutate(userId)}
+              isLoading={deleteUserMutation.isPending || updateUserRoleMutation.isPending}
+            />
+          </div>
         )}
       </div>
     </DashboardLayout>

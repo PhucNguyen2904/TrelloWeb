@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { Topbar, type TopbarProps } from './Topbar';
@@ -15,6 +15,7 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Client-side auth guard
   useEffect(() => {
@@ -26,38 +27,32 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
   // Don't render dashboard content while redirecting
   if (!user || !token) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--background)',
-        }}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            border: '3px solid var(--outline-variant)',
-            borderTopColor: 'var(--primary-container)',
-            borderRadius: '50%',
-            animation: 'spin 0.7s linear infinite',
-          }}
-        />
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f9ff]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-[#0079BF]" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <main className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <Topbar {...(topbarProps || {})} />
-        <div className="w-full flex-1 bg-gray-50 p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-7xl">{children}</div>
-        </div>
-      </main>
+    <div className="flex min-h-screen bg-[#f7f9ff]">
+      <Sidebar
+        className="w-64"
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
+      />
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Topbar
+          {...(topbarProps || {})}
+          onMobileMenuClick={() => setMobileSidebarOpen((prev) => !prev)}
+        />
+
+        <main className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4 md:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-7xl animate-fadeIn">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

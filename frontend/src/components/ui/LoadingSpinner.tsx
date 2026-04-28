@@ -12,13 +12,20 @@ export function LoadingSpinner({ size = 'md' }: LoadingSpinnerProps) {
   };
 
   return (
-    <div className={clsx(sizeClasses[size], 'border-[var(--border)] border-t-[var(--primary)] rounded-full animate-spin')} />
+    <div
+      className={clsx(
+        sizeClasses[size],
+        'border-slate-200 border-t-[#0079BF] rounded-full animate-spin'
+      )}
+      role="status"
+      aria-label="Loading"
+    />
   );
 }
 
 export function FullPageLoader() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'var(--surface-0)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
       <LoadingSpinner size="lg" />
     </div>
   );

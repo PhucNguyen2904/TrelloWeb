@@ -1,69 +1,69 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { LogOut, Menu, X, LayoutDashboard, Users, ShieldCheck, Settings, HelpCircle } from 'lucide-react';
+import { CalendarDays, HelpCircle, LayoutDashboard, LogOut, Settings, ShieldCheck, Users, X } from 'lucide-react';
 import { RoleBadge } from '@/components/ui/Badge';
+import { cn } from '@/lib/utils';
 
-/* ── Nav item type ─────────────────────────────────────────── */
 interface NavItem {
   label: string;
   href: string;
-  icon: React.ReactNode;
+  icon: typeof LayoutDashboard;
 }
 
 const NAV_ITEMS: Record<string, NavItem[]> = {
   superadmin: [
-    { label: 'Users Management', href: '/dashboard/users', icon: <Users size={17} /> },
-    { label: 'Roles', href: '/dashboard/roles', icon: <ShieldCheck size={17} /> },
-    { label: 'Settings', href: '/dashboard/settings', icon: <Settings size={17} /> },
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Calendar', href: '/dashboard', icon: CalendarDays },
+    { label: 'Users Management', href: '/dashboard/users', icon: Users },
+    { label: 'Roles', href: '/dashboard/roles', icon: ShieldCheck },
+    { label: 'Settings', href: '/dashboard/settings', icon: Settings },
   ],
   admin: [
-    { label: 'Users Management', href: '/dashboard/users', icon: <Users size={17} /> },
-    { label: 'Settings', href: '/dashboard/settings', icon: <Settings size={17} /> },
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Calendar', href: '/dashboard', icon: CalendarDays },
+    { label: 'Users Management', href: '/dashboard/users', icon: Users },
+    { label: 'Settings', href: '/dashboard/settings', icon: Settings },
   ],
   user: [
-    { label: 'My Boards', href: '/dashboard', icon: <LayoutDashboard size={17} /> },
+    { label: 'My Boards', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Calendar', href: '/dashboard', icon: CalendarDays },
   ],
   guest: [
-    { label: 'Boards', href: '/dashboard', icon: <LayoutDashboard size={17} /> },
+    { label: 'Boards', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Calendar', href: '/dashboard', icon: CalendarDays },
   ],
 };
 
-/* ── ProjectFlow Logo SVG ──────────────────────────────────── */
 function Logo() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="3" width="8" height="5" rx="1.5" fill="currentColor" opacity="0.85"/>
-      <rect x="13" y="3" width="8" height="9" rx="1.5" fill="currentColor"/>
-      <rect x="3" y="10" width="8" height="11" rx="1.5" fill="currentColor"/>
-      <rect x="13" y="14" width="8" height="7" rx="1.5" fill="currentColor" opacity="0.85"/>
+      <rect x="3" y="3" width="8" height="5" rx="1.5" fill="currentColor" opacity="0.85" />
+      <rect x="13" y="3" width="8" height="9" rx="1.5" fill="currentColor" />
+      <rect x="3" y="10" width="8" height="11" rx="1.5" fill="currentColor" />
+      <rect x="13" y="14" width="8" height="7" rx="1.5" fill="currentColor" opacity="0.85" />
     </svg>
   );
 }
 
-/* ── Avatar initials ───────────────────────────────────────── */
 function Avatar({ email }: { email: string }) {
   const initials = email.charAt(0).toUpperCase();
   return (
-    <div
-      style={{
-        width: 34, height: 34, borderRadius: '50%',
-        background: 'linear-gradient(135deg, #0079bf, #005f98)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#ffffff', fontSize: 13, fontWeight: 700, flexShrink: 0,
-      }}
-    >
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
       {initials}
     </div>
   );
 }
 
-/* ── Sidebar ───────────────────────────────────────────────── */
-export function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+interface SidebarProps {
+  className?: string;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export function Sidebar({ className, mobileOpen = false, onCloseMobile }: SidebarProps) {
   const { user, logout } = useAuthStore();
   const pathname = usePathname();
 
@@ -75,60 +75,51 @@ export function Sidebar() {
     window.location.href = '/login';
   };
 
-  /* ── Shared sidebar content ──────────────────────────────── */
-  const SidebarContent = () => (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        background: '#f7f9ff',
-        borderRight: '1px solid #e0e2e9',
-        width: '100%',
-      }}
-    >
-      {/* ── Logo ─────────────────────────────────────────── */}
-      <div
-        style={{
-          padding: '18px 20px',
-          borderBottom: '1px solid #e0e2e9',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-        }}
-      >
-        <div style={{ color: '#0079bf' }}>
+  const sidebarContent = (
+    <div className="flex h-full flex-col border-r border-[#e2e8f0] bg-[#f7f9ff]">
+      <div className="flex items-center gap-3 border-b border-[#e2e8f0] px-5 py-5">
+        <div className="text-[#0079BF]">
           <Logo />
         </div>
-        <span style={{ fontWeight: 800, fontSize: 17, color: '#005f98', letterSpacing: '-0.01em' }}>
-          ProjectFlow
-        </span>
+        <span className="text-base font-bold tracking-tight text-slate-800">ProjectFlow</span>
       </div>
 
-      {/* ── Navigation ───────────────────────────────────── */}
-      <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
-        {/* Section label */}
-        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#707882', textTransform: 'uppercase', padding: '6px 12px 10px' }}>
-          Navigation
-        </p>
+      <div className="mx-4 mt-4 rounded-xl border border-[#e2e8f0] bg-white p-3 shadow-sm">
+        <p className="text-xs text-slate-400">Workspace</p>
+        <div className="mt-2 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0079BF] text-sm font-bold text-white">
+            PF
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-800">Engineering Team</p>
+            <p className="text-xs text-slate-500">Premium Workspace</p>
+          </div>
+        </div>
+      </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <nav className="mt-4 flex-1 overflow-y-auto px-3">
+        <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Navigation</p>
+        <div className="space-y-1">
           {items.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+            const Icon = item.icon;
+
             return (
               <Link
-                key={item.href}
+                key={`${item.href}-${item.label}`}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-all duration-200 ${
+                onClick={onCloseMobile}
+                className={cn(
+                  'group flex items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 text-sm font-medium transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-400',
                   isActive
-                    ? 'rounded-l-none bg-blue-50 font-semibold text-blue-700 shadow-[inset_3px_0_0_0_#2563eb]'
-                    : 'font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                    ? 'border-[#0079BF] bg-blue-50 text-blue-600'
+                    : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                )}
               >
-                <span style={{ color: isActive ? '#2563eb' : '#707882', display: 'flex', alignItems: 'center' }}>
-                  {item.icon}
-                </span>
+                <Icon
+                  size={17}
+                  className={cn('transition duration-200 ease-in-out', isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700')}
+                />
                 {item.label}
               </Link>
             );
@@ -136,101 +127,73 @@ export function Sidebar() {
         </div>
       </nav>
 
-      {/* ── Footer ───────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid #e0e2e9' }}>
-        {/* Help link */}
-        <div style={{ padding: '8px' }}>
-          <a
-            href="#"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px',
-              borderRadius: 8, fontSize: 14, fontWeight: 500, color: '#707882',
-              textDecoration: 'none', transition: 'background 120ms ease, color 120ms ease',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#ebeef4'; e.currentTarget.style.color = '#181c20'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#707882'; }}
-          >
-            <HelpCircle size={17} />
-            Help Center
-          </a>
-        </div>
+      <footer className="space-y-3 border-t border-[#e2e8f0] p-4">
+        <button
+          aria-label="Help Center"
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-400"
+        >
+          <HelpCircle size={16} />
+          Help Center
+        </button>
 
-        {/* User info + logout */}
-        {user && (
-          <div style={{ padding: '12px 16px', borderTop: '1px solid #e0e2e9' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        {user ? (
+          <div className="rounded-xl border border-[#e2e8f0] bg-white p-3 shadow-sm">
+            <div className="mb-3 flex items-center gap-3">
               <Avatar email={user.email} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#181c20', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user.email}
-                </p>
-                <div style={{ marginTop: 3 }}>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-slate-800">{user.email}</p>
+                <div className="mt-1">
                   <RoleBadge role={user.role.name as 'superadmin' | 'admin' | 'user' | 'guest'} size="sm" />
                 </div>
               </div>
             </div>
+
             <button
               onClick={handleLogout}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-                padding: '8px 12px', background: 'transparent', border: '1px solid #e0e2e9',
-                borderRadius: 8, fontSize: 13, fontWeight: 500, color: '#404751',
-                cursor: 'pointer', transition: 'background 120ms ease, border-color 120ms ease, color 120ms ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#ffdad6'; e.currentTarget.style.borderColor = '#ba1a1a'; e.currentTarget.style.color = '#ba1a1a'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#e0e2e9'; e.currentTarget.style.color = '#404751'; }}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-400"
             >
               <LogOut size={15} />
-              Log out
+              Logout
             </button>
           </div>
-        )}
-      </div>
+        ) : null}
+      </footer>
     </div>
   );
 
   return (
     <>
-      {/* Mobile hamburger button */}
-      <button
-        onClick={() => setIsOpen((v) => !v)}
-        className="fixed top-4 left-4 z-40 md:hidden"
-        style={{
-          padding: '8px', background: '#ffffff', border: '1px solid #e0e2e9',
-          borderRadius: 8, color: '#404751', cursor: 'pointer',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-        }}
-        aria-label={isOpen ? 'Close menu' : 'Open menu'}
-      >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      <aside className={cn('hidden shrink-0 md:flex', className)}>{sidebarContent}</aside>
 
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-30 md:hidden"
-          style={{ background: 'rgba(0,0,0,0.45)' }}
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Desktop sidebar (always visible, in normal flow) */}
-      <aside className="hidden h-screen w-64 shrink-0 md:flex md:flex-col">
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile sidebar (slide-in) */}
       <div
-        className="md:hidden"
-        style={{
-          position: 'fixed', left: 0, top: 0, bottom: 0,
-          width: '16rem', zIndex: 35,
-          transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 280ms cubic-bezier(0.4,0,0.2,1)',
-        }}
+        className={cn(
+          'fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm transition duration-300 ease-in-out md:hidden',
+          mobileOpen ? 'opacity-100 pointer-events-auto' : 'pointer-events-none opacity-0'
+        )}
+        onClick={onCloseMobile}
+        role="button"
+        aria-label="Close sidebar overlay"
+        tabIndex={-1}
+      />
+
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transform transition duration-300 ease-in-out md:hidden',
+          mobileOpen ? 'translate-x-0 shadow-lg' : '-translate-x-full'
+        )}
       >
-        <SidebarContent />
-      </div>
+        <div className="relative h-full overflow-y-auto overscroll-contain">
+          <button
+            onClick={onCloseMobile}
+            className="absolute right-3 top-3 z-10 rounded-lg border border-[#e2e8f0] bg-white p-1.5 text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            aria-label="Close sidebar"
+          >
+            <X size={16} />
+          </button>
+
+          <div className="pt-2">{sidebarContent}</div>
+        </div>
+      </aside>
     </>
   );
 }

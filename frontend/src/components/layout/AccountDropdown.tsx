@@ -14,6 +14,7 @@ function getRoleLabel(roleName?: string) {
 export function AccountDropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const { user, logout } = useAuthStore();
 
   useEffect(() => {
@@ -25,8 +26,26 @@ export function AccountDropdown() {
     };
 
     document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onEscape);
+    return () => {
+      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('keydown', onEscape);
+    };
   }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setOpen((prev) => !prev);
+    }
+  };
 
   if (!user) return null;
 
@@ -42,41 +61,45 @@ export function AccountDropdown() {
   return (
     <div ref={dropdownRef} className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setOpen((prev) => !prev)}
-        className="group flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-slate-100 active:scale-[0.99]"
+        onKeyDown={handleKeyDown}
+        className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition duration-200 ease-in-out hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-200"
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-label="Account menu"
       >
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-700 text-sm font-bold text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
           {avatarText}
         </div>
-        <div className="hidden min-w-0 text-left lg:block">
-          <p className="truncate text-sm font-medium text-slate-900">{user.email}</p>
+        <div className="hidden min-w-0 text-left xl:block">
+          <p className="max-w-[150px] truncate text-sm font-medium text-slate-800">{user.email}</p>
           <p className="text-xs text-slate-500">{roleLabel}</p>
         </div>
         <ChevronDown
           size={16}
-          className={`text-slate-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`text-slate-500 transition duration-200 ease-in-out ${open ? 'rotate-180' : ''}`}
+          aria-hidden="true"
         />
       </button>
 
       <div
-        className={`absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-slate-200 bg-white p-2 shadow-lg transition-all duration-200 ${
+        className={`absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-slate-200 bg-white p-2 shadow-lg transition duration-200 ease-in-out ${
           open ? 'scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
         }`}
         role="menu"
       >
-        <div className="mb-2 flex items-center gap-3 rounded-lg px-2 py-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-700 text-sm font-bold text-white">
+        <div className="mb-1 flex items-center gap-3 rounded-lg px-2 py-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
             {avatarText}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">{user.email}</p>
+            <p className="truncate text-sm font-semibold text-slate-800">{user.email}</p>
             <p className="text-xs text-slate-500">{roleLabel}</p>
           </div>
         </div>
 
-        <div className="mb-2 px-2">
+        <div className="mb-2 px-2 pb-1">
           <RoleBadge role={roleName} size="sm" />
         </div>
 
@@ -84,16 +107,18 @@ export function AccountDropdown() {
 
         <Link
           href="/dashboard/profile"
-          className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-700 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"
           onClick={() => setOpen(false)}
+          role="menuitem"
         >
           <User size={16} />
           Profile
         </Link>
         <Link
           href="/dashboard/settings"
-          className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-700 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"
           onClick={() => setOpen(false)}
+          role="menuitem"
         >
           <Settings size={16} />
           Settings
@@ -103,7 +128,8 @@ export function AccountDropdown() {
 
         <button
           onClick={handleLogout}
-          className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50"
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-200"
+          role="menuitem"
         >
           <LogOut size={16} />
           Logout
