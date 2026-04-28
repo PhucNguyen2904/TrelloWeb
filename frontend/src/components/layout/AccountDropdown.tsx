@@ -11,6 +11,10 @@ function getRoleLabel(roleName?: string) {
   return roleName.charAt(0).toUpperCase() + roleName.slice(1);
 }
 
+function getCompactName(email: string) {
+  return email.split('@')[0];
+}
+
 export function AccountDropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -68,6 +72,7 @@ export function AccountDropdown() {
 
   const roleName = user.role?.name as 'superadmin' | 'admin' | 'user' | 'guest';
   const roleLabel = getRoleLabel(user.role?.name);
+  const compactName = getCompactName(user.email);
   const avatarText = user.email.charAt(0).toUpperCase();
 
   const handleLogout = () => {
@@ -91,9 +96,8 @@ export function AccountDropdown() {
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
           {avatarText}
         </div>
-        <div className="hidden min-w-0 text-left xl:block">
-          <p className="max-w-[150px] truncate text-sm font-medium text-slate-800">{user.email}</p>
-          <p className="text-xs text-slate-500">{roleLabel}</p>
+        <div className="hidden min-w-0 text-left lg:block">
+          <p className="max-w-[120px] truncate text-sm font-medium text-slate-800">{compactName}</p>
         </div>
         <ChevronDown
           size={16}

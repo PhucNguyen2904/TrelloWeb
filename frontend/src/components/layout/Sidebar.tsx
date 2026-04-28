@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { CalendarDays, HelpCircle, LayoutDashboard, LogOut, Settings, ShieldCheck, Users, X } from 'lucide-react';
-import { RoleBadge } from '@/components/ui/Badge';
+import { CalendarDays, ChevronLeft, ChevronRight, HelpCircle, LayoutDashboard, LogOut, Settings, ShieldCheck, Users, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -16,24 +15,24 @@ interface NavItem {
 const NAV_ITEMS: Record<string, NavItem[]> = {
   superadmin: [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/dashboard', icon: CalendarDays },
+    { label: 'Calendar', href: '/dashboard/calendar', icon: CalendarDays },
     { label: 'Users Management', href: '/dashboard/users', icon: Users },
     { label: 'Roles', href: '/dashboard/roles', icon: ShieldCheck },
     { label: 'Settings', href: '/dashboard/settings', icon: Settings },
   ],
   admin: [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/dashboard', icon: CalendarDays },
+    { label: 'Calendar', href: '/dashboard/calendar', icon: CalendarDays },
     { label: 'Users Management', href: '/dashboard/users', icon: Users },
     { label: 'Settings', href: '/dashboard/settings', icon: Settings },
   ],
   user: [
-    { label: 'My Boards', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/dashboard', icon: CalendarDays },
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Calendar', href: '/dashboard/calendar', icon: CalendarDays },
   ],
   guest: [
-    { label: 'Boards', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Calendar', href: '/dashboard', icon: CalendarDays },
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Calendar', href: '/dashboard/calendar', icon: CalendarDays },
   ],
 };
 
@@ -48,22 +47,21 @@ function Logo() {
   );
 }
 
-function Avatar({ email }: { email: string }) {
-  const initials = email.charAt(0).toUpperCase();
-  return (
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0079BF] to-[#005f98] text-sm font-bold text-white">
-      {initials}
-    </div>
-  );
-}
-
 interface SidebarProps {
   className?: string;
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ className, mobileOpen = false, onCloseMobile }: SidebarProps) {
+export function Sidebar({
+  className,
+  mobileOpen = false,
+  onCloseMobile,
+  collapsed = false,
+  onToggleCollapse,
+}: SidebarProps) {
   const { user, logout } = useAuthStore();
   const pathname = usePathname();
 
@@ -76,29 +74,41 @@ export function Sidebar({ className, mobileOpen = false, onCloseMobile }: Sideba
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col border-r border-slate-200 bg-[#f7f9ff]">
-      <div className="flex items-center gap-3 border-b border-slate-200 px-5 py-5">
+    <div className="flex h-full flex-col border-r border-slate-200 bg-[#f7f9ff] transition-all duration-300 ease-in-out">
+      <div className={cn('flex items-center border-b border-slate-200 px-5 py-5', collapsed ? 'justify-center' : 'gap-3')}>
         <div className="text-[#0079BF]">
           <Logo />
         </div>
-        <span className="text-base font-bold tracking-tight text-slate-800">ProjectFlow</span>
+        {!collapsed ? <span className="text-base font-bold tracking-tight text-slate-800">ProjectFlow</span> : null}
       </div>
 
       <div className="mx-4 mt-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-        <p className="text-xs text-slate-400">Workspace</p>
-        <div className="mt-2 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0079BF] text-sm font-bold text-white">
-            PF
+        {!collapsed ? (
+          <>
+            <p className="text-xs text-slate-400">Workspace</p>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0079BF] text-sm font-bold text-white">
+                PF
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-slate-800">Engineering Team</p>
+                <p className="text-xs text-slate-500">Premium Workspace</p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0079BF] text-sm font-bold text-white">
+              PF
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-800">Engineering Team</p>
-            <p className="text-xs text-slate-500">Premium Workspace</p>
-          </div>
-        </div>
+        )}
       </div>
 
       <nav className="mt-4 flex-1 overflow-y-auto px-3">
-        <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Navigation</p>
+        {!collapsed ? (
+          <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Navigation</p>
+        ) : null}
         <div className="space-y-1">
           {items.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -110,18 +120,20 @@ export function Sidebar({ className, mobileOpen = false, onCloseMobile }: Sideba
                 href={item.href}
                 onClick={onCloseMobile}
                 className={cn(
-                  'group flex items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 text-sm font-medium transition duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400',
+                  'group flex items-center rounded-lg border-l-2 px-3 py-2.5 text-sm font-medium transition duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400',
+                  collapsed ? 'justify-center' : 'gap-3',
                   isActive
                     ? 'border-[#0079BF] bg-blue-50 text-blue-600'
                     : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 )}
                 aria-current={isActive ? 'page' : undefined}
+                title={collapsed ? item.label : undefined}
               >
                 <Icon
                   size={17}
                   className={cn('transition duration-200 ease-in-out', isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700')}
                 />
-                {item.label}
+                {!collapsed ? item.label : null}
               </Link>
             );
           })}
@@ -131,32 +143,41 @@ export function Sidebar({ className, mobileOpen = false, onCloseMobile }: Sideba
       <footer className="space-y-3 border-t border-slate-200 p-4">
         <button
           aria-label="Help Center"
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400"
+          className={cn(
+            'flex w-full items-center rounded-lg px-3 py-2 text-left text-sm text-slate-600 transition duration-200 ease-in-out hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400',
+            collapsed ? 'justify-center' : 'gap-2'
+          )}
+          title={collapsed ? 'Help Center' : undefined}
         >
           <HelpCircle size={16} />
-          Help Center
+          {!collapsed ? 'Help Center' : null}
+        </button>
+
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className={cn(
+            'hidden w-full items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition duration-200 ease-in-out hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400 md:flex',
+            collapsed ? 'justify-center' : 'gap-2'
+          )}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {!collapsed ? 'Collapse Sidebar' : null}
         </button>
 
         {user ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-            <div className="mb-3 flex items-center gap-3">
-              <Avatar email={user.email} />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-800">{user.email}</p>
-                <div className="mt-1">
-                  <RoleBadge role={user.role.name as 'superadmin' | 'admin' | 'user' | 'guest'} size="sm" />
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-400"
-            >
-              <LogOut size={15} />
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className={cn(
+              'flex w-full items-center rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition duration-200 ease-in-out hover:bg-rose-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-400',
+              collapsed ? 'justify-center' : 'justify-center gap-2'
+            )}
+            title={collapsed ? 'Logout' : undefined}
+          >
+            <LogOut size={15} />
+            {!collapsed ? 'Logout' : null}
+          </button>
         ) : null}
       </footer>
     </div>

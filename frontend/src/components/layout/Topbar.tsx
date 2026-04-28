@@ -44,7 +44,7 @@ export function Topbar({
         </div>
 
         <div className="hidden max-w-sm flex-1 xl:block">
-          <label className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-500 transition duration-200 ease-in-out focus-within:ring-2 focus-within:ring-[#0079BF]/20">
+          <label className="flex items-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 py-2 text-sm text-slate-500 shadow-sm transition duration-200 ease-in-out focus-within:border-[#0079BF]/40 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0079BF]/20">
             <Search size={16} className="text-slate-400 flex-shrink-0" />
             <input
               className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
@@ -84,7 +84,7 @@ export function Topbar({
       </div>
 
       <div className="border-t border-slate-200 px-3 pb-3 sm:px-4 xl:hidden">
-        <label className="mt-2 flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-500 transition duration-200 ease-in-out focus-within:ring-2 focus-within:ring-[#0079BF]/20">
+        <label className="mt-2 flex items-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 py-2 text-sm text-slate-500 shadow-sm transition duration-200 ease-in-out focus-within:border-[#0079BF]/40 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0079BF]/20">
           <Search size={16} className="text-slate-400 flex-shrink-0" />
           <input
             className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"

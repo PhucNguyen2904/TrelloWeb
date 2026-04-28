@@ -14,12 +14,12 @@ interface CalendarEvent {
 const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
 const eventPillTone: Record<EventTone, string> = {
-  critical: 'bg-red-500',
-  sprint: 'bg-blue-600',
-  review: 'bg-green-500',
-  audit: 'bg-yellow-500 text-slate-900',
-  prep: 'bg-purple-500',
-  sync: 'bg-orange-500',
+  critical: 'bg-rose-100 text-rose-700',
+  sprint: 'bg-sky-100 text-sky-700',
+  review: 'bg-emerald-100 text-emerald-700',
+  audit: 'bg-amber-100 text-amber-700',
+  prep: 'bg-violet-100 text-violet-700',
+  sync: 'bg-orange-100 text-orange-700',
 };
 
 const eventsByDate: Record<number, CalendarEvent[]> = {
@@ -173,16 +173,16 @@ export function CalendarView() {
               </button>
             </div>
 
-            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-sm">
+            <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 text-sm shadow-sm">
               {(['list', 'week', 'month'] as const).map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
                   aria-pressed={viewMode === mode}
                   aria-label={`View as ${mode}`}
-                  className={`rounded-md px-3 py-1.5 font-medium transition duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-300 ${
+                  className={`rounded-lg px-3.5 py-2 font-medium transition duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-300 ${
                     viewMode === mode
-                      ? 'bg-[#0079BF] text-white'
+                      ? 'bg-[#0079BF] text-white shadow-sm'
                       : 'text-slate-600 hover:bg-white'
                   }`}
                 >
@@ -214,6 +214,8 @@ export function CalendarView() {
             >
               {cells.map((date, index) => {
                 const isToday = date === 10;
+                const colIndex = index % 7;
+                const isWeekend = colIndex === 0 || colIndex === 6;
                 const events = date ? eventsByDate[date] ?? [] : [];
 
                 return (
@@ -226,7 +228,13 @@ export function CalendarView() {
                         ? `${date} October${events.length > 0 ? `, ${events.length} events` : ''}`
                         : 'Empty'
                     }
-                    className={`min-h-[80px] sm:min-h-[118px] border-b border-r border-slate-200 bg-white p-1 sm:p-2 text-xs sm:text-base transition duration-200 ease-in-out hover:bg-slate-50 ${
+                    className={`min-h-[80px] sm:min-h-[118px] border-b border-r border-slate-200 p-1 sm:p-2 text-xs sm:text-base transition duration-200 ease-in-out ${
+                      isToday
+                        ? 'bg-blue-50/70 ring-1 ring-inset ring-blue-200'
+                        : isWeekend
+                          ? 'bg-slate-50'
+                          : 'bg-white'
+                    } ${date ? 'hover:bg-slate-50' : ''} ${
                       date ? 'cursor-pointer hover:shadow-sm' : ''
                     }`}
                   >
@@ -234,7 +242,9 @@ export function CalendarView() {
                       <>
                         <p
                           className={`mb-1 text-xs font-semibold ${
-                            isToday ? 'text-[#0079BF]' : 'text-slate-600'
+                            isToday
+                              ? 'inline-flex items-center rounded-full bg-blue-600 px-2 py-0.5 text-[11px] text-white'
+                              : 'text-slate-600'
                           }`}
                         >
                           {date}
@@ -243,10 +253,10 @@ export function CalendarView() {
                         <div className="space-y-0.5 hidden sm:block">
                           {events.map((event, idx) => (
                             <p
-                              key={`${date}-${event.label}-${idx}`}
-                              className={`truncate rounded px-2 py-0.5 text-[10px] font-bold text-white ${eventPillTone[event.tone]}`}
-                              title={event.label}
-                            >
+                                key={`${date}-${event.label}-${idx}`}
+                                className={`truncate rounded-md px-2.5 py-1 text-[10px] font-semibold ${eventPillTone[event.tone]}`}
+                                title={event.label}
+                              >
                               {event.label}
                             </p>
                           ))}

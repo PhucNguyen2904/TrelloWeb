@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarView } from '@/components/dashboard/CalendarView';
+import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default function DashboardPage() {
@@ -8,11 +8,11 @@ export default function DashboardPage() {
     <DashboardLayout
       topbarProps={{
         title: 'Dashboard',
-        subtitle: 'Track releases, sprint milestones, and team capacity in one place.',
+        subtitle: 'Track delivery health and recent execution signals in one place.',
         showCreateButton: true,
       }}
     >
-      <CalendarView />
+      <DashboardOverview />
     </DashboardLayout>
   );
 }

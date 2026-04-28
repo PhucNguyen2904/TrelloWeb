@@ -16,6 +16,7 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
 
   // Client-side auth guard
   useEffect(() => {
@@ -56,9 +57,11 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
   return (
     <div className="relative flex min-h-screen overflow-x-clip bg-[#f7f9ff]">
       <Sidebar
-        className="w-64"
+        className={desktopSidebarCollapsed ? 'w-20' : 'w-64'}
         mobileOpen={mobileSidebarOpen}
         onCloseMobile={() => setMobileSidebarOpen(false)}
+        collapsed={desktopSidebarCollapsed}
+        onToggleCollapse={() => setDesktopSidebarCollapsed((prev) => !prev)}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
