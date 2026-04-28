@@ -16,6 +16,8 @@ export interface TopbarProps {
 }
 
 export function Topbar({
+  title,
+  subtitle,
   onMobileMenuClick,
 }: TopbarProps) {
   const user = useAuthStore((s) => s.user);
@@ -33,9 +35,11 @@ export function Topbar({
         </button>
 
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-bold text-slate-800 transition duration-200 ease-in-out sm:text-2xl">
-            {title}
-          </h1>
+          {title && (
+            <h1 className="truncate text-xl font-bold text-slate-800 transition duration-200 ease-in-out sm:text-2xl">
+              {title}
+            </h1>
+          )}
           {subtitle ? (
             <p className="mt-0.5 truncate text-sm text-slate-500 transition duration-200 ease-in-out">
               {subtitle}
