@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { handleLogoutClean } from '@/lib/logout';
 import {
   LayoutDashboard,
   Kanban,
@@ -83,7 +84,11 @@ export function Sidebar({}: SidebarProps) {
           Help Center
         </button>
 
-        <button className="w-full text-left text-sm text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 flex items-center gap-3 h-9">
+        <button
+          onClick={handleLogoutClean}
+          type="button"
+          className="w-full text-left text-sm text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 flex items-center gap-3 h-9"
+        >
           <LogOut className="w-4 h-4 flex-shrink-0" />
           Logout
         </button>

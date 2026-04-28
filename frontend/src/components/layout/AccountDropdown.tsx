@@ -6,6 +6,7 @@ import { ChevronDown, LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/Button';
+import { handleLogoutClean } from '@/lib/logout';
 
 function getRoleLabel(roleName?: string) {
   if (!roleName) return 'Guest';
@@ -21,7 +22,7 @@ export function AccountDropdown() {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const { resolvedTheme, setTheme } = useTheme();
   const menuId = 'account-menu';
 
@@ -78,8 +79,7 @@ export function AccountDropdown() {
   const avatarText = user.email.charAt(0).toUpperCase();
 
   const handleLogout = () => {
-    logout();
-    window.location.href = '/login';
+    handleLogoutClean();
   };
 
   return (

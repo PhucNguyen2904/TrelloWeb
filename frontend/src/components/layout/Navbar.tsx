@@ -2,15 +2,13 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { LogOut, Kanban, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { handleLogoutClean } from "@/lib/logout";
 
 export default function Navbar() {
   const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
-  const router = useRouter();
 
   const handleLogout = () => {
-    logout();
-    router.push("/login");
+    handleLogoutClean();
   };
 
   return (
