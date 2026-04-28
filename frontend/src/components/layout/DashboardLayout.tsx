@@ -52,13 +52,9 @@ export function DashboardLayout({ children, topbarProps }: DashboardLayoutProps)
   return (
     <div className="flex min-h-screen bg-[var(--background)]">
       <Sidebar />
-      <Topbar {...(topbarProps || {})} />
-
-      <main
-        className="flex-1 pt-[var(--topbar-height)] md:ml-64"
-        style={{ minHeight: '100vh' }}
-      >
-        <div className="w-full p-4 md:p-6 lg:p-8">
+      <main className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <Topbar {...(topbarProps || {})} />
+        <div className="w-full flex-1 p-4 md:p-6 lg:p-8 bg-gray-50">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </div>
       </main>

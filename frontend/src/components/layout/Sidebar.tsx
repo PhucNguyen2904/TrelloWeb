@@ -77,7 +77,7 @@ export function Sidebar() {
 
   /* ── Shared sidebar content ──────────────────────────────── */
   const SidebarContent = () => (
-    <aside
+    <div
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -207,7 +207,7 @@ export function Sidebar() {
           </div>
         )}
       </div>
-    </aside>
+    </div>
   );
 
   return (
@@ -235,15 +235,10 @@ export function Sidebar() {
         />
       )}
 
-      {/* Desktop sidebar (always visible) */}
-      <div
-        className="fixed left-0 top-0 z-10 hidden h-screen w-64 md:flex md:flex-col"
-        style={{
-          bottom: 0,
-        }}
-      >
+      {/* Desktop sidebar (always visible, in normal flow) */}
+      <aside className="hidden h-screen w-64 shrink-0 md:flex md:flex-col">
         <SidebarContent />
-      </div>
+      </aside>
 
       {/* Mobile sidebar (slide-in) */}
       <div
