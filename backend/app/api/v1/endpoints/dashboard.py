@@ -1,3 +1,4 @@
+# Dashboard API endpoints — v2 (stats, activities, calendar, boards)
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
