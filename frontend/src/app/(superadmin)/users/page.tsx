@@ -99,11 +99,12 @@ function InviteModal({ roles, onClose, onSuccess }: InviteModalProps) {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.post('/api/admin/users', { email, role_id: roleId });
-      toast.success('User invited successfully');
+      // ✅ super-admin endpoint (not admin)
+      await api.post('/api/super-admin/users', { email, role_id: roleId });
+      toast.success('User created successfully');
       onSuccess();
     } catch {
-      toast.error('Failed to invite user');
+      toast.error('Failed to create user');
     } finally {
       setSaving(false);
     }
@@ -331,15 +332,16 @@ export default function SuperAdminUsersPage() {
     onError: () => toast.error('Failed to update role'),
   });
 
-  const deactivateMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async (userId: number) => {
-      await api.put(`/api/admin/users/${userId}/deactivate`);
+      // ✅ super-admin delete endpoint
+      await api.delete(`/api/super-admin/users/${userId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sa-users'] });
-      toast.success('User deactivated');
+      toast.success('User deleted');
     },
-    onError: () => toast.error('Failed to deactivate user'),
+    onError: () => toast.error('Failed to delete user'),
   });
 
   // ── Filter + sort + paginate (client-side)
@@ -565,11 +567,11 @@ export default function SuperAdminUsersPage() {
                         )}
                         {user.is_active !== false && (
                           <button
-                            onClick={() => deactivateMutation.mutate(user.id)}
-                            disabled={deactivateMutation.isPending}
+                            onClick={() => deleteMutation.mutate(user.id)}
+                            disabled={deleteMutation.isPending}
                             className="rounded-lg p-2 text-text-muted transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-                            title="Deactivate user"
-                            aria-label={`Deactivate ${user.email}`}
+                            title="Delete user"
+                            aria-label={`Delete ${user.email}`}
                           >
                             <PowerOff size={15} />
                           </button>
