@@ -26,34 +26,42 @@ export const api = axios.create({
 
 // ===== API Endpoint Functions =====
 
+/** Activities feed — 20 most recently updated tasks across all user boards */
 export async function getActivities() {
-  const { data } = await api.get('/api/activities');
+  const { data } = await api.get('/api/dashboard/activities');
   return data;
 }
 
+/** All boards of the current user (with task cards grouped into columns) */
 export async function getBoards() {
-  const { data } = await api.get('/api/boards');
+  const { data } = await api.get('/api/dashboard/boards');
   return data;
 }
 
-export async function getBoard(boardId: string) {
-  const { data } = await api.get(`/api/boards/${boardId}`);
+/**
+ * Single board by integer ID with tasks grouped into Kanban columns.
+ * Pass the numeric board ID (e.g. 1), NOT a string like 'board-1'.
+ */
+export async function getBoard(boardId: string | number) {
+  const { data } = await api.get(`/api/dashboard/boards/${boardId}`);
   return data;
 }
 
+/** Tasks formatted as calendar events (date = task updated_at) */
 export async function getCalendarEvents() {
-  const { data } = await api.get('/api/calendar-events');
+  const { data } = await api.get('/api/dashboard/calendar-events');
   return data;
 }
 
+/** User's boards grouped as a single workspace object */
 export async function getWorkspaces() {
-  const { data } = await api.get('/api/workspaces');
+  const { data } = await api.get('/api/dashboard/workspaces');
   return data;
 }
 
+/** Members endpoint (not yet implemented on backend — returns empty list) */
 export async function getMembers() {
-  const { data } = await api.get('/api/members');
-  return data;
+  return [];
 }
 
 /**

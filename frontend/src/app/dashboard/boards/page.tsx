@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Star, Filter, Menu } from 'lucide-react';
-import { getBoard } from '@/lib/api';
+import { getBoards } from '@/lib/api';
 import KanbanColumnComponent from '@/components/board/KanbanColumnComponent';
 import type { Card } from '@/lib/types';
 
@@ -12,12 +12,23 @@ interface KanbanColumn {
   cardIds: string[];
 }
 
+interface BoardCard {
+  id: string;
+  title: string;
+  columnId: string;
+  description?: string;
+  labels: any[];
+  assignees: any[];
+  commentCount: number;
+}
+
 interface Board {
   id: string;
   name: string;
   coverColor: string;
   members: Array<{ id: string; name: string; initials: string; avatarColor: string }>;
   columns: KanbanColumn[];
+  cards: BoardCard[];
 }
 
 interface CardDetailModal {
@@ -33,8 +44,11 @@ export default function BoardsPage() {
     const fetchBoard = async () => {
       try {
         setLoading(true);
-        const data = await getBoard('board-1');
-        setBoard(data);
+        // Fetch all boards, then use the first one
+        const boards = await getBoards();
+        if (boards && boards.length > 0) {
+          setBoard(boards[0]);
+        }
       } catch (err) {
         // Silently fail — show empty board shell, never show error to user
         console.error('Failed to fetch board:', err);
@@ -72,26 +86,21 @@ export default function BoardsPage() {
     );
   }
 
-  // Map cards to columns
-  const getCardsForColumn = (columnId: string) => {
-    const allCards: Card[] = [];
-    if (board.columns) {
-      board.columns.forEach(column => {
-        if (column.cardIds) {
-          column.cardIds.forEach(cardId => {
-            allCards.push({
-              id: cardId,
-              title: `Card ${cardId}`,
-              columnId: column.id,
-              labels: [],
-              assignees: [],
-              commentCount: 0,
-            });
-          });
-        }
-      });
-    }
-    return allCards.filter(card => card.columnId === columnId);
+  // Map cards from real API data
+  const getCardsForColumn = (columnId: string): Card[] => {
+    const boardCards = (board as any).cards as BoardCard[] | undefined;
+    if (!boardCards) return [];
+    return boardCards
+      .filter((c) => c.columnId === columnId)
+      .map((c) => ({
+        id: c.id,
+        title: c.title,
+        columnId: c.columnId,
+        description: c.description,
+        labels: c.labels ?? [],
+        assignees: c.assignees ?? [],
+        commentCount: c.commentCount ?? 0,
+      }));
   };
 
   return (
