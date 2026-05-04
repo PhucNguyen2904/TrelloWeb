@@ -8,9 +8,9 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { handleLogoutClean } from '@/lib/logout';
 
 const navItems = [
-  { label: 'Dashboard', href: '/superadmin/dashboard', icon: LayoutDashboard },
-  { label: 'User Management', href: '/superadmin/users', icon: Users },
-  { label: 'Role Management', href: '/superadmin/roles', icon: Shield },
+  { label: 'Dashboard', href: '/superadmin', icon: LayoutDashboard },
+  { label: 'User Management', href: '/users', icon: Users },
+  { label: 'Role Management', href: '/roles', icon: Shield },
 ];
 
 /* ── Shared nav list ──────────────────────────────────────────────────────── */

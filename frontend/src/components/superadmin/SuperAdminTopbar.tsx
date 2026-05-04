@@ -7,9 +7,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronDown, LogOut, User } from 'lucide-react';
 
 const PAGE_TITLES: Record<string, string> = {
-  '/superadmin/dashboard': 'Platform Overview',
-  '/superadmin/users': 'User Management',
-  '/superadmin/roles': 'Role Management',
+  '/superadmin': 'Platform Overview',
+  '/users': 'User Management',
+  '/roles': 'Role Management',
 };
 
 function getTitle(pathname: string): string {
