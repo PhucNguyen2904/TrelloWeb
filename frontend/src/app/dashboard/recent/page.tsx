@@ -37,13 +37,11 @@ export default function RecentPage() {
   const [recentBoards, setRecentBoards] = useState<Board[]>([]);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        setError(null);
         const [boardsData, workspacesData] = await Promise.all([
           getBoards(),
           getWorkspaces(),
@@ -51,8 +49,8 @@ export default function RecentPage() {
         setRecentBoards((boardsData || []).slice(0, 6));
         setWorkspaces(workspacesData || []);
       } catch (err) {
+        // Silently fail — show empty sections, never show error to user
         console.error('Failed to fetch data:', err);
-        setError('Failed to load data. Please try again later.');
         setRecentBoards([]);
         setWorkspaces([]);
       } finally {
@@ -70,17 +68,6 @@ export default function RecentPage() {
         <div className="text-center">
           <div className="animate-spin h-10 w-10 border-4 border-brand border-t-transparent rounded-full mx-auto"></div>
           <p className="text-text-muted text-sm mt-3">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 text-sm">{error}</p>
         </div>
       </div>
     );

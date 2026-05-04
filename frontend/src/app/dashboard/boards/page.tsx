@@ -28,18 +28,17 @@ export default function BoardsPage() {
   const [selectedCard, setSelectedCard] = useState<CardDetailModal | null>(null);
   const [board, setBoard] = useState<Board | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBoard = async () => {
       try {
         setLoading(true);
-        setError(null);
         const data = await getBoard('board-1');
         setBoard(data);
       } catch (err) {
+        // Silently fail — show empty board shell, never show error to user
         console.error('Failed to fetch board:', err);
-        setError('Failed to load board. Please try again later.');
+        setBoard(null);
       } finally {
         setLoading(false);
       }
@@ -59,11 +58,15 @@ export default function BoardsPage() {
     );
   }
 
-  if (error || !board) {
+  // No board data — render an empty shell with no columns
+  if (!board) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 text-sm">{error || 'Board not found'}</p>
+      <div className="h-full flex flex-col space-y-4">
+        <div className="bg-surface-card border-b border-border px-6 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-text-heading">Board</h1>
+        </div>
+        <div className="flex-1 overflow-x-auto bg-surface-app px-6 py-4">
+          <div className="flex gap-4 h-full min-w-min" />
         </div>
       </div>
     );
