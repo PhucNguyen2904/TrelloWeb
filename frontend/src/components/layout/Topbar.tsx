@@ -1,11 +1,8 @@
 'use client';
 
-import { Bell, Menu, Search, Settings } from 'lucide-react';
+import { Bell, Search, Settings, HelpCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { AccountDropdown } from './AccountDropdown';
-import { Button } from '@/components/ui/Button';
-import { useTheme } from 'next-themes';
-import { Moon, SunMedium } from 'lucide-react';
 
 export interface TopbarProps {
   title?: string;
@@ -16,83 +13,84 @@ export interface TopbarProps {
 }
 
 export function Topbar({
-  title,
-  subtitle,
-  onMobileMenuClick,
+  onCreateClick,
 }: TopbarProps) {
   const user = useAuthStore((s) => s.user);
-  const { resolvedTheme, setTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div className="flex h-[52px] items-center gap-2 px-3 sm:px-4 lg:px-6">
-        <button
-          onClick={onMobileMenuClick}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] transition duration-150 ease-out hover:border-[var(--border-hover)] hover:text-[var(--text-primary)] lg:hidden"
-          aria-label="Open sidebar"
-        >
-          <Menu size={18} />
-        </button>
-
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-bold text-slate-800 transition duration-200 ease-in-out sm:text-2xl">
-            {title}
-          </h1>
-          {subtitle ? (
-            <p className="mt-0.5 truncate text-sm text-slate-500 transition duration-200 ease-in-out">
-              {subtitle}
-            </p>
-          ) : null}
+    <header className="sticky top-0 z-50 bg-white border-b border-[#e2e8f0] h-14 px-5 flex items-center justify-between gap-4">
+      {/* Left: Logo + Nav Links */}
+      <div className="flex items-center gap-6">
+        {/* ProjectFlow Logo */}
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-sm bg-[#0079BF] flex items-center justify-center">
+            <span className="text-white font-bold text-sm">P</span>
+          </div>
+          <span className="font-bold text-[#0079BF] text-sm hidden sm:inline">ProjectFlow</span>
         </div>
 
-        <div className="hidden max-w-sm flex-1 xl:block">
-          <label className="flex items-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 py-2 text-sm text-slate-500 shadow-sm transition duration-200 ease-in-out focus-within:border-[#0079BF]/40 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0079BF]/20">
-            <Search size={16} className="text-slate-400 flex-shrink-0" />
-            <input
-              className="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
-              placeholder="Search boards, tasks, members..."
-              aria-label="Search"
-            />
-          </label>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-2)] md:inline-flex"
-            onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
-            aria-label="Toggle theme"
-          >
-            {resolvedTheme === 'light' ? <Moon size={16} /> : <SunMedium size={16} />}
-          </Button>
-          <button
-            aria-label="Notifications"
-            className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] transition duration-150 ease-out hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
-          >
-            <Bell size={17} />
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--accent-danger)]" aria-hidden="true" />
-          </button>
-          <button
-            aria-label="Settings"
-            className="hidden h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] transition duration-150 ease-out hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] md:inline-flex"
-          >
-            <Settings size={17} />
-          </button>
-
-          {user ? <AccountDropdown /> : null}
-        </div>
+        {/* Nav Links */}
+        <nav className="hidden sm:flex items-center gap-4 ml-4">
+          {['Workspaces', 'Recent', 'Starred'].map((link) => (
+            <button
+              key={link}
+              className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-colors"
+            >
+              {link}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </button>
+          ))}
+        </nav>
       </div>
 
-      <div className="border-t border-slate-200 px-3 pb-3 sm:px-4 xl:hidden">
-        <label className="mt-2 flex items-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 py-2 text-sm text-slate-500 shadow-sm transition duration-200 ease-in-out focus-within:border-[#0079BF]/40 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0079BF]/20">
-          <Search size={16} className="text-slate-400 flex-shrink-0" />
+      {/* Center: Search */}
+      <div className="hidden lg:flex flex-1 max-w-sm">
+        <label className="bg-slate-100 rounded-full px-4 py-1.5 text-sm w-72 flex items-center gap-2 text-slate-400">
+          <Search size={16} className="text-slate-400" />
           <input
             className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
             placeholder="Search..."
             aria-label="Search"
           />
         </label>
+      </div>
+
+      {/* Right: Buttons + Icons + Avatar */}
+      <div className="flex items-center gap-4">
+        {/* Create Button */}
+        <button
+          onClick={onCreateClick}
+          className="bg-[#0079BF] hover:bg-[#005c91] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
+        >
+          Create
+        </button>
+
+        {/* Icon Buttons */}
+        <button
+          aria-label="Notifications"
+          className="w-8 h-8 rounded-md hover:bg-slate-100 text-slate-500 flex items-center justify-center transition-colors"
+        >
+          <Bell size={18} />
+        </button>
+
+        <button
+          aria-label="Help"
+          className="w-8 h-8 rounded-md hover:bg-slate-100 text-slate-500 flex items-center justify-center transition-colors"
+        >
+          <HelpCircle size={18} />
+        </button>
+
+        <button
+          aria-label="Settings"
+          className="w-8 h-8 rounded-md hover:bg-slate-100 text-slate-500 flex items-center justify-center transition-colors"
+        >
+          <Settings size={18} />
+        </button>
+
+        {/* Avatar */}
+        {user ? <AccountDropdown /> : null}
       </div>
     </header>
   );

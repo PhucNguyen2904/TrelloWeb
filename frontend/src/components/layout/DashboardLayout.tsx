@@ -10,7 +10,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-surface-app">
+    <div className="min-h-screen bg-[#f7f9ff] flex flex-col">
       <Topbar
         onMobileMenuClick={() => {
           // TODO: Handle mobile menu for future mobile sidebar implementation
@@ -25,7 +25,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         
-        <main className="flex-1 overflow-y-auto px-8 py-6">
+        <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
       </div>

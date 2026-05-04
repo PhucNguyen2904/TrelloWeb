@@ -9,19 +9,22 @@ import {
   LayoutDashboard,
   Kanban,
   Calendar,
-  Clock,
   HelpCircle,
   LogOut,
   Users,
+  UserPlus,
 } from 'lucide-react';
 
-interface SidebarProps {}
+interface SidebarProps {
+  // Sidebar props placeholder for future extensibility
+}
 
 const navItems = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Boards', href: '/dashboard/boards', icon: Kanban },
+  { label: 'Members', href: '/dashboard/members', icon: Users },
+  { label: 'Workspace Settings', href: '/dashboard/workspace-settings', icon: LayoutDashboard },
+  { label: 'Analytics', href: '/dashboard/analytics', icon: LayoutDashboard },
   { label: 'Calendar', href: '/dashboard/calendar', icon: Calendar },
-  { label: 'Recent', href: '/dashboard/recent', icon: Clock },
 ];
 
 const adminNavItems = [
@@ -35,33 +38,27 @@ export function Sidebar({}: SidebarProps) {
   const isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
 
   return (
-    <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-[240px] bg-surface-card border-r border-border h-full">
-      {/* Workspace block */}
-      <div className="p-4 border-b border-border">
-        <div className="bg-surface-muted rounded-lg p-3 flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-lg bg-brand flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-            style={{ backgroundColor: '#0079BF' }}
-          >
-            ET
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-text-heading truncate">
-              Engineering
-            </p>
-            <p className="text-xs text-text-muted truncate">
-              Premium Workspace
-            </p>
-          </div>
+    <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-60 bg-[#f7f9ff] border-r border-[#e2e8f0] h-full py-4 px-3 gap-1">
+      {/* Workspace Header */}
+      <div className="flex items-center gap-3 px-3 py-2 mb-2">
+        <div
+          className="w-8 h-8 rounded-md bg-[#0079BF] text-white text-xs font-bold flex items-center justify-center flex-shrink-0"
+          style={{ backgroundColor: '#0079BF' }}
+        >
+          ET
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-slate-800 truncate">
+            Engineering Team
+          </p>
+          <p className="text-[10px] uppercase text-slate-400 truncate">
+            Premium Workspace
+          </p>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-        <p className="text-xs tracking-widest font-medium text-text-muted px-3 mb-3 uppercase">
-          Navigation
-        </p>
-
+      <nav className="flex-1 overflow-y-auto space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -69,16 +66,13 @@ export function Sidebar({}: SidebarProps) {
           return (
             <Link key={item.href} href={item.href}>
               <button
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg h-9 text-sm font-medium transition-colors relative ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors relative ${
                   isActive
-                    ? 'bg-brand-light text-brand'
-                    : 'text-text-body hover:bg-surface-muted'
+                    ? 'bg-blue-50 text-[#0079BF] border-l-4 border-[#0079BF] font-semibold'
+                    : 'text-slate-600 hover:bg-slate-100'
                 }`}
               >
-                {isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand rounded-r" />
-                )}
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-brand' : ''}`} />
+                <Icon className="w-4 h-4 flex-shrink-0" />
                 <span>{item.label}</span>
               </button>
             </Link>
@@ -88,10 +82,6 @@ export function Sidebar({}: SidebarProps) {
         {/* Admin / Superadmin only section */}
         {isAdminOrSuperAdmin && (
           <>
-            <p className="text-xs tracking-widest font-medium text-text-muted px-3 pt-4 pb-1 uppercase">
-              Administration
-            </p>
-
             {adminNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -99,16 +89,13 @@ export function Sidebar({}: SidebarProps) {
               return (
                 <Link key={item.href} href={item.href}>
                   <button
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg h-9 text-sm font-medium transition-colors relative ${
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors relative ${
                       isActive
-                        ? 'bg-brand-light text-brand'
-                        : 'text-text-body hover:bg-surface-muted'
+                        ? 'bg-blue-50 text-[#0079BF] border-l-4 border-[#0079BF] font-semibold'
+                        : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
-                    {isActive && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand rounded-r" />
-                    )}
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-brand' : ''}`} />
+                    <Icon className="w-4 h-4 flex-shrink-0" />
                     <span>{item.label}</span>
                   </button>
                 </Link>
@@ -118,19 +105,24 @@ export function Sidebar({}: SidebarProps) {
         )}
       </nav>
 
-      {/* Bottom Section */}
-      <div className="border-t border-border p-3 space-y-2">
-        <button className="w-full text-left text-sm text-text-body hover:bg-surface-muted rounded-lg px-3 py-2 flex items-center gap-3 h-9">
-          <HelpCircle className="w-4 h-4 flex-shrink-0" />
+      {/* Footer */}
+      <div className="border-t border-[#e2e8f0] pt-3 space-y-2">
+        <button className="w-full border border-slate-300 hover:bg-slate-100 text-slate-700 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+          <UserPlus size={16} />
+          Invite Members
+        </button>
+
+        <button className="w-full text-left text-sm text-slate-500 hover:bg-slate-100 rounded-lg px-3 py-2 flex items-center gap-3 transition-colors">
+          <HelpCircle size={16} className="flex-shrink-0" />
           Help Center
         </button>
 
         <button
           onClick={handleLogoutClean}
           type="button"
-          className="w-full text-left text-sm text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 flex items-center gap-3 h-9"
+          className="w-full text-left text-sm text-slate-500 hover:bg-slate-100 rounded-lg px-3 py-2 flex items-center gap-3 transition-colors"
         >
-          <LogOut className="w-4 h-4 flex-shrink-0" />
+          <LogOut size={16} className="flex-shrink-0" />
           Logout
         </button>
       </div>

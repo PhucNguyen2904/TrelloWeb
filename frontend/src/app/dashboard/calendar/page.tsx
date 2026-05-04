@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from 'lucide-react';
 import { getCalendarEvents } from '@/lib/api';
 import {
@@ -26,11 +27,13 @@ interface CalendarEvent {
   assignees?: any[];
 }
 
+const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
 export default function CalendarPageView() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'list'>('month');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -80,9 +83,8 @@ export default function CalendarPageView() {
     weeks.push(allDays.slice(i, i + 7));
   }
 
-  // Returns events for a date — always an empty array if data not loaded yet
+  // Returns events for a date
   const getEventsForDate = (date: Date) => {
-    if (loading || events.length === 0) return [];
     return events.filter((event) => isSameDay(new Date(event.date), date));
   };
 
@@ -98,138 +100,155 @@ export default function CalendarPageView() {
     setCurrentMonth(new Date());
   };
 
+  const handleCreateTask = () => {
+    // TODO: Open create task modal
+    console.log('Create task clicked');
+  };
+
   return (
-    <div className="h-full flex flex-col space-y-4">
-      {/* Calendar Header */}
-      <div className="bg-surface-card border border-border rounded-xl p-4 flex items-center justify-between relative">
-        <button
-          onClick={goToPreviousMonth}
-          className="p-1.5 border border-border rounded-lg hover:bg-surface-muted transition-colors"
-          aria-label="Previous month"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+    <div className="h-full flex flex-col gap-4 relative">
+      {/* Calendar Card */}
+      <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm flex flex-col overflow-hidden flex-1">
+        {/* Calendar Toolbar */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#e2e8f0]">
+          {/* Left: Month/year title */}
+          <h2 className="text-xl font-bold text-slate-800">
+            {format(currentMonth, 'MMMM yyyy')}
+          </h2>
 
-        <h2 className="absolute left-1/2 transform -translate-x-1/2 text-lg font-semibold text-text-heading">
-          {format(currentMonth, 'MMMM yyyy')}
-        </h2>
+          {/* Center: Navigation group */}
+          <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
+            <button
+              onClick={goToPreviousMonth}
+              className="w-8 h-8 rounded-md hover:bg-white text-slate-500 transition-colors flex items-center justify-center"
+              aria-label="Previous month"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              onClick={goToToday}
+              className="px-4 py-1 text-sm font-medium text-slate-700 hover:bg-white rounded-md transition-colors"
+            >
+              Today
+            </button>
+            <button
+              onClick={goToNextMonth}
+              className="w-8 h-8 rounded-md hover:bg-white text-slate-500 transition-colors flex items-center justify-center"
+              aria-label="Next month"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
 
-        <button
-          onClick={goToNextMonth}
-          className="p-1.5 border border-border rounded-lg hover:bg-surface-muted transition-colors"
-          aria-label="Next month"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-3 ml-auto">
-          <button
-            onClick={goToToday}
-            className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-muted transition-colors"
-          >
-            Today
-          </button>
-
-          <div className="flex gap-2 bg-surface-muted rounded-lg p-1">
-            {['List', 'Week', 'Month'].map((view) => (
-              <button
-                key={view}
-                className={`px-3 py-1.5 text-sm rounded font-medium transition-colors ${
-                  view === 'Month'
-                    ? 'bg-brand text-white'
-                    : 'text-text-body hover:bg-white'
-                }`}
-              >
-                {view}
-              </button>
-            ))}
+          {/* Right: View toggles */}
+          <div className="flex items-center rounded-lg border border-slate-200 overflow-hidden">
+            {(['List', 'Week', 'Month'] as const).map((mode) => {
+              const modeKey = mode.toLowerCase() as 'month' | 'week' | 'list';
+              return (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(modeKey)}
+                  className={`px-4 py-1.5 text-sm transition-colors ${
+                    viewMode === modeKey
+                      ? 'bg-[#0079BF] text-white font-medium'
+                      : 'text-slate-500 hover:bg-slate-50'
+                  }`}
+                >
+                  {mode}
+                </button>
+              );
+            })}
           </div>
         </div>
-      </div>
 
-      {/* Calendar Grid — always rendered, never replaced by error/overlay */}
-      <div className="bg-surface-card border border-border rounded-xl overflow-hidden flex-1 flex flex-col">
-        {/* Weekday Headers */}
-        <div className="grid grid-cols-7 bg-surface-app border-b border-border">
-          {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
-            <div
-              key={day}
-              className="p-3 text-center text-xs uppercase font-medium text-text-muted border-r border-border last:border-r-0"
-            >
-              {day}
-            </div>
-          ))}
-        </div>
+        {/* Calendar Grid */}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {/* Day Headers row */}
+          <div className="grid grid-cols-7 border-b border-[#e2e8f0]">
+            {weekDays.map((day) => (
+              <div
+                key={day}
+                className="py-3 text-center text-xs font-semibold text-slate-400 uppercase tracking-wide"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
 
-        {/* Calendar Days */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-7 min-h-full">
-            {weeks.map((week, weekIdx) =>
-              week.map((date, dayIdx) => {
-                const isCurrentMonth = isSameMonth(date, currentMonth);
-                const isToday = isSameDay(date, new Date());
-                // getEventsForDate returns [] while loading or if empty — no skeleton needed on cells
-                const dayEvents = getEventsForDate(date);
+          {/* Grid Body */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid grid-cols-7 min-h-full">
+              {weeks.map((week, weekIdx) =>
+                week.map((date, dayIdx) => {
+                  const isCurrentMonth = isSameMonth(date, currentMonth);
+                  const isToday = isSameDay(date, new Date());
+                  const dayEvents = getEventsForDate(date);
 
-                return (
-                  <div
-                    key={`${weekIdx}-${dayIdx}`}
-                    className={`border-r border-b border-border p-2 min-h-[110px] flex flex-col ${
-                      isCurrentMonth
-                        ? 'bg-surface-card'
-                        : 'bg-surface-muted'
-                    }`}
-                    onClick={() => isCurrentMonth && setSelectedDate(date)}
-                  >
-                    {isCurrentMonth && (
-                      <>
-                        {/* Date number */}
-                        <div className="flex justify-start mb-1">
+                  return (
+                    <div
+                      key={`${weekIdx}-${dayIdx}`}
+                      className={`min-h-[120px] border-r border-b border-[#e2e8f0] p-2 flex flex-col gap-1 transition-colors ${
+                        isCurrentMonth
+                          ? 'bg-white hover:bg-slate-50'
+                          : 'bg-slate-50/50'
+                      }`}
+                    >
+                      {isCurrentMonth && (
+                        <>
+                          {/* Date number */}
                           <div
-                            className={`w-7 h-7 flex items-center justify-center text-sm font-medium rounded-full ${
+                            className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full ${
                               isToday
-                                ? 'bg-brand text-white'
-                                : 'text-text-body'
+                                ? 'bg-[#0079BF] text-white font-bold'
+                                : 'text-slate-700'
                             }`}
                           >
                             {loading ? (
-                              /* Subtle skeleton for date numbers while loading */
-                              <span className="w-5 h-4 rounded bg-surface-muted animate-pulse inline-block" />
+                              <span className="w-4 h-3 rounded bg-slate-200 animate-pulse inline-block" />
                             ) : (
                               format(date, 'd')
                             )}
                           </div>
-                        </div>
 
-                        {/* Events — only rendered when data is available and non-empty */}
-                        {!loading && dayEvents.length > 0 && (
-                          <div className="space-y-1">
-                            {dayEvents.slice(0, 3).map((event) => (
-                              <div
-                                key={event.id}
-                                className="h-6 rounded px-2 text-xs font-medium text-white truncate cursor-pointer hover:opacity-90 transition-opacity"
-                                style={{ backgroundColor: event.color }}
-                                title={event.title}
-                              >
-                                {event.title}
-                              </div>
-                            ))}
-                            {dayEvents.length > 3 && (
-                              <div className="text-xs text-text-muted px-1">
-                                +{dayEvents.length - 3} more
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })
-            )}
+                          {/* Event pills */}
+                          {!loading && dayEvents.length > 0 && (
+                            <div className="space-y-0.5">
+                              {dayEvents.slice(0, 2).map((event) => (
+                                <div
+                                  key={event.id}
+                                  className="px-2 py-0.5 rounded text-[11px] font-semibold text-white truncate w-full cursor-pointer hover:opacity-80 transition-opacity mb-0.5"
+                                  style={{ backgroundColor: event.color }}
+                                  title={event.title}
+                                >
+                                  {event.title}
+                                </div>
+                              ))}
+                              {dayEvents.length > 2 && (
+                                <div className="text-xs text-slate-400 px-2">
+                                  +{dayEvents.length - 2} more
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Floating Action Button (FAB) */}
+      <button
+        onClick={handleCreateTask}
+        className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-[#0079BF] hover:bg-[#005c91] text-white shadow-lg flex items-center justify-center text-2xl hover:scale-105 transition-all z-50"
+        aria-label="Create task"
+      >
+        <Plus size={24} />
+      </button>
     </div>
   );
 }
