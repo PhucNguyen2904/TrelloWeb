@@ -28,8 +28,8 @@
   --shadow-soft:     0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Dark-mode overrides */
-.dark {
+/* Dark-mode overrides — keyed to data-theme="dark" (set by next-themes) */
+[data-theme="dark"] {
   --primary:         #0a0a0f;
   --surface:         #13131a;
   --surface-2:       #1e1e2a;
@@ -44,6 +44,12 @@
   --ring:            rgba(99, 102, 241, 0.45);
 
   --shadow-soft:     0 4px 32px rgba(0, 0, 0, 0.45), 0 1px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Force body bg when theme changes */
+[data-theme="dark"] body,
+[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 @import "tailwindcss";
@@ -64,8 +70,8 @@ html {
 }
 
 body {
-  background-color: #f7f9ff;
-  color: #475569;
+  background-color: var(--primary);
+  color: var(--text-secondary);
   font-family: var(--font-inter, system-ui, sans-serif);
   font-size: 14px;
   line-height: 1.5;
@@ -73,6 +79,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 a {
@@ -116,12 +123,12 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cfe9f3;
+  background: var(--border-hover);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8d8f0;
+  background: var(--accent);
 }
 
 /* Smooth transitions */
