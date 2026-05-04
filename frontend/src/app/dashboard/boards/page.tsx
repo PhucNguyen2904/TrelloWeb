@@ -76,12 +76,7 @@ export default function BoardsPage() {
   if (!board) {
     return (
       <div className="h-full flex flex-col space-y-4" style={{
-        background: `
-          linear-gradient(135deg, #f7f9ff 0%, #e8f4f8 25%, #e0f2f1 50%, #f1f8f7 75%, #f7f9ff 100%),
-          radial-gradient(circle at 20% 50%, rgba(100, 200, 200, 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 80% 80%, rgba(100, 180, 220, 0.06) 0%, transparent 50%),
-          radial-gradient(circle at 50% 0%, rgba(150, 210, 220, 0.04) 0%, transparent 60%)
-        `,
+        background: 'linear-gradient(135deg, #6B8DD6 0%, #8ECAE6 50%, #A8DADC 100%)',
         backgroundAttachment: 'fixed',
       }}>
         <div className="bg-surface-card border-b border-border px-6 py-4 flex items-center justify-between">
@@ -113,12 +108,7 @@ export default function BoardsPage() {
 
   return (
     <div className="h-full flex flex-col space-y-4" style={{
-      background: `
-        linear-gradient(135deg, #f7f9ff 0%, #e8f4f8 25%, #e0f2f1 50%, #f1f8f7 75%, #f7f9ff 100%),
-        radial-gradient(circle at 20% 50%, rgba(100, 200, 200, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(100, 180, 220, 0.06) 0%, transparent 50%),
-        radial-gradient(circle at 50% 0%, rgba(150, 210, 220, 0.04) 0%, transparent 60%)
-      `,
+      background: 'linear-gradient(135deg, #6B8DD6 0%, #8ECAE6 50%, #A8DADC 100%)',
       backgroundAttachment: 'fixed',
     }}>
       {/* Board Header */}

@@ -38,7 +38,7 @@ export function Sidebar({}: SidebarProps) {
   const isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
 
   return (
-    <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-60 bg-[#f7f9ff] border-r border-[#e2e8f0] h-full py-4 px-3 gap-1">
+    <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-60 bg-[#F4F5F7] border-r border-[#e2e8f0] h-full py-4 px-3 gap-1">
       {/* Workspace Header */}
       <div className="flex items-center gap-3 px-3 py-2 mb-2">
         <div

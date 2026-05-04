@@ -19,7 +19,7 @@ export const KanbanColumnComponent = memo(function KanbanColumnComponent({
   onAddCard,
 }: KanbanColumnProps) {
   return (
-    <div className="bg-surface-muted rounded-xl p-3 min-w-[272px] max-w-[300px] border border-border flex flex-col max-h-full">
+    <div className="bg-[#EBECF0] rounded-xl p-3 min-w-[272px] max-w-[300px] border border-border flex flex-col max-h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
         <div className="flex items-center gap-2">
