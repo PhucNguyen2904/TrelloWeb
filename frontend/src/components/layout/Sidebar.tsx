@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { handleLogoutClean } from '@/lib/logout';
+import { useAuthStore } from '@/store/useAuthStore';
 import {
   LayoutDashboard,
   Kanban,
@@ -11,6 +12,7 @@ import {
   Clock,
   HelpCircle,
   LogOut,
+  Users,
 } from 'lucide-react';
 
 interface SidebarProps {}
@@ -22,8 +24,15 @@ const navItems = [
   { label: 'Recent', href: '/dashboard/recent', icon: Clock },
 ];
 
+const adminNavItems = [
+  { label: 'User Management', href: '/dashboard/users', icon: Users },
+];
+
 export function Sidebar({}: SidebarProps) {
   const pathname = usePathname();
+  const user = useAuthStore((s) => s.user);
+  const role = user?.role?.name;
+  const isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
 
   return (
     <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-[240px] bg-surface-card border-r border-border h-full">
@@ -75,6 +84,38 @@ export function Sidebar({}: SidebarProps) {
             </Link>
           );
         })}
+
+        {/* Admin / Superadmin only section */}
+        {isAdminOrSuperAdmin && (
+          <>
+            <p className="text-xs tracking-widest font-medium text-text-muted px-3 pt-4 pb-1 uppercase">
+              Administration
+            </p>
+
+            {adminNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+
+              return (
+                <Link key={item.href} href={item.href}>
+                  <button
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg h-9 text-sm font-medium transition-colors relative ${
+                      isActive
+                        ? 'bg-brand-light text-brand'
+                        : 'text-text-body hover:bg-surface-muted'
+                    }`}
+                  >
+                    {isActive && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand rounded-r" />
+                    )}
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-brand' : ''}`} />
+                    <span>{item.label}</span>
+                  </button>
+                </Link>
+              );
+            })}
+          </>
+        )}
       </nav>
 
       {/* Bottom Section */}

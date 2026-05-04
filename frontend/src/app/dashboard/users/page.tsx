@@ -23,17 +23,20 @@ export default function AdminUsersPage() {
   const toast = useToast();
 
   const isAdmin = user?.role?.name === 'admin';
+  const isSuperAdmin = user?.role?.name === 'superadmin';
+  const hasAccess = isAdmin || isSuperAdmin;
 
-  // Fetch Users (admin scope only)
+  // Fetch Users - endpoint differs by role
+  const usersEndpoint = isSuperAdmin ? '/api/super-admin/users' : '/api/admin/users';
   const { data: users = [], isLoading: isUsersLoading } = useQuery<DashboardUser[]>({
-    queryKey: ['admin-users'],
+    queryKey: ['admin-users', usersEndpoint],
     queryFn: async () => {
       const pageSize = 200;
       let skip = 0;
       const allUsers: DashboardUser[] = [];
 
       while (true) {
-        const res = await api.get('/api/admin/users', {
+        const res = await api.get(usersEndpoint, {
           params: { skip, limit: pageSize },
         });
         const batch = Array.isArray(res.data) ? (res.data as DashboardUser[]) : [];
@@ -44,13 +47,14 @@ export default function AdminUsersPage() {
 
       return allUsers;
     },
-    enabled: isAdmin,
+    enabled: hasAccess,
   });
 
   // Delete User
   const deleteUserMutation = useMutation({
     mutationFn: async (id: number) => {
-      await api.delete(`/api/admin/users/${id}`);
+      const deleteEndpoint = isSuperAdmin ? `/api/super-admin/users/${id}` : `/api/admin/users/${id}`;
+      await api.delete(deleteEndpoint);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
@@ -61,7 +65,7 @@ export default function AdminUsersPage() {
     },
   });
 
-  if (!isAdmin) {
+  if (!hasAccess) {
     return (
       <div className="rounded-[28px] border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-16 text-center shadow-[var(--shadow-soft)]">
         <h3 className="font-display text-2xl text-[var(--text-primary)]">Access Denied</h3>
@@ -97,7 +101,7 @@ export default function AdminUsersPage() {
           <UsersTable
             users={users}
             roles={[]}
-            isSuperAdmin={false}
+            isSuperAdmin={isSuperAdmin}
             currentUserId={user?.id}
             onDelete={(userId) => deleteUserMutation.mutate(userId)}
             isLoading={deleteUserMutation.isPending}
