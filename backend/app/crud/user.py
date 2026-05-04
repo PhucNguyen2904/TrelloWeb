@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.model.user import User
 from app.model.role import Role
 from app.schemas.User import UserCreate
-from app.core.security import hash_password, verify_password
+from app.core.security import hash_password, verify_password, needs_rehash
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,9 @@ def get_user_by_id(db: Session, user_id: int) -> User | None:
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | None:
-    """Authenticate user with email and password"""
+    """Authenticate user with email and password.
+    Transparently upgrades legacy bcrypt hashes to argon2 on successful login.
+    """
     user = get_user_by_email(db, email)
     if not user:
         logger.warning("[auth] Login failed: user not found for email=%s", email)
@@ -52,6 +54,16 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
             user.hashed_password[:7] if user.hashed_password else "(empty)",
         )
         return None
+    # Silently upgrade legacy bcrypt hash to argon2 on successful login
+    if needs_rehash(user.hashed_password):
+        try:
+            user.hashed_password = hash_password(password)
+            db.add(user)
+            db.commit()
+            logger.info("[auth] Upgraded password hash to argon2 for email=%s", email)
+        except Exception as e:
+            logger.error("[auth] Failed to upgrade password hash for email=%s: %s", email, e)
+            db.rollback()
     return user
 
 

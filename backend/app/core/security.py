@@ -14,6 +14,11 @@ def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
+def needs_rehash(hashed_password: str) -> bool:
+    """Return True if the hash is a legacy scheme (bcrypt) and should be upgraded to argon2"""
+    return hashed_password.startswith(("$2a$", "$2b$", "$2y$"))
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash (supports both argon2 and legacy bcrypt)"""
     # Detect bcrypt hashes by prefix and use raw bcrypt directly.
