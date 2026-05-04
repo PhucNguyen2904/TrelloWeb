@@ -71,30 +71,28 @@ export default function CalendarPageView() {
   return (
     <div className="h-full flex flex-col space-y-4">
       {/* Calendar Header */}
-      <div className="bg-surface-card border border-border rounded-xl p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={goToPreviousMonth}
-            className="p-1.5 border border-border rounded-lg hover:bg-surface-muted transition-colors"
-            aria-label="Previous month"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+      <div className="bg-surface-card border border-border rounded-xl p-4 flex items-center justify-between relative">
+        <button
+          onClick={goToPreviousMonth}
+          className="p-1.5 border border-border rounded-lg hover:bg-surface-muted transition-colors"
+          aria-label="Previous month"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
 
-          <h2 className="text-lg font-semibold text-text-heading min-w-[150px]">
-            {format(currentMonth, 'MMMM yyyy')}
-          </h2>
+        <h2 className="absolute left-1/2 transform -translate-x-1/2 text-lg font-semibold text-text-heading">
+          {format(currentMonth, 'MMMM yyyy')}
+        </h2>
 
-          <button
-            onClick={goToNextMonth}
-            className="p-1.5 border border-border rounded-lg hover:bg-surface-muted transition-colors"
-            aria-label="Next month"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
+        <button
+          onClick={goToNextMonth}
+          className="p-1.5 border border-border rounded-lg hover:bg-surface-muted transition-colors"
+          aria-label="Next month"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ml-auto">
           <button
             onClick={goToToday}
             className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-muted transition-colors"
@@ -151,39 +149,41 @@ export default function CalendarPageView() {
                         : 'bg-surface-muted'
                     }`}
                   >
-                    {/* Date number */}
-                    <div className="flex justify-start mb-1">
-                      <div
-                        className={`w-7 h-7 flex items-center justify-center text-sm font-medium rounded-full ${
-                          isToday
-                            ? 'bg-brand text-white'
-                            : isCurrentMonth
-                            ? 'text-text-body'
-                            : 'text-text-muted'
-                        }`}
-                      >
-                        {format(date, 'd')}
-                      </div>
-                    </div>
+                    {isCurrentMonth && (
+                      <>
+                        {/* Date number */}
+                        <div className="flex justify-start mb-1">
+                          <div
+                            className={`w-7 h-7 flex items-center justify-center text-sm font-medium rounded-full ${
+                              isToday
+                                ? 'bg-brand text-white'
+                                : 'text-text-body'
+                            }`}
+                          >
+                            {format(date, 'd')}
+                          </div>
+                        </div>
 
-                    {/* Events */}
-                    <div className="space-y-1">
-                      {dayEvents.slice(0, 3).map((event) => (
-                        <div
-                          key={event.id}
-                          className="h-6 rounded px-2 text-xs font-medium text-white truncate cursor-pointer hover:opacity-90 transition-opacity"
-                          style={{ backgroundColor: event.color }}
-                          title={event.title}
-                        >
-                          {event.title}
+                        {/* Events */}
+                        <div className="space-y-1">
+                          {dayEvents.slice(0, 3).map((event) => (
+                            <div
+                              key={event.id}
+                              className="h-6 rounded px-2 text-xs font-medium text-white truncate cursor-pointer hover:opacity-90 transition-opacity"
+                              style={{ backgroundColor: event.color }}
+                              title={event.title}
+                            >
+                              {event.title}
+                            </div>
+                          ))}
+                          {dayEvents.length > 3 && (
+                            <div className="text-xs text-text-muted px-1">
+                              +{dayEvents.length - 3} more
+                            </div>
+                          )}
                         </div>
-                      ))}
-                      {dayEvents.length > 3 && (
-                        <div className="text-xs text-text-muted px-1">
-                          +{dayEvents.length - 3} more
-                        </div>
-                      )}
-                    </div>
+                      </>
+                    )}
                   </div>
                 );
               })
