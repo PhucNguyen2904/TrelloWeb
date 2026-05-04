@@ -24,6 +24,38 @@ export const api = axios.create({
   timeout: 15000,
 });
 
+// ===== API Endpoint Functions =====
+
+export async function getActivities() {
+  const { data } = await api.get('/api/activities');
+  return data;
+}
+
+export async function getBoards() {
+  const { data } = await api.get('/api/boards');
+  return data;
+}
+
+export async function getBoard(boardId: string) {
+  const { data } = await api.get(`/api/boards/${boardId}`);
+  return data;
+}
+
+export async function getCalendarEvents() {
+  const { data } = await api.get('/api/calendar-events');
+  return data;
+}
+
+export async function getWorkspaces() {
+  const { data } = await api.get('/api/workspaces');
+  return data;
+}
+
+export async function getMembers() {
+  const { data } = await api.get('/api/members');
+  return data;
+}
+
 /**
  * Request interceptor: Attach JWT token to protected endpoints
  * - Skip token for auth endpoints (login, register)

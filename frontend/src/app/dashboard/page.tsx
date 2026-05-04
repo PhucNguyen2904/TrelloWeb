@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ListTodo,
   TrendingUp,
@@ -8,7 +8,7 @@ import {
   CheckCircle,
   Activity,
 } from 'lucide-react';
-import { activities } from '@/lib/mock-data';
+import { getActivities } from '@/lib/api';
 
 interface StatCard {
   label: string;
@@ -49,7 +49,39 @@ const statCards: StatCard[] = [
   },
 ];
 
+interface ActivityItem {
+  id: string;
+  activity: string;
+  owner: string;
+  team: string;
+  status: string;
+  time: string;
+}
+
 export default function Dashboard() {
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getActivities();
+        setActivities(data || []);
+      } catch (err) {
+        console.error('Failed to fetch activities:', err);
+        setError('Failed to load activities. Please try again later.');
+        setActivities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchActivities();
+  }, []);
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -99,52 +131,81 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-surface-card border border-border rounded-xl overflow-hidden shadow-card">
-          {/* Table Header */}
-          <div className="bg-surface-app border-b border-border px-6 py-4 grid grid-cols-5 gap-4">
-            <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
-              Activity
-            </p>
-            <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
-              Owner
-            </p>
-            <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
-              Team
-            </p>
-            <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
-              Status
-            </p>
-            <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
-              Time
-            </p>
-          </div>
-
-          {/* Table Body */}
-          <div>
-            {activities.map((activity) => (
-              <div
-                key={activity.id}
-                className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-border hover:bg-surface-muted transition-colors"
-              >
-                <p className="text-sm text-text-heading">{activity.activity}</p>
-                <p className="text-sm text-text-body">{activity.owner}</p>
-                <p className="text-sm text-text-body">{activity.team}</p>
-                <div>
-                  <span
-                    className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
-                      activity.status === 'In Review'
-                        ? 'bg-brand-light text-brand'
-                        : activity.status === 'Completed'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-surface-muted text-text-body'
-                    }`}
-                  >
-                    {activity.status}
-                  </span>
-                </div>
-                <p className="text-sm text-text-muted">{activity.time}</p>
+          {/* Loading State */}
+          {loading && (
+            <div className="px-6 py-8 text-center">
+              <div className="inline-block">
+                <div className="animate-spin h-8 w-8 border-4 border-brand border-t-transparent rounded-full"></div>
               </div>
-            ))}
-          </div>
+              <p className="text-text-muted text-sm mt-2">Loading activities...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="px-6 py-8 text-center">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && activities.length === 0 && (
+            <div className="px-6 py-8 text-center">
+              <p className="text-text-muted text-sm">No activities found</p>
+            </div>
+          )}
+
+          {/* Table */}
+          {!loading && !error && activities.length > 0 && (
+            <>
+              {/* Table Header */}
+              <div className="bg-surface-app border-b border-border px-6 py-4 grid grid-cols-5 gap-4">
+                <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
+                  Activity
+                </p>
+                <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
+                  Owner
+                </p>
+                <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
+                  Team
+                </p>
+                <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
+                  Status
+                </p>
+                <p className="text-xs uppercase font-medium text-text-muted tracking-wide">
+                  Time
+                </p>
+              </div>
+
+              {/* Table Body */}
+              <div>
+                {activities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-border hover:bg-surface-muted transition-colors"
+                  >
+                    <p className="text-sm text-text-heading">{activity.activity}</p>
+                    <p className="text-sm text-text-body">{activity.owner}</p>
+                    <p className="text-sm text-text-body">{activity.team}</p>
+                    <div>
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
+                          activity.status === 'In Review'
+                            ? 'bg-brand-light text-brand'
+                            : activity.status === 'Completed'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-surface-muted text-text-body'
+                        }`}
+                      >
+                        {activity.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-text-muted">{activity.time}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

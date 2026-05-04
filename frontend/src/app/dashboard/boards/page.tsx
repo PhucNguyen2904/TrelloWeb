@@ -1,10 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, Filter, Menu } from 'lucide-react';
-import { boards, cards, kanbanColumns, members } from '@/lib/mock-data';
+import { getBoard } from '@/lib/api';
 import KanbanColumnComponent from '@/components/board/KanbanColumnComponent';
 import type { Card } from '@/lib/types';
+
+interface KanbanColumn {
+  id: string;
+  name: string;
+  cardIds: string[];
+}
+
+interface Board {
+  id: string;
+  name: string;
+  coverColor: string;
+  members: Array<{ id: string; name: string; initials: string; avatarColor: string }>;
+  columns: KanbanColumn[];
+}
 
 interface CardDetailModal {
   card: Card;
@@ -12,11 +26,69 @@ interface CardDetailModal {
 
 export default function BoardsPage() {
   const [selectedCard, setSelectedCard] = useState<CardDetailModal | null>(null);
-  const board = boards[0]; // Use first board
+  const [board, setBoard] = useState<Board | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBoard = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getBoard('board-1');
+        setBoard(data);
+      } catch (err) {
+        console.error('Failed to fetch board:', err);
+        setError('Failed to load board. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBoard();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-12 w-12 border-4 border-brand border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-text-muted text-sm mt-4">Loading board...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !board) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 text-sm">{error || 'Board not found'}</p>
+        </div>
+      </div>
+    );
+  }
 
   // Map cards to columns
   const getCardsForColumn = (columnId: string) => {
-    return cards.filter((card) => card.columnId === columnId);
+    const allCards: Card[] = [];
+    if (board.columns) {
+      board.columns.forEach(column => {
+        if (column.cardIds) {
+          column.cardIds.forEach(cardId => {
+            allCards.push({
+              id: cardId,
+              title: `Card ${cardId}`,
+              columnId: column.id,
+              labels: [],
+              assignees: [],
+              commentCount: 0,
+            });
+          });
+        }
+      });
+    }
+    return allCards.filter(card => card.columnId === columnId);
   };
 
   return (
@@ -70,7 +142,7 @@ export default function BoardsPage() {
       {/* Kanban Board */}
       <div className="flex-1 overflow-x-auto bg-surface-app px-6 py-4">
         <div className="flex gap-4 h-full min-w-min">
-          {kanbanColumns.map((column) => (
+          {board.columns.map((column) => (
             <KanbanColumnComponent
               key={column.id}
               column={column}
@@ -84,7 +156,7 @@ export default function BoardsPage() {
         </div>
       </div>
 
-      {/* TODO: Card Detail Modal */}
+      {/* Card Detail Modal */}
       {selectedCard && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div

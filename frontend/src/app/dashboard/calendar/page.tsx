@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { calendarEvents } from '@/lib/mock-data';
+import { getCalendarEvents } from '@/lib/api';
 import {
   startOfMonth,
   endOfMonth,
@@ -18,9 +18,39 @@ import {
   getDay,
 } from 'date-fns';
 
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string;
+  color: string;
+  assignees?: any[];
+}
+
 export default function CalendarPageView() {
   const [currentMonth, setCurrentMonth] = useState(new Date('2023-10-01'));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getCalendarEvents();
+        setEvents(data || []);
+      } catch (err) {
+        console.error('Failed to fetch calendar events:', err);
+        setError('Failed to load calendar events');
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -53,7 +83,7 @@ export default function CalendarPageView() {
   }
 
   const getEventsForDate = (date: Date) => {
-    return calendarEvents.filter((event) => isSameDay(new Date(event.date), date));
+    return events.filter((event) => isSameDay(new Date(event.date), date));
   };
 
   const goToPreviousMonth = () => {
@@ -119,77 +149,101 @@ export default function CalendarPageView() {
 
       {/* Calendar Grid */}
       <div className="bg-surface-card border border-border rounded-xl overflow-hidden flex-1 flex flex-col">
-        {/* Weekday Headers */}
-        <div className="grid grid-cols-7 bg-surface-app border-b border-border">
-          {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
-            <div
-              key={day}
-              className="p-3 text-center text-xs uppercase font-medium text-text-muted border-r border-border last:border-r-0"
-            >
-              {day}
+        {/* Loading State */}
+        {loading && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin h-10 w-10 border-4 border-brand border-t-transparent rounded-full mx-auto"></div>
+              <p className="text-text-muted text-sm mt-3">Loading calendar...</p>
             </div>
-          ))}
-        </div>
-
-        {/* Calendar Days */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-7 min-h-full">
-            {weeks.map((week, weekIdx) =>
-              week.map((date, dayIdx) => {
-                const isCurrentMonth = isSameMonth(date, currentMonth);
-                const isToday = isSameDay(date, new Date());
-                const dayEvents = getEventsForDate(date);
-
-                return (
-                  <div
-                    key={`${weekIdx}-${dayIdx}`}
-                    className={`border-r border-b border-border p-2 min-h-[110px] flex flex-col ${
-                      isCurrentMonth
-                        ? 'bg-surface-card'
-                        : 'bg-surface-muted'
-                    }`}
-                  >
-                    {isCurrentMonth && (
-                      <>
-                        {/* Date number */}
-                        <div className="flex justify-start mb-1">
-                          <div
-                            className={`w-7 h-7 flex items-center justify-center text-sm font-medium rounded-full ${
-                              isToday
-                                ? 'bg-brand text-white'
-                                : 'text-text-body'
-                            }`}
-                          >
-                            {format(date, 'd')}
-                          </div>
-                        </div>
-
-                        {/* Events */}
-                        <div className="space-y-1">
-                          {dayEvents.slice(0, 3).map((event) => (
-                            <div
-                              key={event.id}
-                              className="h-6 rounded px-2 text-xs font-medium text-white truncate cursor-pointer hover:opacity-90 transition-opacity"
-                              style={{ backgroundColor: event.color }}
-                              title={event.title}
-                            >
-                              {event.title}
-                            </div>
-                          ))}
-                          {dayEvents.length > 3 && (
-                            <div className="text-xs text-text-muted px-1">
-                              +{dayEvents.length - 3} more
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })
-            )}
           </div>
-        </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Calendar Content */}
+        {!loading && !error && (
+          <>
+            {/* Weekday Headers */}
+            <div className="grid grid-cols-7 bg-surface-app border-b border-border">
+              {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
+                <div
+                  key={day}
+                  className="p-3 text-center text-xs uppercase font-medium text-text-muted border-r border-border last:border-r-0"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar Days */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-7 min-h-full">
+                {weeks.map((week, weekIdx) =>
+                  week.map((date, dayIdx) => {
+                    const isCurrentMonth = isSameMonth(date, currentMonth);
+                    const isToday = isSameDay(date, new Date());
+                    const dayEvents = getEventsForDate(date);
+
+                    return (
+                      <div
+                        key={`${weekIdx}-${dayIdx}`}
+                        className={`border-r border-b border-border p-2 min-h-[110px] flex flex-col ${
+                          isCurrentMonth
+                            ? 'bg-surface-card'
+                            : 'bg-surface-muted'
+                        }`}
+                      >
+                        {isCurrentMonth && (
+                          <>
+                            {/* Date number */}
+                            <div className="flex justify-start mb-1">
+                              <div
+                                className={`w-7 h-7 flex items-center justify-center text-sm font-medium rounded-full ${
+                                  isToday
+                                    ? 'bg-brand text-white'
+                                    : 'text-text-body'
+                                }`}
+                              >
+                                {format(date, 'd')}
+                              </div>
+                            </div>
+
+                            {/* Events */}
+                            <div className="space-y-1">
+                              {dayEvents.slice(0, 3).map((event) => (
+                                <div
+                                  key={event.id}
+                                  className="h-6 rounded px-2 text-xs font-medium text-white truncate cursor-pointer hover:opacity-90 transition-opacity"
+                                  style={{ backgroundColor: event.color }}
+                                  title={event.title}
+                                >
+                                  {event.title}
+                                </div>
+                              ))}
+                              {dayEvents.length > 3 && (
+                                <div className="text-xs text-text-muted px-1">
+                                  +{dayEvents.length - 3} more
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
