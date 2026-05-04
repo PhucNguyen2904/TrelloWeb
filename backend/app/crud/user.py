@@ -1,8 +1,11 @@
+import logging
 from sqlalchemy.orm import Session, joinedload
 from app.model.user import User
 from app.model.role import Role
 from app.schemas.User import UserCreate
 from app.core.security import hash_password, verify_password
+
+logger = logging.getLogger(__name__)
 
 
 def create_user(db: Session, user_data: UserCreate) -> User:
@@ -40,8 +43,14 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
     """Authenticate user with email and password"""
     user = get_user_by_email(db, email)
     if not user:
+        logger.warning("[auth] Login failed: user not found for email=%s", email)
         return None
     if not verify_password(password, user.hashed_password):
+        logger.warning(
+            "[auth] Login failed: password mismatch for email=%s hash_prefix=%s",
+            email,
+            user.hashed_password[:7] if user.hashed_password else "(empty)",
+        )
         return None
     return user
 

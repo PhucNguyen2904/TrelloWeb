@@ -16,18 +16,18 @@ def hash_password(password: str) -> str:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash (supports both argon2 and legacy bcrypt)"""
+    # Detect bcrypt hashes by prefix and use raw bcrypt directly.
+    # This avoids relying on passlib to gracefully fail on unknown schemes.
+    if hashed_password.startswith(("$2a$", "$2b$", "$2y$")):
+        try:
+            truncated = plain_password[:72].encode("utf-8")
+            return bcrypt.checkpw(truncated, hashed_password.encode("utf-8"))
+        except Exception:
+            return False
+    # For argon2 and other modern hashes, use passlib
     try:
-        # Try argon2 first (new hashes)
         return pwd_context.verify(plain_password, hashed_password)
     except Exception:
-        # Fall back to bcrypt for legacy hashes (starting with $2a$, $2b$, or $2y$)
-        if hashed_password.startswith(("$2a$", "$2b$", "$2y$")):
-            try:
-                # bcrypt requires bytes, truncate to 72 bytes
-                truncated = plain_password[:72].encode("utf-8")
-                return bcrypt.checkpw(truncated, hashed_password.encode("utf-8"))
-            except Exception:
-                return False
         return False
 
 
