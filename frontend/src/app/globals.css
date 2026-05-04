@@ -1,3 +1,51 @@
+/* ─── Design Tokens ────────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --primary:         #f7f9ff;
+  --surface:         #ffffff;
+  --surface-2:       #f1f3fa;
+
+  /* Borders */
+  --border:          #e2e8f0;
+  --border-hover:    #cbd5e1;
+
+  /* Text */
+  --text-primary:    #0f172a;
+  --text-secondary:  #475569;
+  --text-tertiary:   #94a3b8;
+
+  /* Accent colours */
+  --accent:          #0079bf;
+  --accent-blue:     #38bdf8;
+  --accent-purple:   #6366f1;
+  --accent-warm:     #f59e0b;
+  --accent-danger:   #ef4444;
+
+  /* Ring / focus */
+  --ring:            rgba(0, 121, 191, 0.4);
+
+  /* Shadows */
+  --shadow-soft:     0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark-mode overrides */
+.dark {
+  --primary:         #0a0a0f;
+  --surface:         #13131a;
+  --surface-2:       #1e1e2a;
+
+  --border:          rgba(255, 255, 255, 0.08);
+  --border-hover:    rgba(255, 255, 255, 0.16);
+
+  --text-primary:    #f1f5f9;
+  --text-secondary:  #94a3b8;
+  --text-tertiary:   #64748b;
+
+  --ring:            rgba(99, 102, 241, 0.45);
+
+  --shadow-soft:     0 4px 32px rgba(0, 0, 0, 0.45), 0 1px 6px rgba(0, 0, 0, 0.3);
+}
+
 @import "tailwindcss";
 
 * {
