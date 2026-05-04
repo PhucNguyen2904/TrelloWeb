@@ -110,7 +110,7 @@ export function AccountDropdown() {
 
       <div
         id={menuId}
-        className={`absolute right-0 mt-3 w-72 origin-top-right rounded-[24px] border border-[var(--border)] bg-[color:color-mix(in_srgb,var(--surface)_92%,transparent)] p-3 shadow-[var(--shadow-soft)] backdrop-blur transition duration-200 ease-in-out ${
+        className={`absolute right-0 z-[9999] mt-3 w-72 origin-top-right rounded-[24px] border border-[var(--border)] bg-[color:color-mix(in_srgb,var(--surface)_92%,transparent)] p-3 shadow-[var(--shadow-soft)] backdrop-blur transition duration-200 ease-in-out ${
           open ? 'scale-100 opacity-100' : 'pointer-events-none invisible scale-95 opacity-0'
         }`}
         role="menu"

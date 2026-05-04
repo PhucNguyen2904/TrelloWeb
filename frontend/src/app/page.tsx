@@ -14,7 +14,7 @@ export default function Home() {
       router.replace('/login');
     } else {
       const role = user.role?.name;
-      router.replace(role === 'superadmin' || role === 'admin' ? '/dashboard/users' : '/dashboard');
+      router.replace(role === 'superadmin' ? '/superadmin/users' : '/dashboard');
     }
   }, [token, user, router]);
 

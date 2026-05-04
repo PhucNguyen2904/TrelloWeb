@@ -27,22 +27,20 @@ interface CalendarEvent {
 }
 
 export default function CalendarPageView() {
-  const [currentMonth, setCurrentMonth] = useState(new Date('2023-10-01'));
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        setError(null);
         const data = await getCalendarEvents();
         setEvents(data || []);
       } catch (err) {
+        // Silently fail — show empty calendar grid, never show error to user
         console.error('Failed to fetch calendar events:', err);
-        setError('Failed to load calendar events');
         setEvents([]);
       } finally {
         setLoading(false);
@@ -82,7 +80,9 @@ export default function CalendarPageView() {
     weeks.push(allDays.slice(i, i + 7));
   }
 
+  // Returns events for a date — always an empty array if data not loaded yet
   const getEventsForDate = (date: Date) => {
+    if (loading || events.length === 0) return [];
     return events.filter((event) => isSameDay(new Date(event.date), date));
   };
 
@@ -147,103 +147,88 @@ export default function CalendarPageView() {
         </div>
       </div>
 
-      {/* Calendar Grid */}
+      {/* Calendar Grid — always rendered, never replaced by error/overlay */}
       <div className="bg-surface-card border border-border rounded-xl overflow-hidden flex-1 flex flex-col">
-        {/* Loading State */}
-        {loading && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin h-10 w-10 border-4 border-brand border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-text-muted text-sm mt-3">Loading calendar...</p>
+        {/* Weekday Headers */}
+        <div className="grid grid-cols-7 bg-surface-app border-b border-border">
+          {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
+            <div
+              key={day}
+              className="p-3 text-center text-xs uppercase font-medium text-text-muted border-r border-border last:border-r-0"
+            >
+              {day}
             </div>
-          </div>
-        )}
+          ))}
+        </div>
 
-        {/* Error State */}
-        {error && !loading && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          </div>
-        )}
+        {/* Calendar Days */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-7 min-h-full">
+            {weeks.map((week, weekIdx) =>
+              week.map((date, dayIdx) => {
+                const isCurrentMonth = isSameMonth(date, currentMonth);
+                const isToday = isSameDay(date, new Date());
+                // getEventsForDate returns [] while loading or if empty — no skeleton needed on cells
+                const dayEvents = getEventsForDate(date);
 
-        {/* Calendar Content */}
-        {!loading && !error && (
-          <>
-            {/* Weekday Headers */}
-            <div className="grid grid-cols-7 bg-surface-app border-b border-border">
-              {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
-                <div
-                  key={day}
-                  className="p-3 text-center text-xs uppercase font-medium text-text-muted border-r border-border last:border-r-0"
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
+                return (
+                  <div
+                    key={`${weekIdx}-${dayIdx}`}
+                    className={`border-r border-b border-border p-2 min-h-[110px] flex flex-col ${
+                      isCurrentMonth
+                        ? 'bg-surface-card'
+                        : 'bg-surface-muted'
+                    }`}
+                    onClick={() => isCurrentMonth && setSelectedDate(date)}
+                  >
+                    {isCurrentMonth && (
+                      <>
+                        {/* Date number */}
+                        <div className="flex justify-start mb-1">
+                          <div
+                            className={`w-7 h-7 flex items-center justify-center text-sm font-medium rounded-full ${
+                              isToday
+                                ? 'bg-brand text-white'
+                                : 'text-text-body'
+                            }`}
+                          >
+                            {loading ? (
+                              /* Subtle skeleton for date numbers while loading */
+                              <span className="w-5 h-4 rounded bg-surface-muted animate-pulse inline-block" />
+                            ) : (
+                              format(date, 'd')
+                            )}
+                          </div>
+                        </div>
 
-            {/* Calendar Days */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="grid grid-cols-7 min-h-full">
-                {weeks.map((week, weekIdx) =>
-                  week.map((date, dayIdx) => {
-                    const isCurrentMonth = isSameMonth(date, currentMonth);
-                    const isToday = isSameDay(date, new Date());
-                    const dayEvents = getEventsForDate(date);
-
-                    return (
-                      <div
-                        key={`${weekIdx}-${dayIdx}`}
-                        className={`border-r border-b border-border p-2 min-h-[110px] flex flex-col ${
-                          isCurrentMonth
-                            ? 'bg-surface-card'
-                            : 'bg-surface-muted'
-                        }`}
-                      >
-                        {isCurrentMonth && (
-                          <>
-                            {/* Date number */}
-                            <div className="flex justify-start mb-1">
+                        {/* Events — only rendered when data is available and non-empty */}
+                        {!loading && dayEvents.length > 0 && (
+                          <div className="space-y-1">
+                            {dayEvents.slice(0, 3).map((event) => (
                               <div
-                                className={`w-7 h-7 flex items-center justify-center text-sm font-medium rounded-full ${
-                                  isToday
-                                    ? 'bg-brand text-white'
-                                    : 'text-text-body'
-                                }`}
+                                key={event.id}
+                                className="h-6 rounded px-2 text-xs font-medium text-white truncate cursor-pointer hover:opacity-90 transition-opacity"
+                                style={{ backgroundColor: event.color }}
+                                title={event.title}
                               >
-                                {format(date, 'd')}
+                                {event.title}
                               </div>
-                            </div>
-
-                            {/* Events */}
-                            <div className="space-y-1">
-                              {dayEvents.slice(0, 3).map((event) => (
-                                <div
-                                  key={event.id}
-                                  className="h-6 rounded px-2 text-xs font-medium text-white truncate cursor-pointer hover:opacity-90 transition-opacity"
-                                  style={{ backgroundColor: event.color }}
-                                  title={event.title}
-                                >
-                                  {event.title}
-                                </div>
-                              ))}
-                              {dayEvents.length > 3 && (
-                                <div className="text-xs text-text-muted px-1">
-                                  +{dayEvents.length - 3} more
-                                </div>
-                              )}
-                            </div>
-                          </>
+                            ))}
+                            {dayEvents.length > 3 && (
+                              <div className="text-xs text-text-muted px-1">
+                                +{dayEvents.length - 3} more
+                              </div>
+                            )}
+                          </div>
                         )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </>
-        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ export function Topbar({
   const { resolvedTheme, setTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
       <div className="flex h-[52px] items-center gap-2 px-3 sm:px-4 lg:px-6">
         <button
           onClick={onMobileMenuClick}

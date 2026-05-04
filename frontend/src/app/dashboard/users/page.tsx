@@ -17,35 +17,27 @@ interface DashboardUser {
   created_at?: string;
 }
 
-interface RoleOption {
-  id: number;
-  name: string;
-}
-
-export default function UsersPage() {
+export default function AdminUsersPage() {
   const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  const isSuperAdmin = user?.role?.name === 'superadmin';
-  const isAdmin = user?.role?.name === 'admin' || isSuperAdmin;
+  const isAdmin = user?.role?.name === 'admin';
 
-  // Fetch Users
+  // Fetch Users (admin scope only)
   const { data: users = [], isLoading: isUsersLoading } = useQuery<DashboardUser[]>({
-    queryKey: ['users'],
+    queryKey: ['admin-users'],
     queryFn: async () => {
-      const endpoint = isSuperAdmin ? '/super-admin/users' : '/admin/users';
       const pageSize = 200;
       let skip = 0;
       const allUsers: DashboardUser[] = [];
 
       while (true) {
-        const res = await api.get(endpoint, {
+        const res = await api.get('/api/admin/users', {
           params: { skip, limit: pageSize },
         });
         const batch = Array.isArray(res.data) ? (res.data as DashboardUser[]) : [];
         allUsers.push(...batch);
-
         if (batch.length < pageSize) break;
         skip += pageSize;
       }
@@ -55,44 +47,18 @@ export default function UsersPage() {
     enabled: isAdmin,
   });
 
-  // Fetch Roles (SuperAdmin Only)
-  const { data: roles = [] } = useQuery<RoleOption[]>({
-    queryKey: ['roles'],
-    queryFn: async () => {
-      const res = await api.get('/super-admin/roles');
-      return Array.isArray(res.data) ? (res.data as RoleOption[]) : [];
-    },
-    enabled: isSuperAdmin,
-  });
-
   // Delete User
   const deleteUserMutation = useMutation({
     mutationFn: async (id: number) => {
-      const endpoint = isSuperAdmin ? `/super-admin/users/${id}` : `/admin/users/${id}`;
-      await api.delete(endpoint);
+      await api.delete(`/api/admin/users/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast.success('User deleted successfully');
     },
     onError: () => {
       toast.error('Failed to delete user');
-    }
-  });
-
-  // Update User Role (SuperAdmin Only)
-  const updateUserRoleMutation = useMutation({
-    mutationFn: async ({ userId, roleId }: { userId: number; roleId: number }) => {
-      const res = await api.put(`/super-admin/users/${userId}/role`, { role_id: roleId });
-      return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      toast.success('User role updated successfully');
-    },
-    onError: () => {
-      toast.error('Failed to update user role');
-    }
   });
 
   if (!isAdmin) {
@@ -110,14 +76,10 @@ export default function UsersPage() {
         <p className="font-mono-ui text-[11px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">Users Management</p>
         <div className="mt-2 flex items-start gap-3 md:items-center">
           <Users className="mt-0.5 h-6 w-6 shrink-0 text-[var(--accent)] md:mt-0" />
-          <h1 className="font-display text-3xl text-[var(--text-primary)]">
-            {isSuperAdmin ? 'Manage All Users' : 'Manage Users'}
-          </h1>
+          <h1 className="font-display text-3xl text-[var(--text-primary)]">Manage Users</h1>
         </div>
         <p className="mt-1 pl-9 text-sm text-[var(--text-secondary)] md:pl-9">
-          {isSuperAdmin
-            ? 'View and manage all users across the workspace.'
-            : 'View and manage users you have permission to access.'}
+          View and manage users you have permission to access.
         </p>
       </section>
 
@@ -134,14 +96,11 @@ export default function UsersPage() {
         <div>
           <UsersTable
             users={users}
-            roles={roles}
-            isSuperAdmin={isSuperAdmin}
+            roles={[]}
+            isSuperAdmin={false}
             currentUserId={user?.id}
-            onEdit={(userId, roleId) =>
-              updateUserRoleMutation.mutate({ userId, roleId })
-            }
             onDelete={(userId) => deleteUserMutation.mutate(userId)}
-            isLoading={deleteUserMutation.isPending || updateUserRoleMutation.isPending}
+            isLoading={deleteUserMutation.isPending}
           />
         </div>
       )}
