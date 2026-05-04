@@ -3,8 +3,9 @@ from typing import Optional
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from app.core.config import settings
+import bcrypt
 
-# Password hashing - use argon2 (modern, secure, no 72-byte limit)
+# Password hashing - use argon2 for new passwords
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
@@ -14,8 +15,20 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify password against hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify password against hash (supports both argon2 and legacy bcrypt)"""
+    try:
+        # Try argon2 first (new hashes)
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        # Fall back to bcrypt for legacy hashes (starting with $2a$, $2b$, or $2y$)
+        if hashed_password.startswith(("$2a$", "$2b$", "$2y$")):
+            try:
+                # bcrypt requires bytes, truncate to 72 bytes
+                truncated = plain_password[:72].encode("utf-8")
+                return bcrypt.checkpw(truncated, hashed_password.encode("utf-8"))
+            except Exception:
+                return False
+        return False
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
