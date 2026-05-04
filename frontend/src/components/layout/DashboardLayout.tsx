@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { TopBar } from './Topbar';
+import { Topbar } from './Topbar';
 import { Sidebar } from './Sidebar';
 
 interface DashboardLayoutProps {
@@ -11,7 +11,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-surface-app">
-      <TopBar
+      <Topbar
         onMobileMenuClick={() => {
           // TODO: Handle mobile menu for future mobile sidebar implementation
           console.log('Mobile menu clicked');
