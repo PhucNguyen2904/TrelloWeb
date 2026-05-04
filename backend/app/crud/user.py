@@ -8,8 +8,9 @@ from app.core.security import hash_password, verify_password, needs_rehash
 logger = logging.getLogger(__name__)
 
 
-def create_user(db: Session, user_data: UserCreate) -> User:
-    """Create a new user"""
+def create_user(db: Session, user_data) -> User:
+    """Create a new user. If password is not provided, a random secure one is generated."""
+    import secrets
     default_role_name = "user"
     role = db.query(Role).filter(Role.name == default_role_name).first()
     if not role:
@@ -18,9 +19,10 @@ def create_user(db: Session, user_data: UserCreate) -> User:
         db.commit()
         db.refresh(role)
 
+    raw_password = getattr(user_data, "password", None) or secrets.token_urlsafe(16)
     db_user = User(
         email=user_data.email,
-        hashed_password=hash_password(user_data.password),
+        hashed_password=hash_password(raw_password),
         role_id=role.id
     )
     db.add(db_user)

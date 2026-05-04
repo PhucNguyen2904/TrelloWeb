@@ -1,9 +1,12 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.model.board import Board
+from app.model.task import Task
 from app.model.user import User
 from app.model.role import Role
 from app.schemas.User import UserResponseWithoutPassword, UserCreateByAdmin, UserRoleUpdate
@@ -15,6 +18,36 @@ logger = logging.getLogger(__name__)
 
 # Dependency that ensures the user is a superadmin
 allow_super_admin = RoleChecker(["superadmin"])
+
+
+# ─── Extra Schemas ───────────────────────────────────────────────────────────
+
+class RoleCreate(BaseModel):
+    name: str
+    description: str | None = None
+
+
+class RoleUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+
+
+class RoleResponse(BaseModel):
+    id: int
+    name: str
+    description: str | None = None
+    user_count: int = 0
+
+    class Config:
+        from_attributes = True
+
+
+class StatsResponse(BaseModel):
+    total_users: int
+    total_boards: int
+    total_tasks: int
+    total_roles: int
+    active_users: int
 
 @router.get("/users", response_model=list[UserResponseWithoutPassword])
 async def read_all_users(
@@ -149,13 +182,114 @@ async def remove_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    return None
 
-@router.get("/roles", response_model=list)
+@router.get("/stats", response_model=StatsResponse)
+async def get_platform_stats(
+    current_super_admin: User = Depends(allow_super_admin),
+    db: Session = Depends(get_db),
+):
+    """Get platform-wide statistics (Super Admin only)"""
+    total_users = db.query(User).count()
+    total_boards = db.query(Board).count()
+    total_tasks = db.query(Task).count()
+    total_roles = db.query(Role).count()
+    # No is_active column yet — treat all users as active
+    return StatsResponse(
+        total_users=total_users,
+        active_users=total_users,
+        total_boards=total_boards,
+        total_tasks=total_tasks,
+        total_roles=total_roles,
+    )
+
+
+# ─── Roles CRUD ──────────────────────────────────────────────────────────────
+
+@router.get("/roles", response_model=list[RoleResponse])
 async def get_all_roles(
     current_super_admin: User = Depends(allow_super_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    """Get all available roles (Super Admin only)"""
+    """Get all available roles with user count (Super Admin only)"""
     roles = db.query(Role).all()
-    return [{"id": r.id, "name": r.name, "description": r.description} for r in roles]
+    return [
+        RoleResponse(
+            id=r.id,
+            name=r.name,
+            description=r.description,
+            user_count=len(r.users) if r.users else 0,
+        )
+        for r in roles
+    ]
+
+
+@router.post("/roles", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
+async def create_role(
+    role_data: RoleCreate,
+    current_super_admin: User = Depends(allow_super_admin),
+    db: Session = Depends(get_db),
+):
+    """Create a new role (Super Admin only)"""
+    existing = db.query(Role).filter(Role.name == role_data.name).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Role name already exists",
+        )
+    role = Role(name=role_data.name, description=role_data.description)
+    db.add(role)
+    db.commit()
+    db.refresh(role)
+    return RoleResponse(id=role.id, name=role.name, description=role.description, user_count=0)
+
+
+@router.put("/roles/{role_id}", response_model=RoleResponse)
+async def update_role(
+    role_id: int,
+    role_data: RoleUpdate,
+    current_super_admin: User = Depends(allow_super_admin),
+    db: Session = Depends(get_db),
+):
+    """Update a role (Super Admin only)"""
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+    if role_data.name is not None:
+        # Check name uniqueness
+        conflict = db.query(Role).filter(Role.name == role_data.name, Role.id != role_id).first()
+        if conflict:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Role name already in use",
+            )
+        role.name = role_data.name
+    if role_data.description is not None:
+        role.description = role_data.description
+    db.commit()
+    db.refresh(role)
+    return RoleResponse(
+        id=role.id,
+        name=role.name,
+        description=role.description,
+        user_count=len(role.users) if role.users else 0,
+    )
+
+
+@router.delete("/roles/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_role(
+    role_id: int,
+    current_super_admin: User = Depends(allow_super_admin),
+    db: Session = Depends(get_db),
+):
+    """Delete a role (Super Admin only). Cannot delete a role that still has users."""
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+    if role.users:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot delete role '{role.name}': {len(role.users)} user(s) still assigned.",
+        )
+    db.delete(role)
+    db.commit()
+    return None

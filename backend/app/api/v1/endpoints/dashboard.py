@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends
@@ -140,6 +140,74 @@ def _status_label(status: str) -> str:
 
 
 # ─── Endpoints ──────────────────────────────────────────────────────────────
+
+
+class UserStats(BaseModel):
+    open_tasks: int
+    in_progress: int
+    completed_today: int
+    overdue: int
+    total_boards: int
+    total_tasks: int
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/stats", response_model=UserStats)
+async def get_user_stats(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Return task statistics for the current user's boards:
+    - open_tasks: tasks with status 'todo'
+    - in_progress: tasks with status 'doing'
+    - completed_today: tasks with status 'done' updated today (UTC)
+    - overdue: tasks not 'done' whose updated_at is older than 7 days (proxy)
+    - total_boards: number of boards owned by the user
+    - total_tasks: total task count across all boards
+    """
+    boards = get_user_boards(db, current_user.id)
+    all_tasks: list[Task] = []
+    for board in boards:
+        all_tasks.extend(get_board_tasks(db, board.id))
+
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    open_tasks = 0
+    in_progress = 0
+    completed_today = 0
+    overdue = 0
+
+    for task in all_tasks:
+        if task.status == "todo":
+            open_tasks += 1
+        elif task.status == "doing":
+            in_progress += 1
+        elif task.status == "done":
+            updated = task.updated_at or task.created_at
+            if updated.tzinfo is None:
+                updated = updated.replace(tzinfo=timezone.utc)
+            if updated >= today_start:
+                completed_today += 1
+        # Overdue: not done & last touched more than 7 days ago
+        if task.status != "done":
+            updated = task.updated_at or task.created_at
+            if updated.tzinfo is None:
+                updated = updated.replace(tzinfo=timezone.utc)
+            if (now - updated) > timedelta(days=7):
+                overdue += 1
+
+    return UserStats(
+        open_tasks=open_tasks,
+        in_progress=in_progress,
+        completed_today=completed_today,
+        overdue=overdue,
+        total_boards=len(boards),
+        total_tasks=len(all_tasks),
+    )
 
 
 @router.get("/activities", response_model=list[ActivityItem])

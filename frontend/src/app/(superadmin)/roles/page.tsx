@@ -61,10 +61,10 @@ function RoleForm({ initial, onClose, onSuccess }: RoleFormProps) {
     setSaving(true);
     try {
       if (isEdit) {
-        await api.put(`/api/admin/roles/${initial!.id}`, { name, description });
+        await api.put(`/api/super-admin/roles/${initial!.id}`, { name, description });
         toast.success('Role updated');
       } else {
-        await api.post('/api/admin/roles', { name, description });
+        await api.post('/api/super-admin/roles', { name, description });
         toast.success('Role created');
       }
       onSuccess();
@@ -319,14 +319,14 @@ export default function SuperAdminRolesPage() {
   const { data: roles = [], isLoading } = useQuery<Role[]>({
     queryKey: ['sa-roles'],
     queryFn: async () => {
-      const res = await api.get('/api/admin/roles');
+      const res = await api.get('/api/super-admin/roles');
       return Array.isArray(res.data) ? res.data : [];
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await api.delete(`/api/admin/roles/${id}`);
+      await api.delete(`/api/super-admin/roles/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sa-roles'] });

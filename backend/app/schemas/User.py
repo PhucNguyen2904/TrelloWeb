@@ -17,7 +17,7 @@ class UserUpdate(BaseModel):
 
 
 class UserCreateByAdmin(UserBase):
-    password: str = Field(..., min_length=6, description="User password (min 6 chars)")
+    password: Optional[str] = Field(None, min_length=6, description="User password (generated if omitted)")
     role_id: Optional[int] = Field(None, description="Role ID for the user")
 
 

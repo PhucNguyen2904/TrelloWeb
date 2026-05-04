@@ -7,8 +7,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronDown, LogOut, User } from 'lucide-react';
 
 const PAGE_TITLES: Record<string, string> = {
-  '/superadmin/users': 'Users',
-  '/superadmin/roles': 'Roles',
+  '/superadmin/dashboard': 'Platform Overview',
+  '/superadmin/users': 'User Management',
+  '/superadmin/roles': 'Role Management',
 };
 
 function getTitle(pathname: string): string {
@@ -52,7 +53,7 @@ export function SuperAdminTopbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-surface-card/90 backdrop-blur-xl">
-      <div className="flex h-[52px] items-center gap-4 px-4 lg:px-6">
+      <div className="flex h-[52px] items-center gap-4 px-4 pl-14 lg:pl-6">
         {/* Page title */}
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-bold text-text-heading truncate">{title}</h1>
