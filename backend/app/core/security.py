@@ -4,12 +4,8 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from app.core.config import settings
 
-# Password hashing - use argon2 as primary, support bcrypt for backwards compatibility
-# This allows us to verify existing bcrypt hashes while hashing new passwords with argon2
-pwd_context = CryptContext(
-    schemes=["argon2", "bcrypt"],
-    deprecated="bcrypt"
-)
+# Password hashing - use argon2 (modern, secure, no 72-byte limit)
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
