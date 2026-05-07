@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -10,6 +10,7 @@ from app.crud.user import create_user, get_user_by_email, authenticate_user
 from app.core.security import create_access_token
 from app.core.config import settings
 from app.deps.auth import get_current_user
+from app.infrastructure.cache import cache_response
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -81,7 +82,7 @@ async def refresh_token(refresh_token: str):
         )
     
     jti = payload.get("jti")
-    if is_token_revoked(jti):
+    if await is_token_revoked(jti):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token has been revoked"
@@ -94,7 +95,7 @@ async def refresh_token(refresh_token: str):
     now = datetime.utcnow().timestamp()
     ttl = int(exp - now) if exp > now else 0
     if ttl > 0:
-        revoke_token(jti, ttl)
+        await revoke_token(jti, ttl)
     
     new_access_token = create_access_token(data={"sub": user_id})
     new_refresh_token = create_refresh_token(data={"sub": user_id})
@@ -107,7 +108,9 @@ async def refresh_token(refresh_token: str):
 
 
 @router.get("/me", response_model=UserResponse)
+@cache_response(ttl=3600)
 async def get_current_user_info(
+    request: Request,
     current_user: User = Depends(get_current_user)
 ):
     """Get current authenticated user information"""

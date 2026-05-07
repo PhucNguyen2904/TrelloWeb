@@ -72,6 +72,10 @@ def cache_response(ttl: int = 60):
 
             if request:
                 cache_key = f"cache:{request.url.path}:{str(request.query_params)}"
+                # If we have a user in kwargs (from Depends(get_current_user)), add it to the key
+                user = kwargs.get("current_user")
+                if user and hasattr(user, "id"):
+                    cache_key += f":user:{user.id}"
             else:
                 cache_key = f"cache:{func.__name__}:{hash(str(args) + str(kwargs))}"
 

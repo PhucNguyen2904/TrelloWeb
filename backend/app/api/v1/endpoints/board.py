@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -8,6 +8,7 @@ from app.crud.board import (
     create_board, get_board, get_user_boards, update_board, delete_board
 )
 from app.deps.auth import get_current_user, RoleChecker
+from app.infrastructure.cache import cache_response
 
 router = APIRouter(prefix="/api/boards", tags=["boards"])
 
@@ -24,7 +25,9 @@ async def create_new_board(
 
 
 @router.get("", response_model=list[BoardResponse])
+@cache_response(ttl=300)
 async def get_my_boards(
+    request: Request,
     current_user: User = Depends(RoleChecker(["admin", "user"])),
     db: Session = Depends(get_db)
 ):
@@ -34,8 +37,10 @@ async def get_my_boards(
 
 
 @router.get("/{board_id}", response_model=BoardResponse)
+@cache_response(ttl=600)
 async def get_board_details(
     board_id: int,
+    request: Request,
     current_user: User = Depends(RoleChecker(["admin", "user"])),
     db: Session = Depends(get_db)
 ):
