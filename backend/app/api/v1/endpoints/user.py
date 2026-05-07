@@ -7,7 +7,7 @@ from app.db.session import get_db
 from app.model.user import User
 from app.schemas.User import UserCreate, UserResponse
 from app.crud.user import create_user, get_user_by_email, authenticate_user
-from app.core.security import create_access_token
+from app.core.security import create_access_token, create_refresh_token
 from app.core.config import settings
 from app.deps.auth import get_current_user
 from app.infrastructure.cache import cache_response
