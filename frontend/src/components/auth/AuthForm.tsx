@@ -117,18 +117,17 @@ export function AuthForm({ mode }: AuthFormProps) {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
           });
           
-          // Step 2: Extract token từ response
-          const token = res.data.access_token;
+          // Step 2: Extract tokens từ response
+          const { access_token, refresh_token } = res.data;
           
           // Step 3: Gọi /me với token explicit trong Authorization header
-          // (Không rely vào store vì chưa update)
           const userRes = await api.get('/api/auth/me', {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${access_token}` }
           });
           const user = userRes.data;
           
-          // Step 4: Update store với user data và token
-          login(user, token);
+          // Step 4: Update store với user data và tokens
+          login(user, access_token, refresh_token);
           addToast({ type: 'success', title: 'Login successful!' });
           
           // Step 5: Redirect theo role

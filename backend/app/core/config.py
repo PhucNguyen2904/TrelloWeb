@@ -34,7 +34,14 @@ class Settings(BaseSettings):
     # JWT
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15  # Layer 2: 15 minutes
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7    # Layer 2: 7 days
+    
+    # Redis (Layer 2)
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_PASSWORD: str | None = None
     
     # CORS
     ALLOWED_ORIGINS: list = [

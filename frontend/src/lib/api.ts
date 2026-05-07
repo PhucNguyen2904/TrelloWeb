@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/useAuthStore';
+import { tokenManager } from './TokenManager';
 
 // API Configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Auth endpoints that should NOT include Authorization header
-const AUTH_ENDPOINTS = ['/api/auth/login', '/api/auth/register'];
+const AUTH_ENDPOINTS = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh'];
 
 console.log(`[API] 📡 API URL: ${API_URL}`);
 
@@ -14,13 +15,6 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // Do NOT use withCredentials for Bearer token auth
-  // Only needed for cookie-based auth
-  // withCredentials: true,
-  
-  // Timeout config:
-  // - Auth endpoints: 15s (allow time for network latency + preflight)
-  // - Other endpoints: 10s
   timeout: 15000,
 });
 
@@ -66,26 +60,19 @@ export async function getMembers() {
 
 /**
  * Request interceptor: Attach JWT token to protected endpoints
- * - Skip token for auth endpoints (login, register)
- * - Skip token for public endpoints
- * - Attach token for all other endpoints
  */
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   const url = config.url || '';
   const isAuthEndpoint = AUTH_ENDPOINTS.some(endpoint => url.includes(endpoint));
   
   if (isAuthEndpoint) {
-    // ✓ Public endpoint - no token needed
-    console.log(`[API] 📤 POST ${url} (public endpoint, no token)`);
     return config;
   }
   
-  const token = useAuthStore.getState().token;
+  // Layer 2: Get valid token (auto-refreshes if needed)
+  const token = await tokenManager.getValidToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log(`[API] 🔐 ${config.method?.toUpperCase()} ${url} (token attached)`);
-  } else {
-    console.log(`[API] ⚠️ ${config.method?.toUpperCase()} ${url} (no token in store)`);
   }
   
   return config;

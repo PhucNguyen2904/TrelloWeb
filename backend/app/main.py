@@ -5,6 +5,8 @@ from app.db.session import engine
 from app.api.router import router
 from app.core.config import settings
 
+from app.core.middleware import SecurityHeadersMiddleware, SanitizationMiddleware
+
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
@@ -15,15 +17,19 @@ app = FastAPI(
     description="A Trello-like task management API built with FastAPI"
 )
 
+# Layer 3 & 4: Security and Sanitization Middleware
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(SanitizationMiddleware)
+
 # Add CORS middleware with proper configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,              # Required for cookies & Authorization header
+    allow_origins=settings.ALLOWED_ORIGINS, # Specifically allowed origins
+    allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],                 # Allow all headers including Authorization
-    expose_headers=["*"],                # Expose all response headers to client
-    max_age=3600,                        # Preflight cache: 1 hour
+    allow_headers=["Authorization", "Content-Type"], # Explicitly list allowed headers
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 # Include router

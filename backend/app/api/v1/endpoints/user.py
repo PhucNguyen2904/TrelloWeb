@@ -45,7 +45,7 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    """Login user and get JWT token"""
+    """Login user and get JWT tokens"""
     # Authenticate user
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -55,14 +55,53 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"}
         )
     
-    # Create token
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": str(user.id)}, expires_delta=access_token_expires
-    )
+    # Create tokens
+    access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = create_refresh_token(data={"sub": str(user.id)})
     
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
+
+
+@router.post("/refresh")
+async def refresh_token(refresh_token: str):
+    """Refresh access token using refresh token"""
+    from app.core.security import decode_token
+    from app.core.redis import is_token_revoked, revoke_token
+    from datetime import datetime
+
+    payload = decode_token(refresh_token)
+    if not payload or payload.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
+        )
+    
+    jti = payload.get("jti")
+    if is_token_revoked(jti):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token has been revoked"
+        )
+    
+    user_id = payload.get("sub")
+    
+    # Rotate: Revoke old one and issue new pair
+    exp = payload.get("exp")
+    now = datetime.utcnow().timestamp()
+    ttl = int(exp - now) if exp > now else 0
+    if ttl > 0:
+        revoke_token(jti, ttl)
+    
+    new_access_token = create_access_token(data={"sub": user_id})
+    new_refresh_token = create_refresh_token(data={"sub": user_id})
+    
+    return {
+        "access_token": new_access_token,
+        "refresh_token": new_refresh_token,
         "token_type": "bearer"
     }
 

@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { tokenManager } from '@/lib/TokenManager';
 
 export interface UserRole {
   id: number;
-  name: string; // 'superadmin', 'admin', 'user', 'guest'
+  name: string;
   description?: string;
 }
 
@@ -15,8 +16,8 @@ export interface User {
 
 interface AuthState {
   user: User | null;
-  token: string | null;
-  login: (user: User, token: string) => void;
+  isAuthenticated: boolean;
+  login: (user: User, accessToken: string, refreshToken: string) => void;
   logout: () => void;
 }
 
@@ -24,12 +25,21 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
-      login: (user, token) => set({ user, token }),
-      logout: () => set({ user: null, token: null }),
+      isAuthenticated: false,
+      login: (user, accessToken, refreshToken) => {
+        tokenManager.setTokens(accessToken, refreshToken);
+        set({ user, isAuthenticated: true });
+      },
+      logout: () => {
+        tokenManager.clearTokens();
+        set({ user: null, isAuthenticated: false });
+      },
     }),
     {
       name: 'trello-auth-storage',
+      // Only persist user info, not tokens
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )
 );
+
