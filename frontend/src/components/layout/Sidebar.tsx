@@ -74,13 +74,13 @@ export function Sidebar({}: SidebarProps) {
           return (
             <Link key={item.href} href={item.href}>
               <button
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 transition-all text-sm ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200 font-semibold'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                    ? 'bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-600 rounded-r-xl'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl'
                 }`}
               >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-700' : 'text-gray-400'}`} />
                 <span>{item.label}</span>
               </button>
             </Link>
@@ -98,13 +98,13 @@ export function Sidebar({}: SidebarProps) {
               return (
                 <Link key={item.href} href={item.href}>
                   <button
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 transition-all text-sm ${
                       isActive
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-200 font-semibold'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                        ? 'bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-600 rounded-r-xl'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-700' : 'text-gray-400'}`} />
                     <span>{item.label}</span>
                   </button>
                 </Link>
@@ -122,17 +122,17 @@ export function Sidebar({}: SidebarProps) {
         </button>
 
         <div className="pt-2">
-          <button className="w-full text-left text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-xl px-3 py-2 flex items-center gap-3 transition-all">
-            <HelpCircle size={16} className="text-slate-400" />
+          <button className="w-full text-left text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl px-3 py-2 flex items-center gap-3 transition-all">
+            <HelpCircle size={16} className="text-gray-400" />
             Help Center
           </button>
 
           <button
             onClick={handleLogoutClean}
             type="button"
-            className="w-full text-left text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-xl px-3 py-2 flex items-center gap-3 transition-all"
+            className="w-full text-left text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl px-3 py-2 flex items-center gap-3 transition-all"
           >
-            <LogOut size={16} className="text-slate-400" />
+            <LogOut size={16} className="text-gray-400" />
             Logout
           </button>
         </div>
