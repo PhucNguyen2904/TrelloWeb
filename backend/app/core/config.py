@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     REDIS_DB: int = 0
     REDIS_PASSWORD: str | None = None
     
+    # Upstash Redis
+    UPSTASH_REDIS_REST_URL: str | None = None
+    UPSTASH_REDIS_REST_TOKEN: str | None = None
+    
     # CORS
     ALLOWED_ORIGINS: list = [
         "http://localhost",

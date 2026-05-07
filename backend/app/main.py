@@ -5,16 +5,27 @@ from app.db.session import engine
 from app.api.router import router
 from app.core.config import settings
 
+from contextlib import asynccontextmanager
 from app.core.middleware import SecurityHeadersMiddleware, SanitizationMiddleware
+from app.infrastructure.cache import cache_service
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Connect to Redis
+    await cache_service.connect()
+    yield
+    # Shutdown: Disconnect from Redis
+    await cache_service.disconnect()
 
 # Initialize FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="A Trello-like task management API built with FastAPI"
+    description="A Trello-like task management API built with FastAPI",
+    lifespan=lifespan
 )
 
 # Layer 3 & 4: Security and Sanitization Middleware
