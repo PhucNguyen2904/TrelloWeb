@@ -10,7 +10,10 @@ from app.crud.user import create_user, get_user_by_email, authenticate_user
 from app.core.security import create_access_token, create_refresh_token
 from app.core.config import settings
 from app.deps.auth import get_current_user
-from app.infrastructure.cache import cache_response
+from app.infrastructure.cache import cache_response, cache_service
+from app.crud.board import get_user_boards
+from app.schemas.User import UserResponse
+from app.schemas.Board import BoardResponse
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -60,6 +63,37 @@ async def login(
     access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
     
+    # --- REDIS CACHE LOGIC (AS REQUESTED) ---
+    try:
+        # 1. Cache Profile Data
+        profile_key = f"user:profile:{user.id}"
+        # Convert to dict for JSON serialization
+        profile_data = {
+            "id": user.id,
+            "email": user.email,
+            "username": getattr(user, 'username', ''),
+            "role": getattr(user.role, 'name', 'user') if hasattr(user, 'role') else 'user'
+        }
+        await cache_service.set(profile_key, profile_data, ttl=3600)
+        
+        # 2. Cache Boards Data
+        boards_key = f"user:boards:{user.id}"
+        boards = get_user_boards(db, user.id)
+        # Convert SQLAlchemy objects to list of dicts
+        boards_data = [
+            {
+                "id": b.id, 
+                "title": b.title, 
+                "background_color": b.background_color,
+                "owner_id": b.owner_id
+            } for b in boards
+        ]
+        await cache_service.set(boards_key, boards_data, ttl=3600)
+        
+    except Exception as e:
+        # Don't fail login if cache fails, but log it
+        print(f"⚠️ Redis Caching failed during login: {str(e)}")
+
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,

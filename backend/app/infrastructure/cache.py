@@ -1,45 +1,83 @@
 import json
 import functools
+import logging
 from typing import Any, Callable, Optional
-from fastapi import Request, Response
+from fastapi import Request
 from upstash_redis.asyncio import Redis
 from app.core.config import settings
 
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class CacheService:
-    """
-    Service for interacting with Upstash Redis via REST API.
-    """
     def __init__(self):
         self.redis: Optional[Redis] = None
 
-    async def connect(self) -> None:
-        """Initialize the Redis client."""
-        if settings.UPSTASH_REDIS_REST_URL and settings.UPSTASH_REDIS_REST_TOKEN:
+    async def connect(self) -> bool:
+        """Kết nối tới Upstash Redis và kiểm tra ping."""
+        if not settings.UPSTASH_REDIS_REST_URL or not settings.UPSTASH_REDIS_REST_TOKEN:
+            logger.error("❌ Upstash Redis credentials not found in environment variables!")
+            return False
+        
+        try:
             self.redis = Redis(
                 url=settings.UPSTASH_REDIS_REST_URL,
                 token=settings.UPSTASH_REDIS_REST_TOKEN
             )
-            print("Successfully connected to Upstash Redis")
-        else:
-            print("Upstash Redis credentials not found. Cache is disabled.")
+            # Ping test
+            pong = await self.redis.ping()
+            if pong:
+                logger.info("✅ Successfully connected to Upstash Redis (Ping OK)")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"❌ Failed to connect to Upstash Redis: {str(e)}")
+            return False
 
     async def disconnect(self) -> None:
-        """Close the Redis client."""
         if self.redis:
-            # upstash-redis asyncio client handles session closing
             self.redis = None
-            print("Disconnected from Upstash Redis")
+            logger.info("🔌 Disconnected from Upstash Redis")
 
     async def get(self, key: str) -> Any:
         if not self.redis:
             return None
-        data = await self.redis.get(key)
-        return json.loads(data) if data else None
+        try:
+            data = await self.redis.get(key)
+            if data:
+                return json.loads(data) if isinstance(data, str) else data
+            return None
+        except Exception as e:
+            logger.error(f"❌ Error getting key {key}: {str(e)}")
+            return None
 
-    async def set(self, key: str, value: Any, ttl: int = 60) -> None:
+    async def set(self, key: str, value: Any, ttl: int = 3600, verify: bool = True) -> bool:
+        """Lưu data vào Redis với tùy chọn verify lại."""
         if not self.redis:
-            return
-        await self.redis.set(key, json.dumps(value), ex=ttl)
+            return False
+        try:
+            # Chuyển đổi sang JSON string
+            json_data = json.dumps(value)
+            
+            # QUAN TRỌNG: Phải await lệnh set
+            success = await self.redis.set(key, json_data, ex=ttl)
+            
+            if success:
+                logger.info(f"🚀 Successfully set key: {key} (TTL: {ttl}s)")
+                
+                # Bước kiểm tra lại (Verify) theo yêu cầu của bạn
+                if verify:
+                    check_data = await self.redis.get(key)
+                    if check_data:
+                        logger.info(f"🧪 Verification OK for key: {key}")
+                    else:
+                        logger.warning(f"⚠️ Verification FAILED for key: {key}")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"❌ Error setting key {key}: {str(e)}")
+            return False
 
     async def delete(self, key: str) -> None:
         if not self.redis:
@@ -50,18 +88,12 @@ class CacheService:
 cache_service = CacheService()
 
 def cache_response(ttl: int = 60):
-    """
-    Decorator to cache endpoint responses.
-    Usage: @cache_response(ttl=60)
-    """
     def decorator(func: Callable):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             if not cache_service.redis:
                 return await func(*args, **kwargs)
 
-            # Generate a unique cache key based on function name and arguments
-            # If a 'request' object is present, use its URL path and query params
             request: Optional[Request] = None
             for arg in args:
                 if isinstance(arg, Request):
@@ -72,21 +104,20 @@ def cache_response(ttl: int = 60):
 
             if request:
                 cache_key = f"cache:{request.url.path}:{str(request.query_params)}"
-                # If we have a user in kwargs (from Depends(get_current_user)), add it to the key
                 user = kwargs.get("current_user")
                 if user and hasattr(user, "id"):
                     cache_key += f":user:{user.id}"
             else:
                 cache_key = f"cache:{func.__name__}:{hash(str(args) + str(kwargs))}"
 
-            # Try to get from cache
             cached_data = await cache_service.get(cache_key)
             if cached_data is not None:
+                logger.info(f"🎯 Cache HIT for {cache_key}")
                 return cached_data
 
-            # Execute the function and cache the result
             result = await func(*args, **kwargs)
-            await cache_service.set(cache_key, result, ttl=ttl)
+            # Đối với endpoint response, chúng ta không cần verify quá kỹ để tránh làm chậm response
+            await cache_service.set(cache_key, result, ttl=ttl, verify=False)
             return result
         return wrapper
     return decorator
