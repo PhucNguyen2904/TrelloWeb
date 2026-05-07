@@ -19,19 +19,14 @@ export const KanbanColumnComponent = memo(function KanbanColumnComponent({
   onAddCard,
 }: KanbanColumnProps) {
   return (
-    <div className="bg-[#EBECF0] rounded-xl p-3 min-w-[272px] max-w-[300px] border border-border flex flex-col max-h-full">
+    <div className="bg-white/95 backdrop-blur-sm rounded-[12px] p-4 w-[280px] flex-shrink-0 flex flex-col max-h-full shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-white/50">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-sm text-text-heading">
-            {column.name}
-          </h3>
-          <span className="bg-border text-text-body rounded-full px-2 py-0.5 text-xs font-medium">
-            {cards.length}
-          </span>
-        </div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-bold text-[15px] text-slate-800 tracking-tight">
+          {column.name}
+        </h3>
         <button
-          className="p-1 text-text-muted hover:bg-white rounded transition-colors"
+          className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition-all"
           aria-label="Column menu"
         >
           <MoreHorizontal className="w-4 h-4" />
@@ -39,20 +34,26 @@ export const KanbanColumnComponent = memo(function KanbanColumnComponent({
       </div>
 
       {/* Cards */}
-      <div className="flex-1 overflow-y-auto space-y-2">
-        {cards.map((card) => (
-          <KanbanCard
-            key={card.id}
-            card={card}
-            onCardClick={onCardClick}
-          />
-        ))}
+      <div className="flex-1 overflow-y-auto space-y-3 min-h-[10px] pr-1 -mr-1 custom-scrollbar">
+        {cards.length === 0 ? (
+          <div className="py-8 text-center">
+            <p className="text-[13px] text-slate-400 italic">No tasks here</p>
+          </div>
+        ) : (
+          cards.map((card) => (
+            <KanbanCard
+              key={card.id}
+              card={card}
+              onCardClick={onCardClick}
+            />
+          ))
+        )}
       </div>
 
       {/* Add Card Button */}
       <button
         onClick={() => onAddCard?.(column.id)}
-        className="w-full mt-3 text-sm text-text-body hover:bg-white rounded-lg py-2 flex items-center gap-2 justify-center transition-colors"
+        className="w-full mt-4 text-[13px] font-bold text-blue-600 hover:bg-blue-50 rounded-xl py-2.5 flex items-center gap-2 justify-center transition-all border border-transparent hover:border-blue-100"
       >
         <Plus className="w-4 h-4" />
         Add a card
@@ -60,5 +61,6 @@ export const KanbanColumnComponent = memo(function KanbanColumnComponent({
     </div>
   );
 });
+
 
 export default KanbanColumnComponent;

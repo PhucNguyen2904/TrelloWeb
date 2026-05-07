@@ -38,27 +38,35 @@ export function Sidebar({}: SidebarProps) {
   const isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
 
   return (
-    <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-60 bg-[#F4F5F7] border-r border-[#e2e8f0] h-full py-4 px-3 gap-1">
+    <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-[230px] bg-white border-r border-slate-200 h-full py-6 px-4 gap-2 shadow-[4px_0_12px_rgba(0,0,0,0.03)] z-10">
+      {/* Logo */}
+      <div className="flex items-center gap-2 mb-8 px-2">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+          <span className="text-white font-extrabold text-lg">P</span>
+        </div>
+        <span className="font-bold text-slate-800 text-xl tracking-tight">ProjectFlow</span>
+      </div>
+
       {/* Workspace Header */}
-      <div className="flex items-center gap-3 px-3 py-2 mb-2">
+      <div className="flex items-center gap-3 px-2 py-3 mb-4 bg-slate-50 rounded-xl border border-slate-100">
         <div
-          className="w-8 h-8 rounded-md bg-[#0079BF] text-white text-xs font-bold flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: '#0079BF' }}
+          className="w-10 h-10 rounded-lg bg-blue-500 text-white text-base font-bold flex items-center justify-center flex-shrink-0 shadow-sm"
         >
-          ET
+          E
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-800 truncate">
+          <p className="text-sm font-bold text-slate-800 truncate leading-tight">
             Engineering Team
           </p>
-          <p className="text-[10px] uppercase text-slate-400 truncate">
-            Premium Workspace
-          </p>
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wider mt-1">
+            Premium
+          </span>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto space-y-1">
+      <nav className="flex-1 overflow-y-auto space-y-1.5">
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.05em] px-2 mb-2">Main Menu</p>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -66,13 +74,13 @@ export function Sidebar({}: SidebarProps) {
           return (
             <Link key={item.href} href={item.href}>
               <button
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors relative ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                   isActive
-                    ? 'bg-blue-50 text-[#0079BF] border-l-4 border-[#0079BF] font-semibold'
-                    : 'text-slate-600 hover:bg-slate-100'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200 font-semibold'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                 }`}
               >
-                <Icon className="w-4 h-4 flex-shrink-0" />
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span>{item.label}</span>
               </button>
             </Link>
@@ -81,7 +89,8 @@ export function Sidebar({}: SidebarProps) {
 
         {/* Admin / Superadmin only section */}
         {isAdminOrSuperAdmin && (
-          <>
+          <div className="pt-4 mt-4 border-t border-slate-100">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.05em] px-2 mb-2">Admin</p>
             {adminNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -89,43 +98,46 @@ export function Sidebar({}: SidebarProps) {
               return (
                 <Link key={item.href} href={item.href}>
                   <button
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors relative ${
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                       isActive
-                        ? 'bg-blue-50 text-[#0079BF] border-l-4 border-[#0079BF] font-semibold'
-                        : 'text-slate-600 hover:bg-slate-100'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-200 font-semibold'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                     }`}
                   >
-                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                     <span>{item.label}</span>
                   </button>
                 </Link>
               );
             })}
-          </>
+          </div>
         )}
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-[#e2e8f0] pt-3 space-y-2">
-        <button className="w-full border border-slate-300 hover:bg-slate-100 text-slate-700 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+      <div className="pt-4 space-y-2">
+        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md">
           <UserPlus size={16} />
           Invite Members
         </button>
 
-        <button className="w-full text-left text-sm text-slate-500 hover:bg-slate-100 rounded-lg px-3 py-2 flex items-center gap-3 transition-colors">
-          <HelpCircle size={16} className="flex-shrink-0" />
-          Help Center
-        </button>
+        <div className="pt-2">
+          <button className="w-full text-left text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-xl px-3 py-2 flex items-center gap-3 transition-all">
+            <HelpCircle size={16} className="text-slate-400" />
+            Help Center
+          </button>
 
-        <button
-          onClick={handleLogoutClean}
-          type="button"
-          className="w-full text-left text-sm text-slate-500 hover:bg-slate-100 rounded-lg px-3 py-2 flex items-center gap-3 transition-colors"
-        >
-          <LogOut size={16} className="flex-shrink-0" />
-          Logout
-        </button>
+          <button
+            onClick={handleLogoutClean}
+            type="button"
+            className="w-full text-left text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-xl px-3 py-2 flex items-center gap-3 transition-all"
+          >
+            <LogOut size={16} className="text-slate-400" />
+            Logout
+          </button>
+        </div>
       </div>
     </aside>
   );
 }
+

@@ -18,32 +18,25 @@ export function Topbar({
   const user = useAuthStore((s) => s.user);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-[#e2e8f0] h-14 px-5 flex items-center justify-between gap-4">
-      {/* Left: Logo + Nav Links */}
-      <div className="flex items-center gap-6">
-        {/* ProjectFlow Logo */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-sm bg-[#0079BF] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">P</span>
-          </div>
-          <span className="font-bold text-[#0079BF] text-sm hidden sm:inline">ProjectFlow</span>
-        </div>
-
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 h-14 px-6 flex items-center justify-between gap-4">
+      {/* Left: Nav Links */}
+      <div className="flex items-center gap-8">
         {/* Nav Links */}
-        <nav className="hidden sm:flex items-center gap-4 ml-4">
+        <nav className="hidden sm:flex items-center gap-6">
           {['Workspaces', 'Recent', 'Starred'].map((link) => (
             <button
               key={link}
-              className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-colors"
+              className="text-[14px] font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-1.5 transition-colors group"
             >
               {link}
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              <svg className="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
           ))}
         </nav>
       </div>
+
 
       {/* Center: Search */}
       <div className="hidden lg:flex flex-1 max-w-sm">
