@@ -15,7 +15,7 @@ export default function RegisterPage() {
   useEffect(() => {
     if (user && token) {
       const role = user.role?.name;
-      router.replace(role === 'superadmin' || role === 'admin' ? '/dashboard/users' : '/dashboard');
+      router.replace(role === 'superadmin' ? '/superadmin' : (role === 'admin' ? '/users' : '/boards'));
     }
   }, [user, token, router]);
 

@@ -59,6 +59,24 @@ export async function getWorkspaces() {
   return data;
 }
 
+/** Create a new board */
+export async function createBoard(boardData: { name: string, description?: string }) {
+  const { data } = await api.post('/api/boards', boardData);
+  return data;
+}
+
+/** Create a new task in a specific board */
+export async function createTask(boardId: string | number, taskData: any) {
+  const { data } = await api.post(`/api/boards/${boardId}/tasks`, taskData);
+  return data;
+}
+
+/** Update an existing task */
+export async function updateTask(boardId: string | number, taskId: string | number, taskData: any) {
+  const { data } = await api.put(`/api/boards/${boardId}/tasks/${taskId}`, taskData);
+  return data;
+}
+
 /** Members endpoint (not yet implemented on backend — returns empty list) */
 export async function getMembers() {
   return [];

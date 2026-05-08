@@ -18,7 +18,7 @@ export function SuperAdminShell({ children }: SuperAdminShellProps) {
   // Client-side guard — redirect non-superadmins away
   useEffect(() => {
     if (user && user.role?.name !== 'superadmin') {
-      router.replace('/dashboard');
+      router.replace('/boards');
     }
     // If user is null (not yet hydrated from localStorage), we wait.
   }, [user, router]);

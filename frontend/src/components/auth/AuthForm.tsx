@@ -132,7 +132,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           
           // Step 5: Redirect theo role
           const role = user.role?.name;
-          const dest = role === 'superadmin' || role === 'admin' ? '/dashboard/users' : '/dashboard';
+          const dest = role === 'superadmin' ? '/superadmin' : (role === 'admin' ? '/users' : '/boards');
           router.replace(dest);
         } catch (loginError: unknown) {
           // Improve error messages for user

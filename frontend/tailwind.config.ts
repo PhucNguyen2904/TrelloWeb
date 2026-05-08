@@ -34,6 +34,12 @@ const config: Config = {
           muted:   "var(--text-tertiary)",
           link:    "#0079BF",
         },
+        // Mockup Colors
+        primary: "#005f98",
+        "primary-container": "#0079bf",
+        "surface-container-low": "#f1f3fa",
+        "on-background": "#181c20",
+        "surface-variant": "#e0e2e9",
       },
       borderRadius: {
         DEFAULT: "8px",

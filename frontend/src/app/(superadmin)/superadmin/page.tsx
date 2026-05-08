@@ -93,7 +93,7 @@ export default function SuperAdminDashboardPage() {
           value={stats?.total_users}
           icon={Users}
           color="#6366f1"
-          href="/users"
+          href="/superadmin/users"
         />
         <StatCard
           label="Active Users"
@@ -123,7 +123,7 @@ export default function SuperAdminDashboardPage() {
           value={stats?.total_roles}
           icon={Shield}
           color="#8b5cf6"
-          href="/roles"
+          href="/superadmin/roles"
         />
 
         {/* Active ratio card */}
@@ -167,21 +167,21 @@ export default function SuperAdminDashboardPage() {
             {
               label: 'Manage Users',
               desc: 'View, edit roles, and delete accounts',
-              href: '/users',
+              href: '/superadmin/users',
               icon: Users,
               color: '#6366f1',
             },
             {
               label: 'Manage Roles',
               desc: 'Create and edit permission roles',
-              href: '/roles',
+              href: '/superadmin/roles',
               icon: Shield,
               color: '#8b5cf6',
             },
             {
               label: 'Invite New User',
               desc: 'Create an account and assign a role',
-              href: '/users',
+              href: '/superadmin/users',
               icon: TrendingUp,
               color: '#22c55e',
             },

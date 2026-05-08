@@ -32,7 +32,7 @@ export function RecentBoards({ boards }: RecentBoardsProps) {
             className="shrink-0"
           >
             <Link
-              href={`/dashboard/boards`}
+              href={`/boards`}
               aria-label={`Open board ${board.name}`}
               className="mesh-card group flex h-[140px] w-[220px] flex-col justify-between rounded-[24px] border border-border bg-gradient-to-br from-brand to-blue-700 p-4 shadow-card transition-all duration-150 hover:border-brand hover:shadow-lg"
             >

@@ -3,8 +3,29 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
+import { getWorkspaces } from '@/lib/api';
 
 const FeaturedWorkspace: React.FC = () => {
+  const [mounted, setMounted] = React.useState(false);
+  const { data: workspaces = [], isLoading } = useQuery({
+    queryKey: ['workspaces'],
+    queryFn: getWorkspaces,
+    enabled: mounted,
+  });
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isLoading || workspaces.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-[400px] animate-pulse" />
+    );
+  }
+
+  const featured = workspaces[0];
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden group">
       <div className="flex flex-col lg:flex-row">
@@ -14,10 +35,10 @@ const FeaturedWorkspace: React.FC = () => {
             Featured Workspace
           </div>
           <h2 className="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight leading-tight">
-            Product Design Team
+            {featured.name}
           </h2>
           <p className="text-slate-500 text-base lg:text-lg mb-8 leading-relaxed max-w-lg">
-            Centralize your design systems, user flows, and high-fidelity mockups in one unified workspace. Collaborate with designers in real-time.
+            Manage your {featured.boardCount} boards and collaborate with your team in {featured.name}. Centralize everything in one unified workspace.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -30,11 +51,17 @@ const FeaturedWorkspace: React.FC = () => {
               <div className="flex -space-x-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="w-9 h-9 rounded-full border-4 border-white overflow-hidden bg-slate-100 relative">
-                    <Image src={`https://i.pravatar.cc/100?img=${i + 20}`} alt="Member" fill className="object-cover" />
+                    <Image 
+                      src={`https://i.pravatar.cc/100?img=${i + 20}`} 
+                      alt="Member" 
+                      fill 
+                      sizes="32px"
+                      className="object-cover" 
+                    />
                   </div>
                 ))}
                 <div className="w-9 h-9 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500">
-                  +18
+                  +{featured.memberCount}
                 </div>
               </div>
               <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Active Members</span>
@@ -63,7 +90,7 @@ const FeaturedWorkspace: React.FC = () => {
             </div>
             
             <div className="absolute bottom-6 right-6 px-4 py-2 bg-white/90 rounded-full shadow-lg">
-              <span className="text-xs font-bold text-rose-600">Main Design System v2.0</span>
+              <span className="text-xs font-bold text-rose-600">{featured.boards[0]?.name || 'Project Dashboard'}</span>
             </div>
           </div>
         </div>

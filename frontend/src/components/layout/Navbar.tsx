@@ -13,7 +13,7 @@ export default function Navbar() {
 
   return (
     <nav className="h-16 border-b border-white/10 bg-gray-950/50 backdrop-blur-md sticky top-0 z-50 px-6 flex items-center justify-between">
-      <Link href="/dashboard" className="flex items-center gap-2 text-white hover:text-indigo-400 transition-colors">
+      <Link href="/boards" className="flex items-center gap-2 text-white hover:text-indigo-400 transition-colors">
         <Kanban className="w-6 h-6 text-indigo-500" />
         <span className="font-bold text-xl tracking-tight">TrelloClone</span>
       </Link>

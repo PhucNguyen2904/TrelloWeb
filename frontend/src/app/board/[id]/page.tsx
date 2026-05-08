@@ -8,7 +8,7 @@ export default function BoardPage() {
 
   useEffect(() => {
     // Redirect to new boards structure
-    router.replace('/dashboard/boards');
+    router.replace('/boards');
   }, [router]);
 
   return (

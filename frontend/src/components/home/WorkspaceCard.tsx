@@ -35,7 +35,7 @@ export function WorkspaceCard({ workspace, index }: WorkspaceCardProps) {
         {workspace.boards.slice(0, 4).map((board) => (
           <Link
             key={board.id}
-            href={`/dashboard/boards`}
+            href={`/boards`}
             className="group rounded-2xl border border-border bg-surface-card p-3 transition-all duration-150 hover:bg-surface-muted"
             aria-label={`Open board ${board.name}`}
           >

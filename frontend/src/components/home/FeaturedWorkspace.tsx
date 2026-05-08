@@ -28,7 +28,7 @@ export function FeaturedWorkspace({ workspace }: FeaturedWorkspaceProps) {
             <p className="max-w-xl text-sm leading-7 text-white/72 sm:text-base">Collaborate and organize your workspace</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href={`/dashboard/boards`} className="px-5 py-2 rounded-full bg-brand text-white hover:opacity-90 transition flex items-center gap-2">
+            <Link href={`/boards`} className="px-5 py-2 rounded-full bg-brand text-white hover:opacity-90 transition flex items-center gap-2">
               Open workspace
               <ArrowRight className="h-4 w-4" />
             </Link>

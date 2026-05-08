@@ -137,7 +137,7 @@ export function AccountDropdown() {
 
         <Link
           ref={firstMenuItemRef}
-          href="/dashboard/profile"
+          href="/profile"
           className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition duration-200 ease-in-out hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
           onClick={() => closeMenu()}
           role="menuitem"
@@ -147,7 +147,7 @@ export function AccountDropdown() {
           Profile
         </Link>
         <Link
-          href="/dashboard/settings"
+          href="/workspace-settings"
           className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition duration-200 ease-in-out hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
           onClick={() => closeMenu()}
           role="menuitem"
