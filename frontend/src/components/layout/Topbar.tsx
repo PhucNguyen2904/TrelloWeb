@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, Settings, HelpCircle } from 'lucide-react';
+import { Bell, Search, HelpCircle, LayoutGrid } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { AccountDropdown } from './AccountDropdown';
 
@@ -12,79 +12,58 @@ export interface TopbarProps {
   onMobileMenuClick?: () => void;
 }
 
-export function Topbar({
-  onCreateClick,
-}: TopbarProps) {
+export function Topbar({}: TopbarProps) {
   const user = useAuthStore((s) => s.user);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 h-14 px-6 flex items-center justify-between gap-4">
-      {/* Left: Nav Links */}
-      <div className="flex items-center gap-8">
-        {/* Nav Links */}
-        <nav className="hidden sm:flex items-center gap-6">
-          {['Workspaces', 'Recent', 'Starred'].map((link) => (
-            <button
-              key={link}
-              className="text-[14px] font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-1.5 transition-colors group"
-            >
-              {link}
-              <svg className="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          ))}
-        </nav>
+    <header className="sticky top-0 z-50 bg-white border-b border-[#E5E7EB] h-14 px-6 flex items-center justify-between">
+      {/* Left section: Logo & Team (Duplicate of sidebar in mobile or fixed header) */}
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-[6px] bg-[#1565C0] flex items-center justify-center lg:hidden">
+          <span className="text-white font-bold text-lg">P</span>
+        </div>
+        <div className="hidden lg:block">
+          <h2 className="text-sm font-bold text-[#111827]">ProjectFlow</h2>
+          <p className="text-[11px] text-[#6B7280] font-medium">Engineering Team</p>
+        </div>
       </div>
-
 
       {/* Center: Search */}
-      <div className="hidden lg:flex flex-1 max-w-sm">
-        <label className="bg-slate-100 rounded-full px-4 py-1.5 text-sm w-72 flex items-center gap-2 text-slate-400">
-          <Search size={16} className="text-slate-400" />
+      <div className="flex-1 flex justify-center px-4">
+        <div className="relative w-full max-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
           <input
-            className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            type="text"
             placeholder="Search..."
-            aria-label="Search"
+            className="w-full bg-white border border-[#E5E7EB] rounded-lg py-1.5 pl-9 pr-3 text-sm placeholder-[#6B7280] focus:outline-none focus:border-[#1565C0] focus:ring-1 focus:ring-[#1565C0]"
           />
-        </label>
+        </div>
       </div>
 
-      {/* Right: Buttons + Icons + Avatar */}
-      <div className="flex items-center gap-4">
-        {/* Create Button */}
-        <button
-          onClick={onCreateClick}
-          className="bg-[#0079BF] hover:bg-[#005c91] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
-        >
-          Create
+      {/* Right: Icons + Avatar */}
+      <div className="flex items-center gap-2 md:gap-4">
+        <button className="p-2 text-[#6B7280] hover:bg-gray-100 rounded-lg transition-colors">
+          <Bell size={20} />
         </button>
-
-        {/* Icon Buttons */}
-        <button
-          aria-label="Notifications"
-          className="w-8 h-8 rounded-md hover:bg-slate-100 text-slate-500 flex items-center justify-center transition-colors"
-        >
-          <Bell size={18} />
+        <button className="p-2 text-[#6B7280] hover:bg-gray-100 rounded-lg transition-colors">
+          <HelpCircle size={20} />
         </button>
-
-        <button
-          aria-label="Help"
-          className="w-8 h-8 rounded-md hover:bg-slate-100 text-slate-500 flex items-center justify-center transition-colors"
-        >
-          <HelpCircle size={18} />
+        <button className="p-2 text-[#6B7280] hover:bg-gray-100 rounded-lg transition-colors">
+          <LayoutGrid size={20} />
         </button>
-
-        <button
-          aria-label="Settings"
-          className="w-8 h-8 rounded-md hover:bg-slate-100 text-slate-500 flex items-center justify-center transition-colors"
-        >
-          <Settings size={18} />
-        </button>
-
+        
         {/* Avatar */}
-        {user ? <AccountDropdown /> : null}
+        <div className="ml-2">
+          {user ? (
+            <AccountDropdown />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center text-white text-xs font-bold">
+              UN
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
 }
+

@@ -32,6 +32,12 @@ export async function getBoards() {
   return data;
 }
 
+/** Get the first board from the list for redirecting from dashboard */
+export async function getFirstBoard() {
+  const boards = await getBoards();
+  return boards && boards.length > 0 ? boards[0] : null;
+}
+
 /**
  * Single board by integer ID with tasks grouped into Kanban columns.
  * Pass the numeric board ID (e.g. 1), NOT a string like 'board-1'.

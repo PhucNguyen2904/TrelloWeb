@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Literal
+from typing import Literal, Any
 import json
 import os
 from pathlib import Path
@@ -9,14 +9,21 @@ from dotenv import load_dotenv
 APP_DIR = Path(__file__).parent.parent
 
 # Load environment file
-env_file = os.getenv("ENV_FILE", "staging")
-env_path = APP_DIR / f".env.{env_file}"
+env_file = os.getenv("ENV_FILE")
+if env_file:
+    env_path = APP_DIR / f".env.{env_file}"
+else:
+    # Try .env.local first, then fallback to .env.staging
+    env_path = APP_DIR / ".env.local"
+    if not env_path.exists():
+        env_path = APP_DIR / ".env.staging"
 
 if env_path.exists():
-    load_dotenv(env_path)
+    print(f"DEBUG: Loading env from {env_path}")
+    load_dotenv(env_path, override=True)
 else:
-    # Fallback to .env.staging if no env file specified
-    load_dotenv(APP_DIR / ".env.staging")
+    print(f"DEBUG: Env file NOT FOUND at {env_path}")
+
 
 
 class Settings(BaseSettings):
@@ -48,7 +55,8 @@ class Settings(BaseSettings):
     UPSTASH_REDIS_REST_TOKEN: str | None = None
     
     # CORS
-    ALLOWED_ORIGINS: list = [
+    ALLOWED_ORIGINS: Any = [
+
         "http://localhost",
         "http://localhost:3000",
         "http://localhost:3001",
@@ -77,3 +85,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+print(f"DEBUG: UPSTASH_REDIS_REST_URL: {settings.UPSTASH_REDIS_REST_URL}")

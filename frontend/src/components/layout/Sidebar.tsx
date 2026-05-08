@@ -13,6 +13,8 @@ import {
   LogOut,
   Users,
   UserPlus,
+  Settings,
+  BarChart3,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -37,107 +39,68 @@ export function Sidebar({}: SidebarProps) {
   const role = user?.role?.name;
   const isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
 
+  const items = [
+    { label: 'Members', href: '/dashboard/members', icon: Users },
+    { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+    { label: 'Workspace Settings', href: '/dashboard/workspace-settings', icon: Settings },
+  ];
+
   return (
-    <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-[230px] bg-white border-r border-slate-200 h-full py-6 px-4 gap-2 shadow-[4px_0_12px_rgba(0,0,0,0.03)] z-10">
-      {/* Logo */}
-      <div className="flex items-center gap-2 mb-8 px-2">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-          <span className="text-white font-extrabold text-lg">P</span>
+    <aside className="hidden lg:flex lg:flex-col flex-shrink-0 w-[196px] bg-white border-r border-[#E5E7EB] h-full py-6 px-4 z-10">
+      {/* Logo & Workspace */}
+      <div className="mb-6 px-2">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-8 h-8 rounded-[6px] bg-[#1565C0] flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-bold text-lg">P</span>
+          </div>
+          <span className="font-bold text-[#111827] text-sm truncate">ProjectFlow</span>
         </div>
-        <span className="font-bold text-slate-800 text-xl tracking-tight">ProjectFlow</span>
+        <p className="text-[11px] text-[#6B7280] font-medium ml-11">Engineering Team</p>
       </div>
 
-      {/* Workspace Header */}
-      <div className="flex items-center gap-3 px-2 py-3 mb-4 bg-slate-50 rounded-xl border border-slate-100">
-        <div
-          className="w-10 h-10 rounded-lg bg-blue-500 text-white text-base font-bold flex items-center justify-center flex-shrink-0 shadow-sm"
-        >
-          E
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-slate-800 truncate leading-tight">
-            Engineering Team
-          </p>
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wider mt-1">
-            Premium
-          </span>
-        </div>
-      </div>
+      <div className="h-px bg-[#E5E7EB] mb-6" />
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto space-y-1.5">
-        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.05em] px-2 mb-2">Main Menu</p>
-        {navItems.map((item) => {
+      <nav className="flex-1 space-y-1">
+        {items.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+          const isActive = pathname === item.href;
 
           return (
             <Link key={item.href} href={item.href}>
               <button
-                className={`w-full flex items-center gap-3 px-3 py-2.5 transition-all text-sm ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 transition-all rounded-[6px] text-[13px] ${
                   isActive
-                    ? 'bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-600 rounded-r-xl'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl'
+                    ? 'bg-[#EFF6FF] text-[#1565C0] font-semibold'
+                    : 'text-[#374151] hover:bg-[#F9FAFB]'
                 }`}
               >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-700' : 'text-gray-400'}`} />
+                <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'text-[#1565C0]' : 'text-[#374151]'}`} />
                 <span>{item.label}</span>
               </button>
             </Link>
           );
         })}
-
-        {/* Admin / Superadmin only section */}
-        {isAdminOrSuperAdmin && (
-          <div className="pt-4 mt-4 border-t border-slate-100">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.05em] px-2 mb-2">Admin</p>
-            {adminNavItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-
-              return (
-                <Link key={item.href} href={item.href}>
-                  <button
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 transition-all text-sm ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-600 rounded-r-xl'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-700' : 'text-gray-400'}`} />
-                    <span>{item.label}</span>
-                  </button>
-                </Link>
-              );
-            })}
-          </div>
-        )}
       </nav>
 
-      {/* Footer */}
-      <div className="pt-4 space-y-2">
-        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md">
-          <UserPlus size={16} />
-          Invite Members
+      {/* Bottom section */}
+      <div className="mt-auto pt-6 space-y-1">
+        <div className="h-px bg-[#E5E7EB] mb-4" />
+        <button className="w-full flex items-center gap-2.5 px-3 py-2 text-[#374151] hover:bg-[#F9FAFB] rounded-[6px] text-[13px] transition-all">
+          <HelpCircle size={18} className="text-[#374151]" />
+          <span>Help Center</span>
         </button>
 
-        <div className="pt-2">
-          <button className="w-full text-left text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl px-3 py-2 flex items-center gap-3 transition-all">
-            <HelpCircle size={16} className="text-gray-400" />
-            Help Center
-          </button>
-
-          <button
-            onClick={handleLogoutClean}
-            type="button"
-            className="w-full text-left text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl px-3 py-2 flex items-center gap-3 transition-all"
-          >
-            <LogOut size={16} className="text-gray-400" />
-            Logout
-          </button>
-        </div>
+        <button
+          onClick={handleLogoutClean}
+          className="w-full flex items-center gap-2.5 px-3 py-2 text-[#374151] hover:bg-[#F9FAFB] rounded-[6px] text-[13px] transition-all"
+        >
+          <LogOut size={18} className="text-[#374151]" />
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
   );
 }
+
 

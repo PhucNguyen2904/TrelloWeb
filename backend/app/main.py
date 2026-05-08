@@ -28,17 +28,22 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+print(f"CORS: Allowed origins: {settings.ALLOWED_ORIGINS}")
+
+
 # Layer 3 & 4: Security and Sanitization Middleware
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(SanitizationMiddleware)
 
+
+
 # Add CORS middleware with proper configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS, # Specifically allowed origins
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"], # Explicitly list allowed headers
+    allow_methods=["*"],
+    allow_headers=["*"],
     expose_headers=["*"],
     max_age=3600,
 )
