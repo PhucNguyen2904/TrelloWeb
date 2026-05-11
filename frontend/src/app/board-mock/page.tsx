@@ -67,7 +67,7 @@ export default function BoardPage() {
         <ProjectFlowSidebar />
         
         <main className="flex-1 flex flex-col min-w-0">
-          <BoardHeader workspaceName="Engineering Team" boardName="Website Redesign" />
+          <BoardHeader boardId="mock" workspaceName="Engineering Team" boardName="Website Redesign" />
           
           <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar bg-slate-50 p-6 flex gap-6 items-start">
             <Column title="To Do" icon="📋" count={mockTasks.todo.length}>
