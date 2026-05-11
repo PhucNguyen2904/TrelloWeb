@@ -17,6 +17,9 @@ else:
     env_path = APP_DIR / ".env.local"
     if not env_path.exists():
         env_path = APP_DIR / ".env.staging"
+    # On Render, if .env.staging also doesn't exist, create a fallback (env vars are already set)
+    if not env_path.exists() and os.getenv("RENDER"):
+        print(f"DEBUG: Running on Render - using environment variables directly")
 
 if env_path.exists():
     print(f"DEBUG: Loading env from {env_path}")
