@@ -10,25 +10,15 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#f7f9ff] flex flex-col">
-      <Topbar
-        onMobileMenuClick={() => {
-          // TODO: Handle mobile menu for future mobile sidebar implementation
-          console.log('Mobile menu clicked');
-        }}
-        onCreateClick={() => {
-          // TODO: Open create modal
-          console.log('Create clicked');
-        }}
-      />
-
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        
-        <main className="flex-1 overflow-y-auto flex flex-col">
+    <div className="flex min-h-screen bg-[#F3F4F6]">
+      <Sidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Topbar 
+          onMobileMenuClick={() => console.log('Mobile menu clicked')}
+        />
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">
           {children}
         </main>
-
       </div>
     </div>
   );

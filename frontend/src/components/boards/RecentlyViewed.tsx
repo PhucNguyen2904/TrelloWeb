@@ -1,9 +1,7 @@
-'use client';
-
 import React from 'react';
 import { Clock } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { getBoards } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getBoards, deleteBoard } from '@/lib/api';
 import Link from 'next/link';
 import BoardCard from './BoardCard';
 
@@ -13,15 +11,30 @@ interface RecentlyViewedProps {
 
 const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ onCreateClick }) => {
   const [mounted, setMounted] = React.useState(false);
+  const queryClient = useQueryClient();
+
   const { data: boards = [], isLoading } = useQuery({
     queryKey: ['boards'],
     queryFn: getBoards,
     enabled: mounted,
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: deleteBoard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
+    },
+  });
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleDeleteBoard = (boardId: number, boardName: string) => {
+    if (window.confirm(`Are you sure you want to delete the board "${boardName}"?`)) {
+      deleteMutation.mutate(boardId);
+    }
+  };
 
   if (!mounted || isLoading) {
     return (
@@ -39,8 +52,10 @@ const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ onCreateClick }) => {
     );
   }
 
-  // Pick top 3 for recently viewed (or just all if list is short)
-  const recentBoards = boards.slice(0, 3);
+  // Pick top 4 for recently viewed
+  const recentBoards = boards.slice(0, 4);
+
+  if (recentBoards.length === 0) return null;
 
   return (
     <section className="mb-10">
@@ -54,13 +69,14 @@ const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ onCreateClick }) => {
           <Link key={board.id} href={`/boards/${board.id}`}>
             <BoardCard 
               title={board.name}
+              color={board.color}
               gradient={board.coverColor === '#0079bf' ? 'bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6]' : undefined}
-              isStarred={false} // Backend doesn't support starred yet
-              memberAvatars={[]} // Backend doesn't support avatars yet
+              isStarred={false}
+              memberAvatars={[]}
+              onDelete={() => handleDeleteBoard(board.id, board.name)}
             />
           </Link>
         ))}
-        <BoardCard title="Create" isCreateNew onClick={onCreateClick} />
       </div>
     </section>
   );

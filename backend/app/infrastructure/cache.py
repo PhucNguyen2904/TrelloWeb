@@ -3,6 +3,7 @@ import functools
 import logging
 from typing import Any, Callable, Optional
 from fastapi import Request
+from fastapi.encoders import jsonable_encoder
 from upstash_redis.asyncio import Redis
 from app.core.config import settings
 
@@ -57,8 +58,9 @@ class CacheService:
         if not self.redis:
             return False
         try:
-            # Chuyển đổi sang JSON string
-            json_data = json.dumps(value)
+            # Convert to JSON-serializable format if needed
+            serializable_value = jsonable_encoder(value)
+            json_data = json.dumps(serializable_value)
             
             # QUAN TRỌNG: Phải await lệnh set
             success = await self.redis.set(key, json_data, ex=ttl)

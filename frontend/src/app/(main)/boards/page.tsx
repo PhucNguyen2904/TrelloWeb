@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import RecentlyViewed from '@/components/boards/RecentlyViewed';
+import MyBoards from '@/components/boards/MyBoards';
 import WorkspaceSection from '@/components/boards/WorkspaceSection';
 import FeaturedWorkspace from '@/components/boards/FeaturedWorkspace';
 import CreateBoardModal from '@/components/boards/CreateBoardModal';
@@ -15,7 +16,7 @@ export default function BoardsPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const handleSaveNewBoard = async (boardData: { name: string, description?: string }) => {
+  const handleSaveNewBoard = async (boardData: { name: string, description?: string, color?: string }) => {
     try {
       const newBoard = await createBoard(boardData);
       // Refresh boards list
@@ -39,6 +40,9 @@ export default function BoardsPage() {
       <div className="max-w-[1200px] mx-auto px-6 py-8">
         {/* Recently Viewed Section */}
         <RecentlyViewed onCreateClick={() => setIsCreateModalOpen(true)} />
+
+        {/* My Boards Section */}
+        <MyBoards onCreateClick={() => setIsCreateModalOpen(true)} />
 
         {/* Your Workspaces Section */}
         <WorkspaceSection />

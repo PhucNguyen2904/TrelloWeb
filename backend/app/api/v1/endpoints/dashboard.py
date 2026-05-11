@@ -90,7 +90,8 @@ class BoardColumn(BaseModel):
 class BoardDetailResponse(BaseModel):
     id: str
     name: str
-    coverColor: str
+    color: str
+    coverColor: Optional[str] = None
     members: list = []
     columns: list[BoardColumn]
     cards: list[BoardColumnCard]
@@ -296,7 +297,7 @@ async def get_workspaces(
         WorkspaceBoardItem(
             id=str(b.id),
             name=b.name,
-            color="#0079bf",
+            color=b.color or "#0079bf",
             updatedAt=b.updated_at.strftime("%Y-%m-%d") if b.updated_at else "",
         )
         for b in boards[:6]   # cap at 6 for UI
@@ -358,7 +359,8 @@ async def get_boards_with_columns(
             BoardDetailResponse(
                 id=str(board.id),
                 name=board.name,
-                coverColor="#0079bf",
+                color=board.color or "#0079bf",
+                coverColor=board.color or "#0079bf",
                 members=[],
                 columns=columns,
                 cards=cards,
@@ -414,7 +416,8 @@ async def get_board_detail(
     return BoardDetailResponse(
         id=str(board.id),
         name=board.name,
-        coverColor="#0079bf",
+        color=board.color or "#0079bf",
+        coverColor=board.color or "#0079bf",
         members=[],
         columns=columns,
         cards=cards,

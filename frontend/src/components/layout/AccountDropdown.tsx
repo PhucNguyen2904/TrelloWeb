@@ -89,23 +89,15 @@ export function AccountDropdown() {
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         onKeyDown={handleKeyDown}
-        className="group flex items-center gap-3 rounded-full border border-[var(--border)] bg-[color:color-mix(in_srgb,var(--surface)_78%,transparent)] px-2 py-1.5 transition-all duration-150 ease-out hover:border-[var(--border-hover)] hover:bg-[var(--surface-2)]"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E8E8E8] overflow-hidden hover:opacity-80 transition-all"
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={menuId}
         aria-label="Account menu"
       >
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--accent)] via-[var(--accent-blue)] to-[var(--accent-purple)] text-sm font-semibold text-white">
+        <div className="flex h-full w-full items-center justify-center bg-slate-200 text-sm font-semibold text-slate-600">
           {avatarText}
         </div>
-        <div className="hidden min-w-0 text-left lg:block">
-          <p className="max-w-[120px] truncate text-sm font-medium text-slate-800">{compactName}</p>
-        </div>
-        <ChevronDown
-          size={16}
-          className={`text-[var(--text-secondary)] transition duration-200 ease-in-out ${open ? 'rotate-180' : ''}`}
-          aria-hidden="true"
-        />
       </button>
 
       <div

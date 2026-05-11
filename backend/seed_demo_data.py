@@ -23,6 +23,7 @@ import random
 DEMO_BOARDS = [
     {
         "name": "Product Roadmap Q2 2026",
+        "color": "#0079BF",
         "tasks": [
             {"title": "User authentication redesign", "status": "done", "description": "Revamp the login/signup flow with better UX"},
             {"title": "Dashboard analytics module", "status": "doing", "description": "Add charts and metrics to the main dashboard"},
@@ -34,6 +35,7 @@ DEMO_BOARDS = [
     },
     {
         "name": "Sprint 14 — Backend",
+        "color": "#D29034",
         "tasks": [
             {"title": "Fix database connection pooling", "status": "done", "description": "Resolve intermittent connection drops"},
             {"title": "Add pagination to user list endpoint", "status": "done", "description": "Implement cursor-based pagination"},
@@ -44,6 +46,7 @@ DEMO_BOARDS = [
     },
     {
         "name": "Marketing Campaigns",
+        "color": "#519839",
         "tasks": [
             {"title": "Design landing page banner", "status": "done", "description": "New hero section for summer campaign"},
             {"title": "Write blog post about new features", "status": "doing", "description": "Highlight Q1 feature releases"},
@@ -58,7 +61,7 @@ def seed_for_user(db, user: User):
     """Create demo boards and tasks for a user if they have none."""
     existing_boards = db.query(Board).filter(Board.owner_id == user.id).count()
     if existing_boards > 0:
-        print(f"  ⏭️  User {user.email} already has {existing_boards} board(s), skipping.")
+        print(f"  User {user.email} already has {existing_boards} board(s), skipping.")
         return 0
 
     boards_created = 0
@@ -68,6 +71,7 @@ def seed_for_user(db, user: User):
     for board_data in DEMO_BOARDS:
         board = Board(
             name=board_data["name"],
+            color=board_data.get("color", "#3B82F6"),
             owner_id=user.id,
             created_at=now - timedelta(days=random.randint(5, 30)),
             updated_at=now - timedelta(days=random.randint(0, 4)),
@@ -91,27 +95,27 @@ def seed_for_user(db, user: User):
         boards_created += 1
 
     db.commit()
-    print(f"  ✅ Created {boards_created} boards and {tasks_created} tasks for {user.email}")
+    print(f"  Created {boards_created} boards and {tasks_created} tasks for {user.email}")
     return boards_created
 
 
 def main():
-    print("🌱 Starting demo data seed...")
+    print("Starting demo data seed...")
     db = SessionLocal()
     try:
         users = db.query(User).all()
         if not users:
-            print("❌ No users found in database. Register at least one user first.")
+            print("No users found in database. Register at least one user first.")
             return
 
-        print(f"📋 Found {len(users)} user(s)")
+        print(f"Found {len(users)} user(s)")
         total_boards = 0
         for user in users:
-            print(f"\n👤 Processing: {user.email}")
+            print(f"Processing: {user.email}")
             created = seed_for_user(db, user)
             total_boards += created
 
-        print(f"\n✨ Done! Created {total_boards} new board(s) total.")
+        print(f"Done! Created {total_boards} new board(s) total.")
 
     except Exception as e:
         db.rollback()

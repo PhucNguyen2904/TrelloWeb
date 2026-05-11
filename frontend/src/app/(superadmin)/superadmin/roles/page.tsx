@@ -11,6 +11,11 @@ import {
   X,
   ChevronRight,
   Tag,
+  ShieldCheck,
+  UserCog,
+  History,
+  MoreVertical,
+  UserPlus
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
@@ -37,8 +42,18 @@ interface Role {
 
 function SkeletonCard() {
   return (
-    <div className="h-48 animate-pulse rounded-2xl border border-border bg-surface-muted shadow-card" />
+    <div className="h-64 animate-pulse rounded-xl border border-[#E5E7EB] bg-slate-50" />
   );
+}
+
+/* ─── Role Icons ──────────────────────────────────────────────────────────── */
+
+function getRoleIcon(name: string) {
+  const n = name.toLowerCase();
+  if (n.includes('superadmin')) return <ShieldCheck className="text-[#0079BF]" />;
+  if (n.includes('admin')) return <UserCog className="text-slate-600" />;
+  if (n.includes('member')) return <Users className="text-slate-600" />;
+  return <Shield className="text-slate-600" />;
 }
 
 /* ─── Role form (create / edit) ───────────────────────────────────────────── */
@@ -56,17 +71,37 @@ function RoleForm({ initial, onClose, onSuccess }: RoleFormProps) {
   const [saving, setSaving] = useState(false);
   const toast = useToast();
 
+  const { data: allPermissions = [] } = useQuery<Permission[]>({
+    queryKey: ['sa-permissions'],
+    queryFn: async () => {
+      const res = await api.get('/api/super-admin/permissions');
+      return Array.isArray(res.data) ? res.data : [];
+    },
+  });
+
+  const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>(
+    initial?.permissions?.map((p) => p.id) ?? []
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
+      let roleId = initial?.id;
       if (isEdit) {
-        await api.put(`/api/super-admin/roles/${initial!.id}`, { name, description });
-        toast.success('Role updated');
+        await api.put(`/api/super-admin/roles/${roleId}`, { name, description });
       } else {
-        await api.post('/api/super-admin/roles', { name, description });
-        toast.success('Role created');
+        const res = await api.post('/api/super-admin/roles', { name, description });
+        roleId = res.data.id;
       }
+      
+      if (roleId) {
+        await api.put(`/api/super-admin/roles/${roleId}/permissions`, {
+          permission_ids: selectedPermissionIds,
+        });
+      }
+      
+      toast.success(isEdit ? 'Role updated' : 'Role created');
       onSuccess();
     } catch {
       toast.error(isEdit ? 'Failed to update role' : 'Failed to create role');
@@ -75,62 +110,64 @@ function RoleForm({ initial, onClose, onSuccess }: RoleFormProps) {
     }
   };
 
+  const togglePermission = (id: number) => {
+    setSelectedPermissionIds((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-label={isEdit ? 'Edit role' : 'Create role'}
-    >
-      <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-6 shadow-modal mx-4">
-        <div className="flex items-center justify-between mb-5">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-[#E5E7EB] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-bold text-text-heading">
+            <h2 className="text-xl font-bold text-[#111827]">
               {isEdit ? 'Edit Role' : 'Create Role'}
             </h2>
-            <p className="text-sm text-text-muted mt-0.5">
-              {isEdit ? 'Update role name and description.' : 'Define a new role for your team.'}
+            <p className="text-sm text-[#6B7280]">
+              {isEdit ? 'Update role name and permissions.' : 'Define a new access level.'}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-2 text-text-muted hover:bg-surface-muted transition"
-            aria-label="Close"
-          >
-            <X size={16} />
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+            <X size={20} className="text-slate-500" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-text-muted">
-              Role Name
-            </label>
-            <Input
-              required
-              placeholder="e.g. manager, editor…"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <label className="block text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-2">Role Name</label>
+            <Input required value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-text-muted">
-              Description
-            </label>
-            <Textarea
-              placeholder="Describe what this role can do…"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <label className="block text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-2">Description</label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="secondary" type="button" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" loading={saving}>
-              {isEdit ? 'Save Changes' : 'Create Role'}
-            </Button>
+          <div>
+            <label className="block text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-2">Permissions</label>
+            <div className="max-h-48 overflow-y-auto rounded-xl border border-[#E5E7EB] bg-slate-50 p-4 space-y-3">
+              {allPermissions.map((perm) => (
+                <label key={perm.id} className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={selectedPermissionIds.includes(perm.id)}
+                    onChange={() => togglePermission(perm.id)}
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-[#1565C0] focus:ring-[#1565C0]/20"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#374151] group-hover:text-[#1565C0] transition-colors">{perm.name}</p>
+                    {perm.description && <p className="text-xs text-[#6B7280] leading-relaxed">{perm.description}</p>}
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button type="button" onClick={onClose} className="px-6 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-lg">Cancel</button>
+            <button type="submit" disabled={saving} className="px-6 py-2.5 bg-[#1565C0] text-white font-bold rounded-lg hover:bg-[#1976D2] transition-all">
+              {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Role'}
+            </button>
           </div>
         </form>
       </div>
@@ -138,171 +175,52 @@ function RoleForm({ initial, onClose, onSuccess }: RoleFormProps) {
   );
 }
 
-/* ─── Role detail slide-over ──────────────────────────────────────────────── */
+/* ─── Role Card ───────────────────────────────────────────────────────────── */
 
-interface RoleDetailProps {
-  role: Role;
-  onClose: () => void;
-  onEdit: (r: Role) => void;
-  onDelete: (r: Role) => void;
-}
-
-function RoleDetail({ role, onClose, onEdit, onDelete }: RoleDetailProps) {
+function RoleCard({ role, onClick }: { role: Role; onClick: (r: Role) => void }) {
   return (
-    <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 z-[9998] bg-black/30 backdrop-blur-[2px]"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      {/* Panel */}
-      <div
-        className="fixed right-0 top-0 z-[9999] h-full w-full max-w-md bg-surface-card shadow-modal flex flex-col"
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Role details: ${role.name}`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-light">
-              <Shield size={16} className="text-brand" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-text-heading capitalize">{role.name}</h2>
-              <p className="text-xs text-text-muted">{role.user_count ?? 0} users</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-2 text-text-muted hover:bg-surface-muted transition"
-            aria-label="Close panel"
-          >
-            <X size={16} />
-          </button>
+    <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 shadow-sm flex flex-col hover:border-[#0079BF] hover:shadow-md transition-all group relative">
+      <div className="flex justify-between items-start mb-4">
+        <div className="w-12 h-12 rounded-lg bg-slate-50 flex items-center justify-center">
+          {getRoleIcon(role.name)}
         </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-          {/* Description */}
-          {role.description && (
-            <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-text-muted">
-                Description
-              </p>
-              <p className="text-sm text-text-body">{role.description}</p>
-            </div>
-          )}
-
-          {/* Permissions */}
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-              Permissions
-            </p>
-            {role.permissions && role.permissions.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {role.permissions.map((perm) => (
-                  <span
-                    key={perm.id}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-muted px-3 py-1 text-xs font-medium text-text-body"
-                  >
-                    <Tag size={11} className="text-text-muted" />
-                    {perm.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-text-muted italic">No permissions defined</p>
-            )}
-          </div>
-        </div>
-
-        {/* Footer actions */}
-        <div className="flex justify-end gap-3 border-t border-border px-6 py-4">
-          <Button
-            variant="secondary"
-            size="sm"
-            leadingIcon={<Edit2 size={14} />}
-            onClick={() => onEdit(role)}
-          >
-            Edit Role
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            leadingIcon={<Trash2 size={14} />}
-            onClick={() => onDelete(role)}
-          >
-            Delete
-          </Button>
+        <div className="flex items-center gap-1.5 bg-blue-50 text-[#0079BF] px-3 py-1 rounded-full text-xs font-bold border border-blue-100">
+          <Users size={14} />
+          {role.user_count ?? 0} Users
         </div>
       </div>
-    </>
-  );
-}
-
-/* ─── Role card ───────────────────────────────────────────────────────────── */
-
-function RoleCard({
-  role,
-  onClick,
-}: {
-  role: Role;
-  onClick: (r: Role) => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onClick(role)}
-      className="group w-full text-left rounded-2xl border border-border bg-surface-card p-5 shadow-card hover:border-brand/30 hover:shadow-md transition-all duration-200 flex flex-col gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-      aria-label={`Open ${role.name} role details`}
-    >
-      {/* Header row */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-light group-hover:bg-brand/10 transition">
-            <Shield size={16} className="text-brand" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-text-heading capitalize truncate">{role.name}</p>
-            <div className="flex items-center gap-1 mt-0.5 text-xs text-text-muted">
-              <Users size={11} />
-              <span>{role.user_count ?? 0} users</span>
-            </div>
-          </div>
-        </div>
-        <ChevronRight
-          size={15}
-          className="flex-shrink-0 text-text-muted group-hover:text-brand transition mt-0.5"
-        />
-      </div>
-
-      {/* Description */}
-      {role.description && (
-        <p className="text-xs text-text-muted line-clamp-2">{role.description}</p>
-      )}
-
-      {/* Permissions tags */}
-      {role.permissions && role.permissions.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {role.permissions.slice(0, 4).map((perm) => (
-            <span
-              key={perm.id}
-              className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-text-muted"
-            >
-              <Tag size={9} />
-              {perm.name}
+      
+      <h3 className="text-lg font-bold text-[#111827] mb-1">{role.name}</h3>
+      <p className="text-sm text-[#6B7280] mb-4 line-clamp-2 min-h-[40px]">{role.description || 'No description provided for this role.'}</p>
+      
+      <div className="space-y-2 flex-grow">
+        <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Key Permissions</p>
+        <div className="flex flex-wrap gap-2">
+          {role.permissions?.slice(0, 3).map(p => (
+            <span key={p.id} className="bg-slate-50 px-2 py-1 rounded border border-[#E5E7EB] text-[11px] text-[#374151]">
+              {p.name}
             </span>
-          ))}
-          {role.permissions.length > 4 && (
-            <span className="inline-flex items-center rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-text-muted">
-              +{role.permissions.length - 4} more
+          )) || <span className="text-xs text-slate-400 italic">No permissions</span>}
+          {role.permissions && role.permissions.length > 3 && (
+            <span className="bg-slate-50 px-2 py-1 rounded border border-[#E5E7EB] text-[11px] text-[#6B7280]">
+              +{role.permissions.length - 3} more
             </span>
           )}
         </div>
-      )}
-    </button>
+      </div>
+      
+      <div className="mt-6 pt-4 border-t border-[#E5E7EB] flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <button 
+          onClick={() => onClick(role)}
+          className="text-[#0079BF] text-xs font-bold hover:underline flex items-center gap-1"
+        >
+          Edit Role
+        </button>
+        <div className="p-1 hover:bg-slate-100 rounded-lg cursor-pointer">
+          <MoreVertical size={16} className="text-slate-400" />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -314,7 +232,6 @@ export default function SuperAdminRolesPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [editRole, setEditRole] = useState<Role | null>(null);
-  const [detailRole, setDetailRole] = useState<Role | null>(null);
 
   const { data: roles = [], isLoading } = useQuery<Role[]>({
     queryKey: ['sa-roles'],
@@ -324,24 +241,6 @@ export default function SuperAdminRolesPage() {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await api.delete(`/api/super-admin/roles/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sa-roles'] });
-      toast.success('Role deleted');
-      setDetailRole(null);
-    },
-    onError: () => toast.error('Failed to delete role'),
-  });
-
-  const handleDelete = (role: Role) => {
-    if (confirm(`Delete role "${role.name}"? Users with this role will be unassigned.`)) {
-      deleteMutation.mutate(role.id);
-    }
-  };
-
   const handleFormSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['sa-roles'] });
     setShowForm(false);
@@ -349,67 +248,93 @@ export default function SuperAdminRolesPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* ── Page header */}
-      <div className="flex items-start justify-between gap-4">
+    <div className="max-w-[1400px] mx-auto space-y-8 animate-fade-in">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-heading">Role Management</h1>
-          <p className="mt-1 text-sm text-text-muted">Define roles and permissions for your team</p>
+          <h1 className="text-3xl font-bold text-[#111827]">Role Management</h1>
+          <p className="text-sm text-[#6B7280] mt-1">Define and manage access levels across your organization.</p>
         </div>
-        <Button
-          variant="primary"
-          size="md"
-          leadingIcon={<Plus size={15} />}
+        <button 
           onClick={() => setShowForm(true)}
+          className="flex items-center justify-center gap-2 rounded-lg bg-[#1565C0] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1976D2] shadow-sm active:scale-95"
         >
-          Create Role
-        </Button>
+          <Plus size={18} />
+          Create New Role
+        </button>
       </div>
 
-      {/* ── Card grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-        </div>
-      ) : roles.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface-card py-20 text-center shadow-card">
-          <Shield size={40} className="mb-4 text-text-muted/40" />
-          <p className="text-sm font-semibold text-text-muted">No roles defined yet</p>
-          <p className="mt-1 text-xs text-text-muted">
-            Click <strong>Create Role</strong> to get started.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {roles.map((role) => (
-            <RoleCard
-              key={role.id}
-              role={role}
-              onClick={(r) => setDetailRole(r)}
-            />
-          ))}
-        </div>
-      )}
+      {/* Grid container */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+        ) : (
+          <>
+            {roles.map((role) => (
+              <RoleCard
+                key={role.id}
+                role={role}
+                onClick={(r) => setEditRole(r)}
+              />
+            ))}
+            
+            {/* Create Custom Role Placeholder */}
+            <div 
+              onClick={() => setShowForm(true)}
+              className="border-2 border-dashed border-[#E5E7EB] rounded-xl p-8 flex flex-col items-center justify-center text-center group cursor-pointer hover:border-[#0079BF] hover:bg-blue-50/30 transition-all"
+            >
+              <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-[#0079BF] group-hover:scale-110 transition-transform mb-4">
+                <Plus size={32} />
+              </div>
+              <h3 className="font-bold text-[#374151] group-hover:text-[#0079BF] transition-colors">Create Custom Role</h3>
+              <p className="text-xs text-[#6B7280] max-w-[200px] mt-2">Define a unique set of permissions for specialized needs.</p>
+            </div>
+          </>
+        )}
+      </div>
 
-      {/* ── Create / Edit modal */}
+      {/* Audit Log Section */}
+      <section className="mt-12">
+        <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-[#E5E7EB] flex justify-between items-center bg-[#F9FAFB]">
+            <h3 className="font-bold text-[#111827]">Recent Role Changes</h3>
+            <button className="text-[#0079BF] text-xs font-bold hover:underline">View Audit Log</button>
+          </div>
+          <div className="divide-y divide-[#E5E7EB]">
+            <div className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer group">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0079BF]">
+                  <History size={20} />
+                </div>
+                <div>
+                  <p className="text-sm text-[#111827]"><span className="font-bold">Alex Rivera</span> modified <span className="font-bold text-[#0079BF]">Admin</span> permissions</p>
+                  <p className="text-xs text-[#6B7280] mt-0.5">2 hours ago • Updated "Billing Access"</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+            </div>
+            <div className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer group">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0079BF]">
+                  <UserPlus size={20} />
+                </div>
+                <div>
+                  <p className="text-sm text-[#111827]"><span className="font-bold">Sarah Chen</span> assigned 4 users to <span className="font-bold text-[#0079BF]">Viewer</span> role</p>
+                  <p className="text-xs text-[#6B7280] mt-0.5">5 hours ago • Bulk Update</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Create / Edit Modal */}
       {(showForm || editRole) && (
         <RoleForm
           initial={editRole ?? undefined}
           onClose={() => { setShowForm(false); setEditRole(null); }}
           onSuccess={handleFormSuccess}
-        />
-      )}
-
-      {/* ── Role detail slide-over */}
-      {detailRole && (
-        <RoleDetail
-          role={detailRole}
-          onClose={() => setDetailRole(null)}
-          onEdit={(r) => {
-            setDetailRole(null);
-            setEditRole(r);
-          }}
-          onDelete={handleDelete}
         />
       )}
     </div>

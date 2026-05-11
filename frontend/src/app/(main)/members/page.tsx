@@ -1,50 +1,74 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, UserPlus, Users, Shield, Timer } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import MemberTable from "@/components/members/MemberTable";
 import MemberStatsCard from "@/components/members/MemberStatsCard";
+import InviteMemberModal from "@/components/members/InviteMemberModal";
 import { MemberData } from "@/components/members/MemberRow";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { api, inviteMember } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
+
+import { useToast } from "@/store/useToastStore";
 
 export default function MembersPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const queryClient = useQueryClient();
   const { user: currentUser } = useAuthStore();
+  const toast = useToast();
+  const searchParams = useSearchParams();
 
-  const isSuperAdmin = currentUser?.role?.name === 'superadmin';
-  const isAdmin = currentUser?.role?.name === 'admin';
+  useEffect(() => {
+    if (searchParams.get('invite') === 'true') {
+      setIsInviteModalOpen(true);
+    }
+  }, [searchParams]);
+
+  const userRole = currentUser?.role?.name?.toLowerCase() || '';
+  const isSuperAdmin = userRole === 'superadmin';
+  const isAdmin = userRole === 'admin';
   const hasManagementAccess = isSuperAdmin || isAdmin;
+  const canInvite = hasManagementAccess || userRole === 'user';
 
-  // Fetch real users from backend
   const { data: users = [], isLoading, error } = useQuery({
     queryKey: ['members'],
     queryFn: async () => {
-      // Only admins can access these endpoints
-      if (!hasManagementAccess) {
-        // Fallback for regular users: just return the current user info as the only member
-        return [currentUser];
-      }
-
+      // Allow all authenticated users to see the member list
+      // If superadmin, use super-admin endpoint, otherwise use admin endpoint
       const endpoint = isSuperAdmin ? '/api/super-admin/users' : '/api/admin/users';
       try {
         const res = await api.get(endpoint);
         return Array.isArray(res.data) ? res.data : [];
       } catch (err: any) {
-        // If 403, it means the role check failed on backend
         if (err.response?.status === 403) {
-           return [currentUser]; // Fallback
+          // Fallback if the user really doesn't have access to the list
+          return [currentUser];
         }
         console.error("Failed to fetch members:", err);
         throw err;
       }
     },
     enabled: !!currentUser,
-    retry: false, // Don't retry on 403
+    retry: false,
   });
 
-  // Map backend users to MemberData structure
+  const handleInviteMember = async (email: string, role: string) => {
+    // Role mapping: admin -> 2, user -> 3
+    const roleId = role === 'admin' ? 2 : 3; 
+    try {
+      await inviteMember(email, roleId, isSuperAdmin);
+      toast.success(`Successfully invited ${email}`);
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || "Failed to invite member";
+      toast.error(msg);
+      throw err; // Re-throw to be caught by the modal
+    }
+  };
+
   const members: MemberData[] = users.map((u: any) => ({
     id: String(u.id),
     name: u.email.split('@')[0],
@@ -55,9 +79,13 @@ export default function MembersPage() {
   }));
 
   const filteredMembers = members.filter(
-    (m) =>
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.email.toLowerCase().includes(searchQuery.toLowerCase())
+    (m) => {
+      const roleName = m.role.toLowerCase();
+      const isTeamMember = roleName !== 'admin' && roleName !== 'superadmin';
+      const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           m.email.toLowerCase().includes(searchQuery.toLowerCase());
+      return isTeamMember && matchesSearch;
+    }
   );
 
   if (isLoading) {
@@ -95,8 +123,11 @@ export default function MembersPage() {
                 className="w-full rounded-[10px] border border-[#E5E7EB] bg-white py-2.5 pl-10 pr-4 text-sm placeholder-[#6B7280] focus:border-[#1565C0] focus:outline-none focus:ring-4 focus:ring-[#1565C0]/10 sm:w-[240px]"
               />
             </div>
-            {hasManagementAccess && (
-              <button className="flex items-center gap-2 rounded-[10px] bg-[#1565C0] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1976D2]">
+            {canInvite && (
+              <button 
+                onClick={() => setIsInviteModalOpen(true)}
+                className="flex items-center gap-2 rounded-[10px] bg-[#1565C0] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1976D2]"
+              >
                 <UserPlus className="h-4 w-4" />
                 Invite Members
               </button>
@@ -136,8 +167,20 @@ export default function MembersPage() {
         </div>
 
         {/* Table Section */}
-        <MemberTable members={filteredMembers} />
+        <MemberTable 
+          members={filteredMembers} 
+          totalMembers={members.length} 
+          onAddMember={() => setIsInviteModalOpen(true)}
+          canInvite={canInvite}
+          hasManagementAccess={hasManagementAccess}
+        />
       </div>
+
+      <InviteMemberModal 
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        onInvite={handleInviteMember}
+      />
     </div>
   );
 }

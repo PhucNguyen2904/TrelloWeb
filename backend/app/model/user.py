@@ -17,3 +17,4 @@ class User(Base):
     # Relationships
     role = relationship("Role", back_populates="users")
     boards = relationship("Board", back_populates="owner", cascade="all, delete-orphan")
+    board_members = relationship("BoardMember", back_populates="user", cascade="all, delete-orphan")

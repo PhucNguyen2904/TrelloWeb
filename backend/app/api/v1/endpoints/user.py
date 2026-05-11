@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -47,7 +47,8 @@ async def register(
 @router.post("/login")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = None
 ):
     """Login user and get JWT tokens"""
     # Authenticate user
@@ -64,35 +65,34 @@ async def login(
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
     
     # --- REDIS CACHE LOGIC (AS REQUESTED) ---
-    try:
-        # 1. Cache Profile Data
-        profile_key = f"user:profile:{user.id}"
-        # Convert to dict for JSON serialization
-        profile_data = {
-            "id": user.id,
-            "email": user.email,
-            "username": getattr(user, 'username', ''),
-            "role": getattr(user.role, 'name', 'user') if hasattr(user, 'role') else 'user'
-        }
-        await cache_service.set(profile_key, profile_data, ttl=3600)
-        
-        # 2. Cache Boards Data
-        boards_key = f"user:boards:{user.id}"
+    async def cache_user_data(user_obj, boards_list):
+        try:
+            # 1. Cache Profile Data
+            profile_key = f"user:profile:{user_obj.id}"
+            profile_data = {
+                "id": user_obj.id,
+                "email": user_obj.email,
+                "username": getattr(user_obj, 'username', ''),
+                "role": getattr(user_obj.role, 'name', 'user') if hasattr(user_obj, 'role') else 'user'
+            }
+            await cache_service.set(profile_key, profile_data, ttl=3600)
+            
+            # 2. Cache Boards Data
+            boards_key = f"user:boards:{user_obj.id}"
+            boards_data = [
+                {
+                    "id": b.id, 
+                    "name": b.name, 
+                    "owner_id": b.owner_id
+                } for b in boards_list
+            ]
+            await cache_service.set(boards_key, boards_data, ttl=3600)
+        except Exception as cache_err:
+            print(f"⚠️ Redis Caching failed in background: {str(cache_err)}")
+
+    if background_tasks:
         boards = get_user_boards(db, user.id)
-        # Convert SQLAlchemy objects to list of dicts
-        boards_data = [
-            {
-                "id": b.id, 
-                "title": b.title, 
-                "background_color": b.background_color,
-                "owner_id": b.owner_id
-            } for b in boards
-        ]
-        await cache_service.set(boards_key, boards_data, ttl=3600)
-        
-    except Exception as e:
-        # Don't fail login if cache fails, but log it
-        print(f"⚠️ Redis Caching failed during login: {str(e)}")
+        background_tasks.add_task(cache_user_data, user, boards)
 
     return {
         "access_token": access_token,
@@ -142,7 +142,7 @@ async def refresh_token(refresh_token: str):
 
 
 @router.get("/me", response_model=UserResponse)
-@cache_response(ttl=3600)
+# @cache_response(ttl=3600)
 async def get_current_user_info(
     request: Request,
     current_user: User = Depends(get_current_user)

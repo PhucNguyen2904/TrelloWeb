@@ -40,7 +40,8 @@ export interface KanbanColumn {
 export interface Board {
   id: string;
   name: string;
-  coverColor: string;
+  color: string;
+  coverColor?: string;
   members: Member[];
   columns: KanbanColumn[];
 }

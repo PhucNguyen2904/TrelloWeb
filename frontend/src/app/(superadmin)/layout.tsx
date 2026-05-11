@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { SuperAdminShell } from '@/components/superadmin/SuperAdminShell';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export const metadata = {
   title: 'Admin Panel – ProjectFlow',
@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function SuperAdminLayout({ children }: { children: ReactNode }) {
-  return <SuperAdminShell>{children}</SuperAdminShell>;
+  return <DashboardLayout>{children}</DashboardLayout>;
 }

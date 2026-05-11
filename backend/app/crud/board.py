@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from app.model.board import Board
+from app.model.board import Board, BoardMember
+from app.model.user import User
 from app.schemas.Board import BoardCreate, BoardUpdate
 
 
@@ -7,6 +8,7 @@ def create_board(db: Session, board_data: BoardCreate, owner_id: int) -> Board:
     """Create a new board"""
     db_board = Board(
         name=board_data.name,
+        color=board_data.color,
         owner_id=owner_id
     )
     db.add(db_board)
@@ -32,6 +34,8 @@ def update_board(db: Session, board_id: int, board_data: BoardUpdate) -> Board |
         return None
     if board_data.name:
         db_board.name = board_data.name
+    if board_data.color:
+        db_board.color = board_data.color
     db.add(db_board)
     db.commit()
     db.refresh(db_board)
@@ -46,3 +50,29 @@ def delete_board(db: Session, board_id: int) -> bool:
     db.delete(db_board)
     db.commit()
     return True
+
+
+def invite_member(db: Session, board_id: int, user_id: int, role: str = "member") -> BoardMember:
+    """Add a member to a board"""
+    db_member = BoardMember(
+        board_id=board_id,
+        user_id=user_id,
+        role=role
+    )
+    db.add(db_member)
+    db.commit()
+    db.refresh(db_member)
+    return db_member
+
+
+def get_board_members(db: Session, board_id: int) -> list[BoardMember]:
+    """Get all members of a board"""
+    return db.query(BoardMember).filter(BoardMember.board_id == board_id).all()
+
+
+def get_member_by_user_id(db: Session, board_id: int, user_id: int) -> BoardMember | None:
+    """Get member by user id and board id"""
+    return db.query(BoardMember).filter(
+        BoardMember.board_id == board_id,
+        BoardMember.user_id == user_id
+    ).first()

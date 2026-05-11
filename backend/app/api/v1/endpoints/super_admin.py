@@ -8,7 +8,7 @@ from app.db.session import get_db
 from app.model.board import Board
 from app.model.task import Task
 from app.model.user import User
-from app.model.role import Role
+from app.model.role import Role, Permission
 from app.schemas.User import UserResponseWithoutPassword, UserCreateByAdmin, UserRoleUpdate
 from app.crud.user import get_all_users, delete_user, create_user, get_user_by_id, update_user_role
 from app.deps.auth import RoleChecker
@@ -32,11 +32,21 @@ class RoleUpdate(BaseModel):
     description: str | None = None
 
 
+class PermissionResponse(BaseModel):
+    id: int
+    name: str = ""
+    description: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
 class RoleResponse(BaseModel):
     id: int
     name: str
     description: str | None = None
     user_count: int = 0
+    permissions: list[PermissionResponse] = []
 
     class Config:
         from_attributes = True
@@ -218,6 +228,10 @@ async def get_all_roles(
             name=r.name,
             description=r.description,
             user_count=len(r.users) if r.users else 0,
+            permissions=[
+                PermissionResponse(id=p.id, name=p.name, description=p.description)
+                for p in r.permissions
+            ] if r.permissions else []
         )
         for r in roles
     ]
@@ -272,6 +286,10 @@ async def update_role(
         name=role.name,
         description=role.description,
         user_count=len(role.users) if role.users else 0,
+        permissions=[
+            PermissionResponse(id=p.id, name=p.name, description=p.description)
+            for p in role.permissions
+        ] if role.permissions else []
     )
 
 
@@ -293,3 +311,54 @@ async def delete_role(
     db.delete(role)
     db.commit()
     return None
+
+# ─── Permissions Management ──────────────────────────────────────────────────
+
+@router.get("/permissions", response_model=list[PermissionResponse])
+async def get_all_permissions(
+    current_super_admin: User = Depends(allow_super_admin),
+    db: Session = Depends(get_db),
+):
+    """List all available permissions (Super Admin only)"""
+    return db.query(Permission).all()
+
+
+class RolePermissionsUpdate(BaseModel):
+    permission_ids: list[int]
+
+
+@router.put("/roles/{role_id}/permissions", response_model=RoleResponse)
+async def update_role_permissions(
+    role_id: int,
+    data: RolePermissionsUpdate,
+    current_super_admin: User = Depends(allow_super_admin),
+    db: Session = Depends(get_db),
+):
+    """Update the set of permissions assigned to a role (Super Admin only)"""
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+    
+    # Verify all permission IDs exist
+    permissions = db.query(Permission).filter(Permission.id.in_(data.permission_ids)).all()
+    if len(permissions) != len(data.permission_ids):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="One or more permission IDs are invalid"
+        )
+    
+    # Update relationship
+    role.permissions = permissions
+    db.commit()
+    db.refresh(role)
+    
+    return RoleResponse(
+        id=role.id,
+        name=role.name,
+        description=role.description,
+        user_count=len(role.users) if role.users else 0,
+        permissions=[
+            PermissionResponse(id=p.id, name=p.name, description=p.description)
+            for p in role.permissions
+        ]
+    )

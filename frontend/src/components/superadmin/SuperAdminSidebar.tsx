@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, Shield, LogOut, LayoutDashboard, X, Menu } from 'lucide-react';
+import { Users, Shield, LogOut, LayoutDashboard, X, Menu, Tag } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { handleLogoutClean } from '@/lib/logout';
 
@@ -11,6 +11,7 @@ const navItems = [
   { label: 'Dashboard', href: '/superadmin', icon: LayoutDashboard },
   { label: 'User Management', href: '/superadmin/users', icon: Users },
   { label: 'Role Management', href: '/superadmin/roles', icon: Shield },
+  { label: 'System Permissions', href: '/superadmin/permissions', icon: Tag },
 ];
 
 /* ── Shared nav list ──────────────────────────────────────────────────────── */

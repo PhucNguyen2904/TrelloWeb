@@ -26,6 +26,19 @@
 
   /* Shadows */
   --shadow-soft:     0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.05);
+
+  /* Premium Design Tokens */
+  --bg-app: #F8F9FB;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --text-muted: #9AA0A6;
+  --role-admin: #E8F0FE;
+  --role-admin-text: #1967D2;
+  --role-member: #F1F3F4;
+  --role-member-text: #5F6368;
+  --role-viewer: #FEF7E0;
+  --role-viewer-text: #E37400;
+  --sidebar-width: 240px;
 }
 
 /* Dark-mode overrides — keyed to data-theme="dark" (set by next-themes) */

@@ -14,47 +14,47 @@ export default function BoardPage() {
   const mockTasks = {
     todo: [
       {
-        id: 1,
+        id: "1",
         title: "Refresh the hero section illustrations with new 3D assets",
         labels: [{ name: 'Design', color: 'bg-blue-100', textColor: 'text-blue-700' }],
         priority: 'High' as const,
         commentsCount: 3,
         attachments: 2,
         checklists: { done: 4, total: 5 },
-        assignees: ['https://lh3.googleusercontent.com/aida-public/AB6AXuDBQCs1z3NjFpaQncW8ZtK5dJYpdJ4dI1WulnsTvgqOLhNjC8Xu4_K95WyoKlI5cBBcvQG6Uat_kVUpvx_ihAxh0XSDb6rneXiJLXOfAtsh7Wl8ld32hmNolrEJqni7OrBiYWK11a46HRswk6BnFXKSF1F2KmrWVNbjKjjM9KTJoGX8o5WWez1svuuGA2d-aVfKcszuPBLGyg63oqHv1dqdQMDrWShxEaLhEJ7HksZ7QNP8KkrYvQjRONTyK5sCkptcwLo_O7fWjeI'],
+        assignees: [{ id: '1', name: 'User 1', avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDBQCs1z3NjFpaQncW8ZtK5dJYpdJ4dI1WulnsTvgqOLhNjC8Xu4_K95WyoKlI5cBBcvQG6Uat_kVUpvx_ihAxh0XSDb6rneXiJLXOfAtsh7Wl8ld32hmNolrEJqni7OrBiYWK11a46HRswk6BnFXKSF1F2KmrWVNbjKjjM9KTJoGX8o5WWez1svuuGA2d-aVfKcszuPBLGyg63oqHv1dqdQMDrWShxEaLhEJ7HksZ7QNP8KkrYvQjRONTyK5sCkptcwLo_O7fWjeI' }],
         description: "We need to replace the current 2D flat illustrations in the hero section with the new 3D character assets provided by the design team. The goal is to make the landing page feel more modern and premium."
       },
       {
-        id: 2,
+        id: "2",
         title: "Prepare branding guide for the new landing page",
         labels: [{ name: 'Marketing', color: 'bg-pink-100', textColor: 'text-pink-700' }],
         dueDate: "May 5",
         isOverdue: true,
         coverImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuCP0JbVVs91vZDtrl1HNfqfVJ-w9kJNW3awqSUZFnekikOK4SNG_Qkpq9jOGBIiGd0297yoM0UBNtsY6fU6EmFDJhMYO5Q2RoWcufRr2H5EX0qffTnOT95cYTwCsIFUFgUSzPw9ovuXQLU014aAl2zOcia4BVOo3NqhqLvVxMrM15aXGBhop8E6QuPREU3lZQpBF2-zVW6TBN6pMwKILqCrlNlLhxDHnmn1hfg-kqSS6hQxjzzsnbFy6C0-pbhlRPk9aVSeMlgNpB8",
-        assignees: ['https://lh3.googleusercontent.com/aida-public/AB6AXuCTRI5mdpePujmGBmnEdR9a5r6qAiwXA-7b09fpwlAT6bXXdTareWt5mW3ZhSct3yu1P2HV38BDjkF43Z7i83DWNUbPwAo4pD-H5ZND1IoViOeHx7vaCP3JtbWdH1vGfNt7mTaLGpAZjWsGx4ekQwK5UOYpT83GiMR0ht8F3uq-6kaMleRN8TbgjeWEWoM5XA81E42cONWRS9cXisshWNlU_Yzrh-dnuSCfjkWnQsqGzKuofPQYx5BbUBQRZR44Q3Bk0UHN6OagSVo'],
+        assignees: [{ id: '2', name: 'User 2', avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCTRI5mdpePujmGBmnEdR9a5r6qAiwXA-7b09fpwlAT6bXXdTareWt5mW3ZhSct3yu1P2HV38BDjkF43Z7i83DWNUbPwAo4pD-H5ZND1IoViOeHx7vaCP3JtbWdH1vGfNt7mTaLGpAZjWsGx4ekQwK5UOYpT83GiMR0ht8F3uq-6kaMleRN8TbgjeWEWoM5XA81E42cONWRS9cXisshWNlU_Yzrh-dnuSCfjkWnQsqGzKuofPQYx5BbUBQRZR44Q3Bk0UHN6OagSVo' }],
       }
     ],
     inProgress: [
       {
-        id: 3,
+        id: "3",
         title: "Implement responsive navbar and mobile drawer",
         labels: [{ name: 'Frontend', color: 'bg-indigo-100', textColor: 'text-indigo-700' }],
         priority: 'Medium' as const,
         dueDate: "May 12",
         commentsCount: 8,
         assignees: [
-          'https://lh3.googleusercontent.com/aida-public/AB6AXuA8YG6AIe1rLEEXO-S4UP1ULjBaLPP0Z8lcHMlzYJiEDh51ekkw-YTXZ07e8icriexG-OR7dJ8pZ0zyWrH06BMiPUAgLn9XjyKkAID3Ba0k4p8eZvNYoikV8ADmaQYLfEstOL4JZKxqSZlH1WfV3x1jDtS8xMn6g7f_BDnZRb6UXyydIz_Nvk271iVHmv2HbTNzxjFcwEY314CY3RDfXNg6gckobmicZwpKCaur2SEhZvGiviORmSJRItxLhOPNZg9FCLzzT8SYI4k',
-          'https://lh3.googleusercontent.com/aida-public/AB6AXuDSJMWAw9Fk72l22kMovV3fbkQe3OCqfIgjT0o9TRk1BT01jK7O6VyjyX3W6oEpi80BLjl1Eryu8YPhMSnP9-7yFq4DmTiiztS3yR7UYShuMxeJuJkVlv4WZ8fVIsT5E1MnySPFYY52D1hhRoFwtcQqTOqH0_N1-fjjI2Xo2dzveAo8IcIt33o6v-_2PB2SHtm2mBW00p8clS_KaThVt4jgVwmLvoMNVDpMDGmuqwSyZ23d154fGveFFJJR3PIt7ygBcIWHNlnMDHQ'
+          { id: '3', name: 'User 3', avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8YG6AIe1rLEEXO-S4UP1ULjBaLPP0Z8lcHMlzYJiEDh51ekkw-YTXZ07e8icriexG-OR7dJ8pZ0zyWrH06BMiPUAgLn9XjyKkAID3Ba0k4p8eZvNYoikV8ADmaQYLfEstOL4JZKxqSZlH1WfV3x1jDtS8xMn6g7f_BDnZRb6UXyydIz_Nvk271iVHmv2HbTNzxjFcwEY314CY3RDfXNg6gckobmicZwpKCaur2SEhZvGiviORmSJRItxLhOPNZg9FCLzzT8SYI4k' },
+          { id: '4', name: 'User 4', avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDSJMWAw9Fk72l22kMovV3fbkQe3OCqfIgjT0o9TRk1BT01jK7O6VyjyX3W6oEpi80BLjl1Eryu8YPhMSnP9-7yFq4DmTiiztS3yR7UYShuMxeJuJkVlv4WZ8fVIsT5E1MnySPFYY52D1hhRoFwtcQqTOqH0_N1-fjjI2Xo2dzveAo8IcIt33o6v-_2PB2SHtm2mBW00p8clS_KaThVt4jgVwmLvoMNVDpMDGmuqwSyZ23d154fGveFFJJR3PIt7ygBcIWHNlnMDHQ' }
         ],
       }
     ],
     done: [
       {
-        id: 4,
+        id: "4",
         title: "Analyze competitor pricing strategies",
         labels: [{ name: 'Research', color: 'bg-slate-100', textColor: 'text-slate-500' }],
         isCompleted: true,
-        assignees: ['https://lh3.googleusercontent.com/aida-public/AB6AXuDOOc3BI_cJPi_8Uo2gKj1SD04KQaF7x0FNWlBIoZ2XDW5YMB6sZhAcpy6OkbYJu2DCtW8oDM3TUwHLvkyFe5Ujln8OExcVrsxefSFfdaY8O1iRySu_Eg0v7j_9heL0Z_ezjuAr_iTFCJKO_9YVzSqew0ebDCOjirb85AHo4UnF4rEVtLA8qJU9AWNgnSlYVRsitAeNmH6GKbVgPm_odhapD6-HOOP25DptcdVVQ1lEJ_sDWXmgLC-m4vjYCKdjtkvFtRxCgpme-m4'],
+        assignees: [{ id: '5', name: 'User 5', avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDOOc3BI_cJPi_8Uo2gKj1SD04KQaF7x0FNWlBIoZ2XDW5YMB6sZhAcpy6OkbYJu2DCtW8oDM3TUwHLvkyFe5Ujln8OExcVrsxefSFfdaY8O1iRySu_Eg0v7j_9heL0Z_ezjuAr_iTFCJKO_9YVzSqew0ebDCOjirb85AHo4UnF4rEVtLA8qJU9AWNgnSlYVRsitAeNmH6GKbVgPm_odhapD6-HOOP25DptcdVVQ1lEJ_sDWXmgLC-m4vjYCKdjtkvFtRxCgpme-m4' }],
       }
     ]
   };

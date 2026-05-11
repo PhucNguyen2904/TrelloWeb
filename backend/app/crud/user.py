@@ -33,12 +33,12 @@ def create_user(db: Session, user_data) -> User:
 
 def get_user_by_email(db: Session, email: str) -> User | None:
     """Get user by email"""
-    return db.query(User).filter(User.email == email).first()
+    return db.query(User).options(joinedload(User.role)).filter(User.email == email).first()
 
 
 def get_user_by_id(db: Session, user_id: int) -> User | None:
     """Get user by id"""
-    return db.query(User).filter(User.id == user_id).first()
+    return db.query(User).options(joinedload(User.role)).filter(User.id == user_id).first()
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | None:

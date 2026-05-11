@@ -13,8 +13,16 @@ export default function Home() {
     if (!token || !user) {
       router.replace('/login');
     } else {
-      const role = user.role?.name;
-      router.replace(role === 'superadmin' ? '/superadmin' : '/boards');
+      const roleName = user.role?.name?.toLowerCase();
+      console.log('[Home] User role:', roleName);
+      
+      if (roleName === 'superadmin') {
+        router.replace('/superadmin');
+      } else if (roleName === 'admin') {
+        router.replace('/users');
+      } else {
+        router.replace('/boards');
+      }
     }
   }, [token, user, router]);
 

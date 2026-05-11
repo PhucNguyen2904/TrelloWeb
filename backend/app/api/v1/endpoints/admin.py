@@ -13,21 +13,22 @@ from app.deps.auth import RoleChecker
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 logger = logging.getLogger(__name__)
 
-# Dependency that ensures the user is an admin
-allow_admin = RoleChecker(["admin"])
+# Role dependencies
+allow_admin_or_user = RoleChecker(["admin", "user"])
+allow_admin_only = RoleChecker(["admin"])
 
 @router.get("/users", response_model=list[UserResponseWithoutPassword])
 async def read_users(
     skip: int = 0,
     limit: int | None = Query(default=100, ge=1, le=1000),
-    current_admin: User = Depends(allow_admin),
+    current_user: User = Depends(allow_admin_or_user),
     db: Session = Depends(get_db)
 ):
-    """Retrieve list of users (Admin only)"""
+    """Retrieve list of users (Admin and Users)"""
     users = get_all_users(db, skip=skip, limit=limit)
     logger.info(
         "admin_users_list actor_id=%s skip=%s limit=%s returned=%s",
-        current_admin.id,
+        current_user.id,
         skip,
         limit,
         len(users),
@@ -37,10 +38,10 @@ async def read_users(
 @router.post("/users", response_model=UserResponseWithoutPassword, status_code=status.HTTP_201_CREATED)
 async def create_new_user(
     user_data: UserCreateByAdmin,
-    current_admin: User = Depends(allow_admin),
+    current_user: User = Depends(allow_admin_or_user),
     db: Session = Depends(get_db)
 ):
-    """Create a new user (Admin only)"""
+    """Create a new user (Admin and Users)"""
     # Check if user already exists
     from app.crud.user import get_user_by_email
     existing_user = get_user_by_email(db, user_data.email)
@@ -49,6 +50,11 @@ async def create_new_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
+    
+    # If not admin/superadmin, force role_id to 'user' (ID: 3)
+    is_management = current_user.role.name in ["admin", "superadmin"]
+    if not is_management:
+        user_data.role_id = 3
     
     # If role_id is provided, verify it exists
     if user_data.role_id:
@@ -70,7 +76,7 @@ async def create_new_user(
 async def update_user_role_endpoint(
     user_id: int,
     role_data: UserRoleUpdate,
-    current_admin: User = Depends(allow_admin),
+    current_admin: User = Depends(allow_admin_only),
     db: Session = Depends(get_db)
 ):
     """Update user role (Admin only)"""
@@ -103,7 +109,7 @@ async def update_user_role_endpoint(
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_user(
     user_id: int,
-    current_admin: User = Depends(allow_admin),
+    current_admin: User = Depends(allow_admin_only),
     db: Session = Depends(get_db)
 ):
     """Delete a user (Admin only)"""

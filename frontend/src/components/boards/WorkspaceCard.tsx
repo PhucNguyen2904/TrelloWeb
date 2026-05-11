@@ -11,7 +11,10 @@ interface MiniBoardProps {
 
 const MiniBoard: React.FC<MiniBoardProps> = ({ title, updatedAt, color }) => (
   <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-center gap-3 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all">
-    <div className={`w-1.5 h-8 rounded-full ${color}`} />
+    <div 
+      className={`w-1.5 h-8 rounded-full ${!color.startsWith('#') ? color : ''}`} 
+      style={color.startsWith('#') ? { backgroundColor: color } : {}} 
+    />
     <div className="min-w-0">
       <h4 className="text-sm font-semibold text-slate-800 truncate">{title}</h4>
       <p className="text-[10px] font-medium text-slate-400 uppercase tracking-tight">{updatedAt}</p>
@@ -71,7 +74,10 @@ const WorkspaceCard: React.FC<WorkspaceCardProps> = ({
           {boards.slice(0, 3).map((board, idx) => (
             <div key={idx} className="flex items-center justify-between p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer group transition-colors">
               <div className="flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full ${board.color}`} />
+                <div 
+                  className={`w-2 h-2 rounded-full ${!board.color.startsWith('#') ? board.color : ''}`} 
+                  style={board.color.startsWith('#') ? { backgroundColor: board.color } : {}} 
+                />
                 <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600">{board.title}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-400" />

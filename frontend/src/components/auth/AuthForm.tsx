@@ -128,12 +128,35 @@ export function AuthForm({ mode }: AuthFormProps) {
           
           // Step 4: Update store với user data và tokens
           login(user, access_token, refresh_token);
+
+          // Step 4.5: Set cookie for middleware
+          if (typeof document !== 'undefined') {
+            document.cookie = `user_role=${user.role?.name || ''}; path=/; max-age=86400; SameSite=Lax`;
+          }
+
           addToast({ type: 'success', title: 'Login successful!' });
           
           // Step 5: Redirect theo role
-          const role = user.role?.name;
-          const dest = role === 'superadmin' ? '/superadmin' : (role === 'admin' ? '/users' : '/boards');
-          router.replace(dest);
+          const rawRole = user.role?.name || '';
+          const role = rawRole.toLowerCase();
+          console.log('[AuthForm] User data:', user);
+          console.log('[AuthForm] Role identified:', role);
+          
+          let dest = '/boards';
+          if (role === 'superadmin') {
+            dest = '/superadmin';
+          } else if (role === 'admin') {
+            dest = '/users';
+          }
+          
+          console.log('[AuthForm] Redirecting to:', dest);
+          router.push(dest);
+          // Force a small delay if needed, or just use push
+          setTimeout(() => {
+            if (window.location.pathname === '/login') {
+              window.location.href = dest;
+            }
+          }, 500);
         } catch (loginError: unknown) {
           // Improve error messages for user
           let errorMsg = 'Login failed. Please try again.';

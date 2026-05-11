@@ -249,7 +249,7 @@ export default function BoardDetailPage({ params }: { params: Promise<{ boardId:
     <div className="flex-1 flex flex-col min-h-full relative overflow-hidden" style={boardBgStyle}>
       <div className="absolute inset-0 bg-black/20 pointer-events-none" />
       <div className="relative z-10 flex flex-col h-full">
-        <BoardHeader boardName={board.name} isStarred={false} />
+        <BoardHeader boardId={boardId} boardName={board.name} isStarred={false} ownerId={board.owner_id} />
         <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
           <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar flex items-start gap-4 p-6 pt-2 pb-8">
             {columns.map((column: any) => (

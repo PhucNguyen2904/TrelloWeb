@@ -6,17 +6,19 @@ import { Plus, MoreHorizontal, Trash2 } from 'lucide-react';
 interface ColumnProps {
   title: string;
   count?: number;
+  icon?: string;
   color?: string;
   children?: React.ReactNode;
   onAddCard?: () => void;
   onDelete?: () => void;
 }
 
-const Column: React.FC<ColumnProps> = ({ title, count = 0, children, onAddCard, onDelete }) => {
+const Column: React.FC<ColumnProps> = ({ title, count = 0, icon, children, onAddCard, onDelete }) => {
   return (
     <div className="w-[300px] shrink-0 bg-[#f1f3fa] rounded-lg flex flex-col max-h-full shadow-lg">
       <div className="p-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
+          {icon && <span className="text-lg">{icon}</span>}
           <h2 className="text-sm font-black text-slate-800 px-1 uppercase tracking-tight">{title}</h2>
           <span className="bg-slate-200 text-slate-600 text-[10px] font-black px-1.5 py-0.5 rounded-full">{count}</span>
         </div>

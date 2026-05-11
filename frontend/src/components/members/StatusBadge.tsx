@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export type MemberStatus = "Active" | "Pending";
+export type MemberStatus = "Active" | "Pending" | "Inactive";
 
 interface StatusBadgeProps {
   status: MemberStatus;
@@ -19,6 +19,11 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
       bg: "bg-[#F0F9FF]",
       text: "text-[#0369A1]",
       dot: "bg-[#60A5FA]",
+    },
+    Inactive: {
+      bg: "bg-[#F3F4F6]",
+      text: "text-[#6B7280]",
+      dot: "bg-[#9CA3AF]",
     },
   };
 

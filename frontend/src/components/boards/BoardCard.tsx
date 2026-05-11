@@ -1,29 +1,31 @@
-'use client';
-
 import React from 'react';
-import { Star } from 'lucide-react';
+import { Star, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 
 interface BoardCardProps {
   title: string;
   coverImage?: string;
   gradient?: string;
+  color?: string;
   isStarred?: boolean;
   memberAvatars?: string[];
   extraMembers?: number;
   isCreateNew?: boolean;
   onClick?: () => void;
+  onDelete?: (e: React.MouseEvent) => void;
 }
 
 const BoardCard: React.FC<BoardCardProps> = ({
   title,
   coverImage,
   gradient,
+  color,
   isStarred = false,
   memberAvatars = [],
   extraMembers = 0,
   isCreateNew = false,
-  onClick
+  onClick,
+  onDelete
 }) => {
   if (isCreateNew) {
     return (
@@ -39,10 +41,21 @@ const BoardCard: React.FC<BoardCardProps> = ({
     );
   }
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(e);
+    }
+  };
+
   return (
     <div className="group relative bg-white rounded-xl shadow-sm overflow-hidden border border-[#E5E7EB] hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer h-[180px] flex flex-col">
       {/* Cover Image or Gradient */}
-      <div className={`h-[100px] w-full relative shrink-0 ${gradient || 'bg-slate-200'}`}>
+      <div 
+        className={`h-[100px] w-full relative shrink-0 ${!color && !gradient ? 'bg-slate-200' : ''} ${gradient || ''}`}
+        style={color && !gradient ? { backgroundColor: color } : {}}
+      >
         {coverImage && (
           <Image
             src={coverImage}
@@ -51,6 +64,17 @@ const BoardCard: React.FC<BoardCardProps> = ({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
           />
+        )}
+        
+        {/* Delete Button - Visible on Hover */}
+        {onDelete && (
+          <button 
+            onClick={handleDelete}
+            className="absolute top-2 right-2 p-1.5 bg-black/20 hover:bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-all z-10"
+            title="Delete board"
+          >
+            <Trash2 size={16} />
+          </button>
         )}
       </div>
 

@@ -3,6 +3,7 @@ import React from 'react';
 interface DashboardBoardCardProps {
   title: string;
   bgGradient: string;
+  color?: string;
   bgImage?: string;
   isStarred?: boolean;
   members: string[];
@@ -11,13 +12,17 @@ interface DashboardBoardCardProps {
 const DashboardBoardCard: React.FC<DashboardBoardCardProps> = ({ 
   title, 
   bgGradient, 
+  color,
   bgImage, 
   isStarred = false, 
   members 
 }) => {
   return (
     <div className="group relative bg-white rounded-lg shadow-sm overflow-hidden border border-outline-variant hover:shadow-md transition-all cursor-pointer">
-      <div className={`h-24 ${bgGradient} relative`}>
+      <div 
+        className={`h-24 ${!color && !bgGradient ? 'bg-slate-200' : ''} ${bgGradient} relative`}
+        style={color && !bgGradient ? { backgroundColor: color } : {}}
+      >
         {bgImage && (
           <div className="absolute inset-0 opacity-20 bg-cover bg-center" style={{ backgroundImage: `url(${bgImage})` }}></div>
         )}

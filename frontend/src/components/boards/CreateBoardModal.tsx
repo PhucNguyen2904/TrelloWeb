@@ -6,7 +6,7 @@ import { X, Layout, Type, Palette, Check, Globe, Lock } from 'lucide-react';
 interface CreateBoardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (boardData: { name: string, description?: string, coverColor?: string }) => void;
+  onSave: (boardData: { name: string, description?: string, color?: string }) => void;
 }
 
 const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose, onSave }) => {
@@ -32,7 +32,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose, on
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      onSave({ name, description, coverColor: selectedColor });
+      onSave({ name, description, color: selectedColor });
       setName('');
       setDescription('');
       onClose();

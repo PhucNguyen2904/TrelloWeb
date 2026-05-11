@@ -196,6 +196,30 @@ export default function LoginPage() {
           {/* Form */}
           <AuthForm mode="login" />
 
+          {/* OTP Login Link */}
+          <div style={{ textAlign: 'center', marginTop: 20, paddingTop: 20, borderTop: '1px solid #e0e0e0' }}>
+            <p style={{ fontSize: 13, color: '#707882', marginBottom: 12 }}>
+              Or use passwordless authentication:
+            </p>
+            <Link
+              href="/login/otp"
+              style={{
+                display: 'inline-block',
+                padding: '10px 20px',
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#0079bf',
+                border: '1px solid #0079bf',
+                borderRadius: 8,
+                textDecoration: 'none',
+                transition: 'all 120ms ease',
+              }}
+              className="hover:bg-blue-50"
+            >
+              Sign in with OTP
+            </Link>
+          </div>
+
           {/* Footer */}
           <p style={{ textAlign: 'center', marginTop: 32, fontSize: 14, color: '#707882' }}>
             Don&apos;t have an account?{' '}

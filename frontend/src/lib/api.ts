@@ -6,7 +6,7 @@ import { tokenManager } from './TokenManager';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Auth endpoints that should NOT include Authorization header
-const AUTH_ENDPOINTS = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh'];
+const AUTH_ENDPOINTS = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh', '/api/auth/otp/request', '/api/auth/otp/verify'];
 
 console.log(`[API] 📡 API URL: ${API_URL}`);
 
@@ -60,7 +60,7 @@ export async function getWorkspaces() {
 }
 
 /** Create a new board */
-export async function createBoard(boardData: { name: string, description?: string }) {
+export async function createBoard(boardData: { name: string, description?: string, color?: string }) {
   const { data } = await api.post('/api/boards', boardData);
   return data;
 }
@@ -77,9 +77,33 @@ export async function updateTask(boardId: string | number, taskId: string | numb
   return data;
 }
 
-/** Members endpoint (not yet implemented on backend — returns empty list) */
-export async function getMembers() {
-  return [];
+/** Delete a board */
+export async function deleteBoard(boardId: string | number) {
+  const { data } = await api.delete(`/api/boards/${boardId}`);
+  return data;
+}
+
+/** Invite/Create a new member (Admin or Super Admin) */
+export async function inviteMember(email: string, role_id: number = 2, isSuperAdmin: boolean = false) { 
+  const endpoint = isSuperAdmin ? '/api/super-admin/users' : '/api/admin/users';
+  const { data } = await api.post(endpoint, { 
+    email, 
+    password: 'Password123!', // Default password for invited users
+    role_id 
+  });
+  return data;
+}
+
+/** Invite a member to a specific board */
+export async function inviteBoardMember(boardId: string | number, email: string) {
+  const { data } = await api.post(`/api/boards/${boardId}/members/invite`, { email });
+  return data;
+}
+
+/** Get members of a specific board */
+export async function getBoardMembers(boardId: string | number) {
+  const { data } = await api.get(`/api/boards/${boardId}/members`);
+  return data;
 }
 
 /**
@@ -136,6 +160,17 @@ api.interceptors.response.use(
       return Promise.reject({
         ...error,
         message: `Cannot reach backend at ${API_URL}`,
+      });
+    }
+
+    if (error.code === 'ERR_NETWORK') {
+      console.error(
+        `[API] 🌐 Network error - check your internet connection`,
+        { url, method, code: error.code }
+      );
+      return Promise.reject({
+        ...error,
+        message: 'Network error - check your internet connection or verify the server is accessible',
       });
     }
     
