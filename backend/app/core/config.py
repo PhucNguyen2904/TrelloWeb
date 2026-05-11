@@ -23,7 +23,8 @@ else:
 
 if env_path.exists():
     print(f"DEBUG: Loading env from {env_path}")
-    load_dotenv(env_path, override=True)
+    # Use override=False to prioritize Render environment variables over .env file
+    load_dotenv(env_path, override=False)
 else:
     print(f"DEBUG: Env file NOT FOUND at {env_path}")
 
