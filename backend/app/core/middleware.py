@@ -7,16 +7,24 @@ from app.core.sanitization import sanitize_recursive
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        # Skip security headers for CORS preflight requests
+        # Let CORSMiddleware handle OPTIONS completely
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         response = await call_next(request)
         
-        # Layer 3: CSP Headers (Strict)
+        # Layer 3: CSP Headers
         csp_policy = (
             "default-src 'self'; "
-            "script-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "
-            "connect-src 'self' http://localhost:8000 http://localhost:3000; "
+            "connect-src 'self' "
+            "http://localhost:8000 http://localhost:3000 "
+            "https://trelloweb-1.onrender.com "
+            "https://*.vercel.app; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
             "form-action 'self';"
