@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from app.model.board import Board, BoardMember
 from app.model.user import User
 from app.schemas.Board import BoardCreate, BoardUpdate
@@ -9,6 +10,7 @@ def create_board(db: Session, board_data: BoardCreate, owner_id: int) -> Board:
     db_board = Board(
         name=board_data.name,
         color=board_data.color,
+        gradient=board_data.gradient,
         owner_id=owner_id
     )
     db.add(db_board)
@@ -22,9 +24,23 @@ def get_board(db: Session, board_id: int) -> Board | None:
     return db.query(Board).filter(Board.id == board_id).first()
 
 
-def get_user_boards(db: Session, owner_id: int) -> list[Board]:
-    """Get all boards of a user"""
-    return db.query(Board).filter(Board.owner_id == owner_id).all()
+def get_user_boards(db: Session, user_id: int) -> list[Board]:
+    """Get all boards of a user (owned or as a member) sorted by ID"""
+    return db.query(Board).outerjoin(BoardMember).filter(
+        or_(Board.owner_id == user_id, BoardMember.user_id == user_id)
+    ).distinct().order_by(Board.id.asc()).all()
+
+
+def update_board_view_time(db: Session, board_id: int) -> Board | None:
+    """Update last_viewed_at timestamp for a board"""
+    db_board = get_board(db, board_id)
+    if not db_board:
+        return None
+    from datetime import datetime
+    db_board.last_viewed_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_board)
+    return db_board
 
 
 def update_board(db: Session, board_id: int, board_data: BoardUpdate) -> Board | None:

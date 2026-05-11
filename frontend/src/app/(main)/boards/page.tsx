@@ -16,7 +16,7 @@ export default function BoardsPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const handleSaveNewBoard = async (boardData: { name: string, description?: string, color?: string }) => {
+  const handleSaveNewBoard = async (boardData: { name: string, description?: string, color?: string, gradient?: string }) => {
     try {
       const newBoard = await createBoard(boardData);
       // Refresh boards list

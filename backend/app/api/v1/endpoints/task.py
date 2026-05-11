@@ -16,18 +16,24 @@ router = APIRouter(prefix="/api/boards/{board_id}/tasks", tags=["tasks"])
 
 
 def check_board_ownership(board_id: int, current_user: User, db: Session):
-    """Check if current user owns the board"""
+    """Check if current user owns the board or is a member"""
+    from app.crud.board import get_board, get_member_by_user_id
     board = get_board(db, board_id)
     if not board:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Board not found"
         )
-    if board.owner_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to access this board"
-        )
+    
+    # Check access: Owner OR Member
+    has_access = (board.owner_id == current_user.id)
+    if not has_access:
+        member = get_member_by_user_id(db, board_id, current_user.id)
+        if not member:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this board"
+            )
     return board
 
 

@@ -9,8 +9,10 @@ class Board(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False, index=True)
-    color = Column(String(50), nullable=True, default="#3B82F6")
+    color = Column(String(100), nullable=True, default="navyBlue")
+    gradient = Column(String(255), nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    last_viewed_at = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

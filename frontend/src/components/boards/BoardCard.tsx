@@ -15,6 +15,18 @@ interface BoardCardProps {
   onDelete?: (e: React.MouseEvent) => void;
 }
 
+const gradientPresets: Record<string, string> = {
+  navyBlue:       'linear-gradient(135deg,#0f1f6e 0%,#1a3a8f 45%,#2563eb 100%)',
+  burntAmber:     'linear-gradient(135deg,#7c3a00 0%,#b85c00 45%,#d4820a 100%)',
+  forestDeep:     'linear-gradient(135deg,#1a3a0f 0%,#2d6a1f 45%,#3d8b2e 100%)',
+  deepRust:       'linear-gradient(135deg,#7f1d1d 0%,#b91c1c 45%,#f97316 100%)',
+  midnightPurple: 'linear-gradient(135deg,#1e0533 0%,#581c87 45%,#a855f8 100%)',
+  roseDark:       'linear-gradient(135deg,#4a0522 0%,#9f1239 45%,#f43f5e 100%)',
+  jungleMoss:     'linear-gradient(135deg,#1a2e05 0%,#365314 45%,#84cc16 100%)',
+  arcticMint:     'linear-gradient(135deg,#082f49 0%,#0369a1 45%,#22d3ee 100%)',
+  slateMetal:     'linear-gradient(135deg,#0f172a 0%,#334155 45%,#64748b 100%)',
+};
+
 const BoardCard: React.FC<BoardCardProps> = ({
   title,
   coverImage,
@@ -49,12 +61,20 @@ const BoardCard: React.FC<BoardCardProps> = ({
     }
   };
 
+  // Determine final gradient: prop > preset from color key > none
+  const finalGradient = gradient || (color ? gradientPresets[color] : undefined);
+  // Only use color as background if it's NOT a preset key (i.e. it's likely a hex code)
+  const isHexColor = color && !gradientPresets[color];
+
   return (
     <div className="group relative bg-white rounded-xl shadow-sm overflow-hidden border border-[#E5E7EB] hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer h-[180px] flex flex-col">
       {/* Cover Image or Gradient */}
       <div 
-        className={`h-[100px] w-full relative shrink-0 ${!color && !gradient ? 'bg-slate-200' : ''} ${gradient || ''}`}
-        style={color && !gradient ? { backgroundColor: color } : {}}
+        className={`h-[100px] w-full relative shrink-0 ${!isHexColor && !finalGradient ? 'bg-slate-200' : ''}`}
+        style={{ 
+          backgroundColor: isHexColor ? color : undefined,
+          background: finalGradient ? finalGradient : undefined 
+        }}
       >
         {coverImage && (
           <Image

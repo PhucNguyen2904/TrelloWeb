@@ -14,6 +14,8 @@ class TaskBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255, description="Task title")
     description: Optional[str] = Field("", description="Task description")
     status: TaskStatus = Field(TaskStatus.TODO, description="Task status")
+    labels: Optional[list] = Field(default=[], description="Task labels")
+    checklists: Optional[list] = Field(default=[], description="Task checklists")
 
 
 class TaskCreate(TaskBase):
@@ -24,6 +26,8 @@ class TaskUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=255, description="Task title")
     description: Optional[str] = Field(None, description="Task description")
     status: Optional[TaskStatus] = Field(None, description="Task status")
+    labels: Optional[list] = Field(None, description="Task labels")
+    checklists: Optional[list] = Field(None, description="Task checklists")
 
 
 class TaskResponse(TaskBase):

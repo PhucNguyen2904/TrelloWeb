@@ -76,17 +76,23 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="mt-auto pt-6 border-t border-[#E5E7EB] space-y-1">
-        <button className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[#374151] hover:bg-slate-100 rounded-lg text-[14px] transition-all">
-          <HelpCircle size={18} className="text-slate-500" />
-          <span>Help Center</span>
-        </button>
+      <div className="mt-auto pt-6 border-t border-[#E5E7EB] space-y-1.5">
+        <Link href="/help">
+          <button className={`w-full flex items-center gap-3 px-3 h-10 rounded-lg text-[14px] transition-all duration-200 ${
+            pathname === '/help' 
+              ? 'bg-white text-[#0079BF] font-bold border-l-4 border-[#0079BF] shadow-sm' 
+              : 'text-slate-600 hover:bg-white hover:text-[#0079BF] hover:shadow-sm'
+          }`}>
+            <HelpCircle size={18} className={pathname === '/help' ? 'text-[#0079BF]' : 'text-slate-500'} />
+            <span>Help Center</span>
+          </button>
+        </Link>
         <button 
           onClick={handleLogoutClean}
-          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[#374151] hover:bg-slate-100 rounded-lg text-[14px] transition-all"
+          className="w-full flex items-center gap-3 px-3 h-10 text-slate-600 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-[14px] transition-all duration-200 group"
         >
-          <LogOut size={18} className="text-slate-500" />
-          <span>Logout</span>
+          <LogOut size={18} className="text-slate-500 group-hover:text-rose-600 transition-colors" />
+          <span className="font-medium">Logout</span>
         </button>
       </div>
     </aside>

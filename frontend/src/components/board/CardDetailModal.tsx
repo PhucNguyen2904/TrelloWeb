@@ -42,7 +42,7 @@ interface CardDetailModalProps {
   onCopy?: (cardId: string, newListId: string, newTitle: string) => void;
 }
 
-const CardDetailModal: React.FC<CardDetailModalProps> = ({ isOpen, onClose, card, columns = [], onMove, onCopy }) => {
+const CardDetailModal: React.FC<CardDetailModalProps> = ({ isOpen, onClose, card, columns = [], onMove, onCopy, onSave }) => {
   const [title, setTitle] = React.useState(card?.title || '');
   const [description, setDescription] = React.useState(card?.description || '');
   const [comment, setComment] = React.useState('');
@@ -77,6 +77,20 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({ isOpen, onClose, card
   const handleCopy = () => {
     if (onCopy && card.id) {
       onCopy(card.id, destinationListId, `${title} (Copy)`);
+      onClose();
+    }
+  };
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave({
+        ...card,
+        title,
+        description,
+        labels,
+        members,
+        checklistItems
+      });
       onClose();
     }
   };
@@ -349,6 +363,19 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({ isOpen, onClose, card
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Save Button for all changes */}
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={handleSave}
+                className="px-8 py-3 bg-[#0079BF] text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-[#005a8e] transition-all active:scale-95 flex items-center gap-2"
+                style={{
+                  background: 'linear-gradient(135deg, #1565C0 0%, #1976D2 100%)'
+                }}
+              >
+                Save Changes
+              </button>
             </div>
           </div>
 

@@ -69,10 +69,10 @@ class BoardColumnCard(BaseModel):
     id: str
     title: str
     columnId: str
-    labels: list = []
-    assignees: list = []
     commentCount: int = 0
     description: Optional[str] = None
+    labels: list = []
+    checklists: list = []
 
     class Config:
         from_attributes = True
@@ -282,38 +282,54 @@ async def get_workspaces(
     db: Session = Depends(get_db),
 ):
     """
-    Return the current user's boards grouped as a single workspace.
-    Since the DB has no Workspace model yet, we treat the user's
-    collection of boards as one workspace.
+    Return boards grouped by owner. Each owner represents a workspace.
+    This standardizes the view for both owners and invited members.
     """
+    from app.crud.board import get_board_members
+
     boards = get_user_boards(db, current_user.id)
     if not boards:
         return []
 
-    owner_name = current_user.email.split("@")[0]
-    initials = owner_name[:2].upper() if len(owner_name) >= 2 else owner_name.upper()
-
-    board_items = [
-        WorkspaceBoardItem(
-            id=str(b.id),
-            name=b.name,
-            color=b.color or "#0079bf",
-            updatedAt=b.updated_at.strftime("%Y-%m-%d") if b.updated_at else "",
+    # Group boards by owner_id
+    workspace_groups = {}
+    for board in boards:
+        owner = board.owner
+        if owner.id not in workspace_groups:
+            owner_name = owner.email.split("@")[0]
+            workspace_groups[owner.id] = {
+                "id": str(owner.id),
+                "name": f"{owner_name}'s Workspace" if owner.id != current_user.id else "My Workspace",
+                "initials": (owner_name[:2].upper() if len(owner_name) >= 2 else owner_name.upper()),
+                "boards": [],
+                "member_count": 0 # We'll calculate this or use a placeholder
+            }
+        
+        workspace_groups[owner.id]["boards"].append(
+            WorkspaceBoardItem(
+                id=str(board.id),
+                name=board.name,
+                color=board.color or "#0079bf",
+                updatedAt=board.updated_at.strftime("%Y-%m-%d") if board.updated_at else "",
+            )
         )
-        for b in boards[:6]   # cap at 6 for UI
-    ]
 
-    return [
-        WorkspaceItem(
-            id=str(current_user.id),
-            name=f"{owner_name}'s Workspace",
-            initials=initials,
-            avatarColor="#0079bf",
-            boardCount=len(boards),
-            memberCount=1,
-            boards=board_items,
+    # Convert groups to list and finalize metadata
+    results = []
+    for owner_id, ws in workspace_groups.items():
+        results.append(
+            WorkspaceItem(
+                id=ws["id"],
+                name=ws["name"],
+                initials=ws["initials"],
+                avatarColor="#0079bf" if int(ws["id"]) == current_user.id else "#1d9e6e",
+                boardCount=len(ws["boards"]),
+                memberCount=1, # Default placeholder
+                boards=ws["boards"][:6], # Cap at 6 for UI
+            )
         )
-    ]
+
+    return results
 
 
 @router.get("/boards", response_model=list[BoardDetailResponse])
@@ -322,17 +338,13 @@ async def get_boards_with_columns(
     db: Session = Depends(get_db),
 ):
     """
-    Return all boards of the current user with tasks already grouped
-    into synthetic Kanban columns (todo / doing / done).
-    This endpoint is consumed by the Recent page board card grid.
+    Return all boards accessible by the current user with tasks grouped into columns.
     """
     boards = get_user_boards(db, current_user.id)
     result = []
 
     for board in boards:
         tasks = get_board_tasks(db, board.id)
-
-        # Group tasks by status into columns
         columns = []
         cards = []
         for status in _COLUMN_ORDER:
@@ -352,6 +364,8 @@ async def get_boards_with_columns(
                         title=t.title,
                         columnId=col_id,
                         description=t.description,
+                        labels=t.labels or [],
+                        checklists=t.checklists or []
                     )
                 )
 
@@ -376,18 +390,24 @@ async def get_board_detail(
     db: Session = Depends(get_db),
 ):
     """
-    Return a single board (by integer ID) with tasks grouped into
-    synthetic Kanban columns. Consumed by the Boards Kanban page.
+    Return a single board detail, allowing access if user is owner or member.
     """
-    from app.crud.board import get_board
+    from app.crud.board import get_board, get_member_by_user_id
     from fastapi import HTTPException, status as http_status
 
     board = get_board(db, board_id)
-    if not board or board.owner_id != current_user.id:
-        raise HTTPException(
-            status_code=http_status.HTTP_404_NOT_FOUND,
-            detail="Board not found",
-        )
+    if not board:
+        raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Board not found")
+    
+    # Check access: Owner OR Member
+    has_access = (board.owner_id == current_user.id)
+    if not has_access:
+        member = get_member_by_user_id(db, board_id, current_user.id)
+        if not member:
+            raise HTTPException(
+                status_code=http_status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this board",
+            )
 
     tasks = get_board_tasks(db, board.id)
 
@@ -410,6 +430,8 @@ async def get_board_detail(
                     title=t.title,
                     columnId=col_id,
                     description=t.description,
+                    labels=t.labels or [],
+                    checklists=t.checklists or []
                 )
             )
 

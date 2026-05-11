@@ -65,7 +65,7 @@ const MyBoards: React.FC<MyBoardsProps> = ({ onCreateClick }) => {
             <BoardCard 
               title={board.name}
               color={board.color}
-              gradient={board.coverColor === '#0079bf' ? 'bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6]' : undefined}
+              gradient={board.gradient}
               isStarred={false}
               memberAvatars={[]}
               onDelete={() => handleDeleteBoard(board.id, board.name)}

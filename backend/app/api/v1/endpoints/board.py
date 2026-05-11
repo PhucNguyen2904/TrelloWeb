@@ -8,7 +8,7 @@ from app.model.role import Role
 from app.schemas.Board import BoardCreate, BoardUpdate, BoardResponse, BoardInvite, BoardMemberResponse
 from app.crud.board import (
     create_board, get_board, get_user_boards, update_board, delete_board,
-    invite_member, get_board_members, get_member_by_user_id
+    invite_member, get_board_members, get_member_by_user_id, update_board_view_time
 )
 from app.crud.user import get_user_by_email
 from app.deps.auth import get_current_user, RoleChecker
@@ -112,6 +112,28 @@ async def delete_board_info(
         )
     
     delete_board(db, board_id)
+
+
+@router.post("/{board_id}/view", status_code=status.HTTP_200_OK)
+async def mark_board_as_viewed(
+    board_id: int,
+    current_user: User = Depends(RoleChecker(["admin", "user"])),
+    db: Session = Depends(get_db)
+):
+    """Update last_viewed_at for the board"""
+    board = get_board(db, board_id)
+    if not board:
+        raise HTTPException(status_code=404, detail="Board not found")
+    
+    # Check if user has access to this board
+    if board.owner_id != current_user.id:
+        # Check if user is a member
+        member = get_member_by_user_id(db, board_id, current_user.id)
+        if not member:
+            raise HTTPException(status_code=403, detail="Access denied")
+    
+    update_board_view_time(db, board_id)
+    return {"status": "ok"}
 
 
 @router.post("/{board_id}/members/invite", response_model=BoardMemberResponse)

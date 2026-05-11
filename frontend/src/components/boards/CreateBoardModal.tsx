@@ -6,33 +6,54 @@ import { X, Layout, Type, Palette, Check, Globe, Lock } from 'lucide-react';
 interface CreateBoardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (boardData: { name: string, description?: string, color?: string }) => void;
+  onSave: (boardData: { name: string, description?: string, color?: string, gradient?: string }) => void;
 }
 
 const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose, onSave }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedColor, setSelectedColor] = useState('#0079BF');
+  const [selectedColor, setSelectedColor] = useState('navyBlue');
   const [visibility, setVisibility] = useState<'private' | 'public'>('private');
 
   if (!isOpen) return null;
 
-  const colors = [
-    '#0079BF', // Blue
-    '#D29034', // Orange
-    '#519839', // Green
-    '#B04632', // Red
-    '#89609E', // Purple
-    '#CD5A91', // Pink
-    '#4BBF6B', // Light Green
-    '#00AECC', // Teal
-    '#838C91', // Grey
+  const colorSwatches = [
+    { key: 'navyBlue',       g: 'linear-gradient(135deg,#0f1f6e,#1a3a8f,#2563eb)' },
+    { key: 'burntAmber',     g: 'linear-gradient(135deg,#7c3a00,#b85c00,#d4820a)' },
+    { key: 'forestDeep',     g: 'linear-gradient(135deg,#1a3a0f,#2d6a1f,#3d8b2e)' },
+    { key: 'deepRust',       g: 'linear-gradient(135deg,#7f1d1d,#b91c1c,#f97316)' },
+    { key: 'midnightPurple', g: 'linear-gradient(135deg,#1e0533,#581c87,#a855f8)' },
+    { key: 'roseDark',       g: 'linear-gradient(135deg,#4a0522,#9f1239,#f43f5e)' },
+    { key: 'jungleMoss',     g: 'linear-gradient(135deg,#1a2e05,#365314,#84cc16)' },
+    { key: 'arcticMint',     g: 'linear-gradient(135deg,#082f49,#0369a1,#22d3ee)' },
+    { key: 'slateMetal',     g: 'linear-gradient(135deg,#0f172a,#334155,#64748b)' },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const gradientPresets: Record<string, string> = {
+    navyBlue:       'linear-gradient(135deg,#0f1f6e 0%,#1a3a8f 45%,#2563eb 100%)',
+    burntAmber:     'linear-gradient(135deg,#7c3a00 0%,#b85c00 45%,#d4820a 100%)',
+    forestDeep:     'linear-gradient(135deg,#1a3a0f 0%,#2d6a1f 45%,#3d8b2e 100%)',
+    deepRust:       'linear-gradient(135deg,#7f1d1d 0%,#b91c1c 45%,#f97316 100%)',
+    midnightPurple: 'linear-gradient(135deg,#1e0533 0%,#581c87 45%,#a855f8 100%)',
+    roseDark:       'linear-gradient(135deg,#4a0522 0%,#9f1239 45%,#f43f5e 100%)',
+    jungleMoss:     'linear-gradient(135deg,#1a2e05 0%,#365314 45%,#84cc16 100%)',
+    arcticMint:     'linear-gradient(135deg,#082f49 0%,#0369a1 45%,#22d3ee 100%)',
+    slateMetal:     'linear-gradient(135deg,#0f172a 0%,#334155 45%,#64748b 100%)',
+  };
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    handleCreateBoard();
+  };
+
+  const handleCreateBoard = () => {
     if (name.trim()) {
-      onSave({ name, description, color: selectedColor });
+      onSave({ 
+        name, 
+        description, 
+        color: selectedColor,
+        gradient: gradientPresets[selectedColor] ?? gradientPresets['navyBlue']
+      });
       setName('');
       setDescription('');
       onClose();
@@ -84,21 +105,33 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose, on
               <Palette className="w-3 h-3" />
               Background
             </label>
-            <div className="grid grid-cols-5 gap-2">
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setSelectedColor(color)}
-                  className="aspect-video rounded-lg transition-all hover:scale-105 relative overflow-hidden group shadow-sm"
-                  style={{ backgroundColor: color }}
+            <div className="grid grid-cols-3 gap-3">
+              {colorSwatches.map(swatch => (
+                <div
+                  key={swatch.key}
+                  onClick={() => setSelectedColor(swatch.key)}
+                  style={{
+                    width: '100%',
+                    height: 48,
+                    borderRadius: 8,
+                    background: swatch.g,
+                    cursor: 'pointer',
+                    border: selectedColor === swatch.key
+                      ? '3px solid #fff'
+                      : '2px solid transparent',
+                    boxShadow: selectedColor === swatch.key
+                      ? '0 0 0 2px #2563eb'
+                      : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                  className="relative"
                 >
-                  {selectedColor === color && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                  {selectedColor === swatch.key && (
+                    <div className="absolute inset-0 flex items-center justify-center">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                   )}
-                </button>
+                </div>
               ))}
             </div>
           </div>
@@ -132,9 +165,15 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose, on
           {/* Submit Button */}
           <div className="pt-2">
             <button
-              type="submit"
+              type="button"
+              onClick={handleCreateBoard}
               disabled={!name.trim()}
-              className="w-full bg-[#0079BF] hover:bg-[#005a8e] disabled:opacity-50 disabled:hover:bg-[#0079BF] text-white py-4 rounded-xl font-black text-sm tracking-wide transition-all shadow-lg shadow-blue-100 active:scale-[0.98]"
+              className="w-full py-2 rounded-lg font-medium text-white transition-all"
+              style={{
+                background: 'linear-gradient(135deg, #1e40af 0%, #1d9e6e 100%)',
+                opacity: name.trim() ? 1 : 0.5,
+                cursor: name.trim() ? 'pointer' : 'not-allowed',
+              }}
             >
               Create Board
             </button>

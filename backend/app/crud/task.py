@@ -9,6 +9,8 @@ def create_task(db: Session, task_data: TaskCreate, board_id: int) -> Task:
         title=task_data.title,
         description=task_data.description,
         status=task_data.status,
+        labels=task_data.labels,
+        checklists=task_data.checklists,
         board_id=board_id
     )
     db.add(db_task)
@@ -38,6 +40,10 @@ def update_task(db: Session, task_id: int, task_data: TaskUpdate) -> Task | None
         db_task.description = task_data.description
     if task_data.status is not None:
         db_task.status = task_data.status
+    if task_data.labels is not None:
+        db_task.labels = task_data.labels
+    if task_data.checklists is not None:
+        db_task.checklists = task_data.checklists
     db.add(db_task)
     db.commit()
     db.refresh(db_task)

@@ -106,6 +106,12 @@ export async function getBoardMembers(boardId: string | number) {
   return data;
 }
 
+/** Mark board as viewed to update last_viewed_at */
+export async function markBoardAsViewed(boardId: string | number) {
+  const { data } = await api.post(`/api/boards/${boardId}/view`);
+  return data;
+}
+
 /**
  * Request interceptor: Attach JWT token to protected endpoints
  */

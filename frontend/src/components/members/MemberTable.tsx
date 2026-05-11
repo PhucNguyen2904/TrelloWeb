@@ -103,12 +103,19 @@ export default function MemberTable({
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`flex h-8 w-8 items-center justify-center rounded-lg text-[13px] font-medium transition-all ${
+              onClick={() => {
+                setCurrentPage(page);
+                // Optional: scroll table to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold transition-all duration-200 ${
                 currentPage === page 
-                  ? "bg-[#1565C0] text-white shadow-md shadow-blue-100" 
-                  : "border border-[#E5E7EB] text-[#374151] hover:bg-[#F9FAFB]"
+                  ? "text-white shadow-lg shadow-blue-200/50 scale-110 z-10" 
+                  : "border border-[#E5E7EB] text-[#374151] hover:bg-[#F9FAFB] hover:border-[#D1D5DB]"
               }`}
+              style={currentPage === page ? {
+                background: 'linear-gradient(135deg, #1565C0 0%, #1976D2 100%)'
+              } : {}}
             >
               {page}
             </button>

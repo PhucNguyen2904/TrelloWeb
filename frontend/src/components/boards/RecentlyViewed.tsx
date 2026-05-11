@@ -52,10 +52,19 @@ const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ onCreateClick }) => {
     );
   }
 
-  // Pick top 4 for recently viewed
-  const recentBoards = boards.slice(0, 4);
+  // Sort by last_viewed_at (descending), fallback to created_at or id
+  const recentBoards = [...boards]
+    .sort((a, b) => {
+      const timeA = a.last_viewed_at ? new Date(a.last_viewed_at).getTime() : 0;
+      const timeB = b.last_viewed_at ? new Date(b.last_viewed_at).getTime() : 0;
+      
+      if (timeA !== timeB) return timeB - timeA;
+      // Fallback to ID descending (newest first) if no view history
+      return b.id - a.id;
+    })
+    .slice(0, 4);
 
-  if (recentBoards.length === 0) return null;
+  if (boards.length === 0) return null;
 
   return (
     <section className="mb-10">
@@ -70,7 +79,7 @@ const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ onCreateClick }) => {
             <BoardCard 
               title={board.name}
               color={board.color}
-              gradient={board.coverColor === '#0079bf' ? 'bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6]' : undefined}
+              gradient={board.gradient}
               isStarred={false}
               memberAvatars={[]}
               onDelete={() => handleDeleteBoard(board.id, board.name)}

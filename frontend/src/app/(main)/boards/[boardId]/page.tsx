@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getBoard, createTask } from '@/lib/api';
+import { getBoard, createTask, updateTask, markBoardAsViewed } from '@/lib/api';
 import BoardHeader from '@/components/board/BoardHeader';
 import Column from '@/components/board/Column';
 import TaskCard from '@/components/board/TaskCard';
@@ -67,6 +67,13 @@ export default function BoardDetailPage({ params }: { params: Promise<{ boardId:
       setLocalColumns(board.columns);
     }
   }, [board?.cards, board?.columns]);
+
+  // Track last viewed board
+  React.useEffect(() => {
+    if (boardId) {
+      markBoardAsViewed(boardId).catch(err => console.error("Failed to mark board as viewed:", err));
+    }
+  }, [boardId]);
 
   if (isLoading) {
     return (
@@ -207,13 +214,8 @@ export default function BoardDetailPage({ params }: { params: Promise<{ boardId:
       .filter((card: any) => card.columnId === col.id)
       .map((task: any, index: number) => ({
         ...task,
-        labels: task.labels || [
-          { color: 'bg-emerald-500', name: 'Done' },
-          { color: 'bg-amber-500', name: 'In Progress' }
-        ][index % 2],
-        assignees: [
-          { id: '1', name: 'User', avatarUrl: `https://i.pravatar.cc/100?img=${(index % 70) + 1}` }
-        ],
+        labels: task.labels || [],
+        assignees: task.assignees || [],
       }))
   }));
 
@@ -242,6 +244,20 @@ export default function BoardDetailPage({ params }: { params: Promise<{ boardId:
         columnId: newListId
       };
       setLocalCards([...localCards, newCard]);
+    }
+  };
+
+  const handleSaveCard = async (cardData: any) => {
+    try {
+      await updateTask(boardId, cardData.id, {
+        title: cardData.title,
+        description: cardData.description,
+        labels: cardData.labels,
+        checklists: cardData.checklistItems // Map checklistItems from modal to checklists in DB
+      });
+      queryClient.invalidateQueries({ queryKey: ['board', boardId] });
+    } catch (err) {
+      console.error("Failed to update task:", err);
     }
   };
 
@@ -297,6 +313,7 @@ export default function BoardDetailPage({ params }: { params: Promise<{ boardId:
         columns={localColumns}
         onMove={handleMoveCard}
         onCopy={handleCopyCard}
+        onSave={handleSaveCard}
       />
       {createTarget && (
         <CreateTaskModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} onSave={handleSaveNewCard} boardName={board.name} listName={createTarget.name} listId={createTarget.id} boardId={boardId} />
