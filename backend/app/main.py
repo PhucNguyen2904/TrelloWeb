@@ -31,13 +31,7 @@ app = FastAPI(
 print(f"CORS: Allowed origins: {settings.ALLOWED_ORIGINS}")
 
 
-# Layer 3 & 4: Security and Sanitization Middleware
-app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(SanitizationMiddleware)
-
-
-
-# Add CORS middleware with proper configuration
+# Add CORS middleware FIRST (it runs last in the chain but must intercept OPTIONS preflight)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
@@ -47,6 +41,10 @@ app.add_middleware(
     expose_headers=["*"],
     max_age=3600,
 )
+
+# Layer 3 & 4: Security and Sanitization Middleware (added after CORS so CORS runs first)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(SanitizationMiddleware)
 
 # Include router
 app.include_router(router)

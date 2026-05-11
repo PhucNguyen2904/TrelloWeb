@@ -56,15 +56,17 @@ class Settings(BaseSettings):
     
     # CORS
     ALLOWED_ORIGINS: Any = [
-
+        # Local development
         "http://localhost",
         "http://localhost:3000",
         "http://localhost:3001",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
+        # Vercel production & preview deployments
         "https://trello-web-neon-rho.vercel.app",
         "https://trello-web-phi-five.vercel.app",
         "https://trello-web-git-master-team-alpla.vercel.app",
+        "https://trelloweb-phucnguyen2904.vercel.app",
     ]
     
     class Config:
