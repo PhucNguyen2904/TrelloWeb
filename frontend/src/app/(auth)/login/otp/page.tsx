@@ -329,7 +329,7 @@ export default function OTPLoginPage() {
                 }}
                 className="hover:bg-blue-700"
               >
-                {loading && <LoadingSpinner size="small" />}
+                {loading && <LoadingSpinner size="sm" />}
                 {loading ? 'Sending...' : 'Send Code'}
               </button>
             </form>
@@ -445,7 +445,7 @@ export default function OTPLoginPage() {
                 }}
                 className="hover:bg-blue-700"
               >
-                {loading && <LoadingSpinner size="small" />}
+                {loading && <LoadingSpinner size="sm" />}
                 {loading ? 'Verifying...' : 'Verify Code'}
               </button>
 
